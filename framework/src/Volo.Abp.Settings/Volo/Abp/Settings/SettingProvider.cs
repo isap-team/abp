@@ -23,7 +23,9 @@ namespace Volo.Abp.Settings
 
         public virtual async Task<string> GetOrNullAsync(string name)
         {
-            var setting = SettingDefinitionManager.Get(name);
+            var setting = SettingDefinitionManager.GetOrNull(name);
+            if (setting == null)
+                return null;
             var providers = Enumerable
                 .Reverse(SettingValueProviderManager.Providers);
 
