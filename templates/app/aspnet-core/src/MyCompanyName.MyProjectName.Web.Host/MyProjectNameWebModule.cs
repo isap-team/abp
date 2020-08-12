@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using Isap.Abp.Extensions.Logging;
 using Isap.CommonCore.Integrations;
 using Isap.CommonCore.Web.Middlewares.RequestLogging;
@@ -8,6 +9,7 @@ using Isap.CommonCore.Web.Middlewares.Tracing;
 using Isap.Converters;
 using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -67,6 +69,8 @@ namespace MyCompanyName.MyProjectName.Web
         )]
     public class MyProjectNameWebModule : AbpModule
     {
+        private const string DefaultCorsPolicyName = "Default";
+
         public override void PreConfigureServices(ServiceConfigurationContext context)
         {
             context.Services.PreConfigure<AbpMvcDataAnnotationsLocalizationOptions>(options =>
@@ -98,6 +102,7 @@ namespace MyCompanyName.MyProjectName.Web
             ConfigureVirtualFileSystem(hostingEnvironment);
             ConfigureNavigationServices(configuration);
             ConfigureMultiTenancy();
+            ConfigureCors(context, configuration);
             ConfigureSwaggerServices(context.Services);
         }
 
@@ -254,6 +259,28 @@ namespace MyCompanyName.MyProjectName.Web
             }
         }
 
+        private void ConfigureCors(ServiceConfigurationContext context, IConfiguration configuration)
+        {
+            context.Services.AddCors(options =>
+                {
+                    options.AddPolicy(DefaultCorsPolicyName, builder =>
+                        {
+                            builder
+                                .WithOrigins(
+                                    configuration["App:CorsOrigins"]
+                                        .Split(",", StringSplitOptions.RemoveEmptyEntries)
+                                        .Select(o => o.RemovePostFix("/"))
+                                        .ToArray()
+                                )
+                                .WithAbpExposedHeaders()
+                                .SetIsOriginAllowedToAllowWildcardSubdomains()
+                                .AllowAnyHeader()
+                                .AllowAnyMethod()
+                                .AllowCredentials();
+                        });
+                });
+        }
+
         public override void OnApplicationInitialization(ApplicationInitializationContext context)
         {
             var app = context.GetApplicationBuilder();
@@ -274,6 +301,7 @@ namespace MyCompanyName.MyProjectName.Web
             app.UseCorrelationId();
             app.UseVirtualFiles();
             app.UseRouting();
+            app.UseCors(DefaultCorsPolicyName);
             app.UseAuthentication();
 
             if (MultiTenancyConsts.IsEnabled)
