@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Isap.Abp.BackgroundJobs</RootNamespace>
+    <AssemblyName>Isap.Abp.BackgroundJobs.Domain.Shared</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.Core\Volo.Abp.Core.csproj" />
+    <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.Ddd.Application.Contracts\Volo.Abp.Ddd.Application.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\Abp.Extensions\src\Isap.Abp.Extensions\Isap.Abp.Extensions.csproj" />
+  </ItemGroup>
+
+</Project>

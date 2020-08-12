@@ -1,0 +1,36 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Isap.Abp.Extensions</RootNamespace>
+    <AssemblyName>Isap.Abp.Extensions</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Localization\AbpExtensions\en.json" />
+    <None Remove="Localization\AbpExtensions\ru.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Localization\AbpExtensions\ru.json" />
+    <EmbeddedResource Include="Localization\AbpExtensions\en.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="9.0.0" />
+    <PackageReference Include="Castle.Core" Version="4.4.1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.AutoMapper\Volo.Abp.AutoMapper.csproj" />
+    <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.Caching\Volo.Abp.Caching.csproj" />
+    <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.Core\Volo.Abp.Core.csproj" />
+    <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.Ddd.Application\Volo.Abp.Ddd.Application.csproj" />
+    <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.EntityFrameworkCore\Volo.Abp.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\..\..\..\..\..\..\..\modules\tenant-management\src\Volo.Abp.TenantManagement.Domain\Volo.Abp.TenantManagement.Domain.csproj " />
+    <ProjectReference Include="..\..\..\..\Isap\CommonCore\src\Isap.CommonCore\Isap.CommonCore.csproj" />
+  </ItemGroup>
+
+</Project>

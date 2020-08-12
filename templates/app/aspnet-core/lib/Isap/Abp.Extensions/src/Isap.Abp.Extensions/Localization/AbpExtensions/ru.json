@@ -1,0 +1,7 @@
+{
+  "culture": "ru",
+	"texts": {
+		"CouldNotValidateOnCreating": "Ошибка валидации при создании сущности '{0}'.",
+		"CouldNotValidateOnUpdating": "Ошибка валидации при изменении сущности '{0}'."
+	}
+}

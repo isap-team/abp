@@ -1,7 +1,8 @@
-﻿using MyCompanyName.MyProjectName.MultiTenancy;
+using Isap.Abp.BackgroundJobs;
+using Isap.Abp.Extensions;
+using MyCompanyName.MyProjectName.MultiTenancy;
 using MyCompanyName.MyProjectName.ObjectExtending;
 using Volo.Abp.AuditLogging;
-using Volo.Abp.BackgroundJobs;
 using Volo.Abp.FeatureManagement;
 using Volo.Abp.Identity;
 using Volo.Abp.IdentityServer;
@@ -17,14 +18,15 @@ namespace MyCompanyName.MyProjectName
     [DependsOn(
         typeof(MyProjectNameDomainSharedModule),
         typeof(AbpAuditLoggingDomainModule),
-        typeof(AbpBackgroundJobsDomainModule),
         typeof(AbpFeatureManagementDomainModule),
         typeof(AbpIdentityDomainModule),
         typeof(AbpPermissionManagementDomainIdentityModule),
         typeof(AbpIdentityServerDomainModule),
         typeof(AbpPermissionManagementDomainIdentityServerModule),
         typeof(AbpSettingManagementDomainModule),
-        typeof(AbpTenantManagementDomainModule)
+        typeof(AbpTenantManagementDomainModule),
+        typeof(IsapAbpExtensionsModule),
+        typeof(IsapAbpBackgroundJobsDomainModule)
         )]
     public class MyProjectNameDomainModule : AbpModule
     {

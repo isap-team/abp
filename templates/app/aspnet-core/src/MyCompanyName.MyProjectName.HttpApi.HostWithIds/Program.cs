@@ -1,14 +1,20 @@
-﻿using System;
+using System;
+using System.IO;
+using System.Threading.Tasks;
+using Autofac;
+using Isap.Hosting;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Serilog;
 using Serilog.Events;
+using Serilog.Sinks.SystemConsole.Themes;
 
 namespace MyCompanyName.MyProjectName
 {
     public class Program
     {
-        public static int Main(string[] args)
+        public static async Task<int> Main(string[] args)
         {
             Log.Logger = new LoggerConfiguration()
 #if DEBUG
@@ -17,14 +23,23 @@ namespace MyCompanyName.MyProjectName
                 .MinimumLevel.Information()
 #endif
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
+                .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
-                .WriteTo.Async(c => c.File("Logs/logs.txt"))
+#if DEBUG
+                .WriteTo.Logger(lc => lc
+                    .WriteTo
+                    .Console(LogEventLevel.Information, theme: AnsiConsoleTheme.Code)
+                    .Filter.With<HostingLifetimeFilter>()
+                )
+#endif
+                .WriteTo.Async(c => c.File("App_Data/Logs/logs.txt"))
                 .CreateLogger();
 
             try
             {
                 Log.Information("Starting MyCompanyName.MyProjectName.HttpApi.Host.");
-                CreateHostBuilder(args).Build().Run();
+                IHostBuilder hostBuilder = CreateHostBuilder(args);
+                await hostBuilder.BuildAndRunAsync();
                 return 0;
             }
             catch (Exception ex)
@@ -38,13 +53,27 @@ namespace MyCompanyName.MyProjectName
             }
         }
 
-        internal static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
+        internal static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            string contentRootDir = Directory.GetCurrentDirectory();
+
+            IConfigurationRoot config = new ConfigurationBuilder()
+                .SetBasePath(contentRootDir)
+                .AddJsonFile("hosting.json", optional: true)
+                .AddCommandLine(args)
+                .Build();
+
+            return Host.CreateDefaultBuilder(args)
                 .ConfigureWebHostDefaults(webBuilder =>
-                {
-                    webBuilder.UseStartup<Startup>();
-                })
-                .UseAutofac()
+                    {
+                        webBuilder
+                            .UseContentRoot(contentRootDir)
+                            .UseUrls("https://*:44305")
+                            .UseConfiguration(config)
+                            .UseStartup<Startup>();
+                    })
+                .UseAutofac(containerBuilder => containerBuilder.RegisterModule<IsapAutofacModule>())
                 .UseSerilog();
+        }
     }
 }

@@ -1,5 +1,11 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using Isap.Abp.Extensions.Logging;
+using Isap.CommonCore.Integrations;
+using Isap.CommonCore.Web.Middlewares.RequestLogging;
+using Isap.CommonCore.Web.Middlewares.Tracing;
+using Isap.Converters;
 using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
@@ -13,9 +19,9 @@ using MyCompanyName.MyProjectName.MultiTenancy;
 using MyCompanyName.MyProjectName.Web.Menus;
 using StackExchange.Redis;
 using Microsoft.OpenApi.Models;
-using Swashbuckle.AspNetCore.Swagger;
 using Volo.Abp;
 using Volo.Abp.AspNetCore.Authentication.OAuth;
+using Volo.Abp.AspNetCore.MultiTenancy;
 using Volo.Abp.AspNetCore.Mvc.Client;
 using Volo.Abp.AspNetCore.Mvc.Localization;
 using Volo.Abp.AspNetCore.Mvc.UI;
@@ -32,12 +38,16 @@ using Volo.Abp.Http.Client.IdentityModel.Web;
 using Volo.Abp.Identity.Web;
 using Volo.Abp.Modularity;
 using Volo.Abp.MultiTenancy;
+using Volo.Abp.MultiTenancy.ConfigurationStore;
 using Volo.Abp.PermissionManagement.Web;
 using Volo.Abp.TenantManagement.Web;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.UI;
 using Volo.Abp.UI.Navigation;
 using Volo.Abp.VirtualFileSystem;
+
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
+// ReSharper disable UnusedParameter.Local
 
 namespace MyCompanyName.MyProjectName.Web
 {
@@ -75,6 +85,11 @@ namespace MyCompanyName.MyProjectName.Web
             var hostingEnvironment = context.Services.GetHostingEnvironment();
             var configuration = context.Services.GetConfiguration();
 
+            IValueConverter converter = ValueConverterProviders.Default.GetConverter();
+            context.Services.AddSingleton(converter);
+
+            ConfigureRequestLogging(context, converter, configuration);
+
             ConfigureCache(configuration);
             ConfigureRedis(context, configuration, hostingEnvironment);
             ConfigureUrls(configuration);
@@ -84,6 +99,21 @@ namespace MyCompanyName.MyProjectName.Web
             ConfigureNavigationServices(configuration);
             ConfigureMultiTenancy();
             ConfigureSwaggerServices(context.Services);
+        }
+
+        private void ConfigureRequestLogging(ServiceConfigurationContext context, IValueConverter converter, IConfiguration configuration)
+        {
+            context.Services.UseMsToCastleLoggingAdapter();
+
+            Configure<IsapRequestLoggingOptions>(options =>
+                {
+                    IConfigValueProvider config = new ConfigurationSectionValueProvider(converter, configuration.GetSection("RequestLogging"));
+
+                    options.IsEnabled = config.GetValue("IsEnabled", false);
+
+                    List<string> basePaths = config.GetValue("BasePaths", () => new List<string>());
+                    options.AddBasePaths(basePaths.ToArray());
+                });
         }
 
         private void ConfigureCache(IConfiguration configuration)
@@ -108,6 +138,24 @@ namespace MyCompanyName.MyProjectName.Web
             {
                 options.IsEnabled = MultiTenancyConsts.IsEnabled;
             });
+
+            if (MultiTenancyConsts.IsEnabled)
+            {
+                Configure<AbpTenantResolveOptions>(options =>
+                    {
+                        options.TenantResolvers.Add(new DefaultTenantResolveContributor());
+                    });
+
+                Configure<AbpDefaultTenantStoreOptions>(options =>
+                    {
+                        options.Tenants = MultiTenancyConsts.DefaultTenants;
+                    });
+
+                Configure<AbpAspNetCoreMultiTenancyOptions>(options =>
+                    {
+                        options.TenantKey = "ABP-TenantId";
+                    });
+            }
         }
 
         private void ConfigureAuthentication(ServiceConfigurationContext context, IConfiguration configuration)
@@ -210,6 +258,9 @@ namespace MyCompanyName.MyProjectName.Web
         {
             var app = context.GetApplicationBuilder();
             var env = context.GetEnvironment();
+
+            app.UseMiddleware<LoggingTraceIdentifierMiddleware>();
+            app.UseRequestResponseLogging();
 
             if (env.IsDevelopment())
             {

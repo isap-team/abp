@@ -1,16 +1,16 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 using Volo.Abp.DependencyInjection;
 
-namespace MyCompanyName.MyProjectName.Data
+namespace Isap.Abp.Extensions.Data
 {
-    /* This is used if database provider does't define
-     * IMyProjectNameDbSchemaMigrator implementation.
-     */
-    public class NullMyProjectNameDbSchemaMigrator : IMyProjectNameDbSchemaMigrator, ITransientDependency
-    {
-        public Task MigrateAsync()
-        {
-            return Task.CompletedTask;
-        }
-    }
+	/* This is used if database provider doesn't define
+	 * IIdentityServerDbSchemaMigrator implementation.
+	 */
+	public class NullAbpExtDbSchemaMigrator: IAbpExtDbSchemaMigrator, ITransientDependency
+	{
+		public Task MigrateAsync()
+		{
+			return Task.CompletedTask;
+		}
+	}
 }

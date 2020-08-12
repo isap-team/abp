@@ -1,9 +1,9 @@
-﻿using System.Threading.Tasks;
+using System.Threading.Tasks;
 
-namespace MyCompanyName.MyProjectName.Data
+namespace Isap.Abp.Extensions.Data
 {
-    public interface IMyProjectNameDbSchemaMigrator
-    {
-        Task MigrateAsync();
-    }
+	public interface IAbpExtDbSchemaMigrator
+	{
+		Task MigrateAsync();
+	}
 }

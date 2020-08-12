@@ -1,6 +1,15 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Isap.Abp.BackgroundJobs.Configuration;
+using Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql;
+using Isap.Abp.Extensions.Clustering;
+using Isap.Abp.Extensions.Logging;
+using Isap.CommonCore.Integrations;
+using Isap.CommonCore.Web.Middlewares.RequestLogging;
+using Isap.CommonCore.Web.Middlewares.Tracing;
+using Isap.Converters;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.DataProtection;
@@ -13,6 +22,7 @@ using MyCompanyName.MyProjectName.MultiTenancy;
 using StackExchange.Redis;
 using Microsoft.OpenApi.Models;
 using Volo.Abp;
+using Volo.Abp.AspNetCore.MultiTenancy;
 using Volo.Abp.AspNetCore.Mvc;
 using Volo.Abp.AspNetCore.Mvc.UI.MultiTenancy;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
@@ -22,7 +32,12 @@ using Volo.Abp.Caching;
 using Volo.Abp.Caching.StackExchangeRedis;
 using Volo.Abp.Localization;
 using Volo.Abp.Modularity;
+using Volo.Abp.MultiTenancy;
+using Volo.Abp.MultiTenancy.ConfigurationStore;
 using Volo.Abp.VirtualFileSystem;
+
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
+// ReSharper disable UnusedParameter.Local
 
 namespace MyCompanyName.MyProjectName
 {
@@ -31,6 +46,7 @@ namespace MyCompanyName.MyProjectName
         typeof(AbpAutofacModule),
         typeof(AbpCachingStackExchangeRedisModule),
         typeof(AbpAspNetCoreMvcUiMultiTenancyModule),
+        typeof(IsapAbpBackgroundJobsPostgreSqlModule),
         typeof(MyProjectNameApplicationModule),
         typeof(MyProjectNameEntityFrameworkCoreDbMigrationsModule),
         typeof(AbpAspNetCoreSerilogModule)
@@ -44,6 +60,12 @@ namespace MyCompanyName.MyProjectName
             var configuration = context.Services.GetConfiguration();
             var hostingEnvironment = context.Services.GetHostingEnvironment();
 
+            IValueConverter converter = ValueConverterProviders.Default.GetConverter();
+            context.Services.AddSingleton(converter);
+
+            ConfigureRequestLogging(context, converter, configuration);
+            ConfigureMultiTenancy();
+
             ConfigureConventionalControllers();
             ConfigureAuthentication(context, configuration);
             ConfigureLocalization();
@@ -52,6 +74,50 @@ namespace MyCompanyName.MyProjectName
             ConfigureRedis(context, configuration, hostingEnvironment);
             ConfigureCors(context, configuration);
             ConfigureSwaggerServices(context);
+
+            ConfigureClusterNode(context, configuration);
+            ConfigureBackgroundJobs(context, converter, configuration);
+        }
+
+        private void ConfigureRequestLogging(ServiceConfigurationContext context, IValueConverter converter, IConfiguration configuration)
+        {
+            context.Services.UseMsToCastleLoggingAdapter();
+
+            Configure<IsapRequestLoggingOptions>(options =>
+                {
+                    IConfigValueProvider config = new ConfigurationSectionValueProvider(converter, configuration.GetSection("RequestLogging"));
+
+                    options.IsEnabled = config.GetValue("IsEnabled", false);
+
+                    List<string> basePaths = config.GetValue("BasePaths", () => new List<string>());
+                    options.AddBasePaths(basePaths.ToArray());
+                });
+        }
+
+        private void ConfigureMultiTenancy()
+        {
+            Configure<AbpMultiTenancyOptions>(options =>
+                {
+                    options.IsEnabled = MultiTenancyConsts.IsEnabled;
+                });
+
+            if (MultiTenancyConsts.IsEnabled)
+            {
+                Configure<AbpTenantResolveOptions>(options =>
+                    {
+                        options.TenantResolvers.Add(new DefaultTenantResolveContributor());
+                    });
+
+                Configure<AbpDefaultTenantStoreOptions>(options =>
+                    {
+                        options.Tenants = MultiTenancyConsts.DefaultTenants;
+                    });
+
+                Configure<AbpAspNetCoreMultiTenancyOptions>(options =>
+                    {
+                        options.TenantKey = "ABP-TenantId";
+                    });
+            }
         }
 
         private void ConfigureCache(IConfiguration configuration)
@@ -157,10 +223,23 @@ namespace MyCompanyName.MyProjectName
             });
         }
 
+        private void ConfigureClusterNode(ServiceConfigurationContext context, IConfiguration configuration)
+        {
+            Configure<AbpClusterNodeOptions>(configuration.GetSection("ClusterNodeOptions"));
+        }
+
+        private void ConfigureBackgroundJobs(ServiceConfigurationContext context, IValueConverter converter, IConfiguration configuration)
+        {
+            Configure<AbpBackgroundJobsOptions>(configuration.GetSection("BackgroundJobProcessing"));
+        }
+
         public override void OnApplicationInitialization(ApplicationInitializationContext context)
         {
             var app = context.GetApplicationBuilder();
             var env = context.GetEnvironment();
+
+            app.UseMiddleware<LoggingTraceIdentifierMiddleware>();
+            app.UseRequestResponseLogging();
 
             if (env.IsDevelopment())
             {

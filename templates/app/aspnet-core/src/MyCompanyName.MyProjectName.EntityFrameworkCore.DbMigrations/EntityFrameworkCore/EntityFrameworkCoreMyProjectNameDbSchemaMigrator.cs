@@ -1,14 +1,15 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
+using Isap.Abp.Extensions.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using MyCompanyName.MyProjectName.Data;
 using Volo.Abp.DependencyInjection;
 
 namespace MyCompanyName.MyProjectName.EntityFrameworkCore
 {
+    [ExposeServices(typeof(IAbpExtDbSchemaMigrator))]
     public class EntityFrameworkCoreMyProjectNameDbSchemaMigrator
-        : IMyProjectNameDbSchemaMigrator, ITransientDependency
+        : IAbpExtDbSchemaMigrator, ITransientDependency
     {
         private readonly IServiceProvider _serviceProvider;
 
