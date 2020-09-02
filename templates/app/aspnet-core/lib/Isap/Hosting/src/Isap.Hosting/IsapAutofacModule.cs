@@ -16,7 +16,7 @@ namespace Isap.Hosting
 		private void OnActivated(object sender, ActivatedEventArgs<object> e)
 		{
 			if (e.Instance is ICommonInitialize initializable)
-                initializable.Initialize();
+				initializable.Initialize();
 		}
 	}
 }

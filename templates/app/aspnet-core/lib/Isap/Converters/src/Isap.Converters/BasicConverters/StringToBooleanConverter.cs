@@ -1,5 +1,3 @@
-using Isap.Converters;
-
 namespace Isap.Converters.BasicConverters
 {
 	public class StringToBooleanConverter: BasicValueConverterBase<string, bool>

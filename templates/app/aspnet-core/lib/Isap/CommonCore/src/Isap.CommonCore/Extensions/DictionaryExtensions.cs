@@ -91,5 +91,11 @@ namespace Isap.CommonCore.Extensions
 		{
 			return collection.GetOrDefault(key, extractResult, dummy => defaultValue);
 		}
+
+		public static void Assign<TKey, TValue>(this IDictionary<TKey, TValue> destination, IDictionary<TKey, TValue> source)
+		{
+			foreach (KeyValuePair<TKey, TValue> pair in source)
+				destination[pair.Key] = pair.Value;
+		}
 	}
 }

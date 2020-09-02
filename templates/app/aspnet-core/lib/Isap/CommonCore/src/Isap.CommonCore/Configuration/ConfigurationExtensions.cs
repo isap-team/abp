@@ -1,8 +1,8 @@
 using System;
 using System.Net;
-using Microsoft.Extensions.Configuration;
 using Isap.CommonCore.Extensions;
 using Isap.CommonCore.Integrations;
+using Microsoft.Extensions.Configuration;
 
 namespace Isap.CommonCore.Configuration
 {

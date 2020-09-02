@@ -8,10 +8,10 @@ using Isap.Abp.Extensions.Data.Specifications.OrderSpecs;
 using Isap.Abp.Extensions.DataFilters;
 using Isap.Abp.Extensions.Expressions;
 using Isap.Abp.Extensions.Querying;
-using Microsoft.EntityFrameworkCore;
 using Isap.CommonCore;
 using Isap.CommonCore.Extensions;
 using Isap.CommonCore.Services;
+using Microsoft.EntityFrameworkCore;
 using Volo.Abp;
 using Volo.Abp.Data;
 using Volo.Abp.Domain.Entities;
@@ -74,7 +74,7 @@ namespace Isap.Abp.Extensions.Domain
 			query = IncludeRelatedData(query);
 
 			List<TImpl> result = await query
-				.Where(e => idList.Contains(((IEntity<TKey>)e).Id))
+				.Where(e => idList.Contains(((IEntity<TKey>) e).Id))
 				.ToListAsync();
 
 			return result.Cast<TIntf>().ToList();
@@ -140,7 +140,8 @@ namespace Isap.Abp.Extensions.Domain
 			return GetPageInternal(pageNumber, pageSize, countTotal, predicate, sortOptions);
 		}
 
-		/// <inheritdoc cref="IReferenceDataStore{TIntf,TImpl,TKey}.GetPage(int,int,Expression{Func{TImpl,bool}},IOrderSpecification{TImpl},bool)" />
+		/// <inheritdoc
+		///     cref="IReferenceDataStore{TIntf,TImpl,TKey}.GetPage(int,int,Expression{Func{TImpl,bool}},IOrderSpecification{TImpl},bool)" />
 		public Task<ResultSet<TIntf>> GetPage(int pageNumber, int pageSize, Expression<Func<TImpl, bool>> predicate,
 			IOrderSpecification<TImpl> orderSpecification, bool countTotal = false)
 		{
@@ -209,7 +210,7 @@ namespace Isap.Abp.Extensions.Domain
 		{
 			IQueryable<TImpl> query = GetQuery();
 			query = IncludeRelatedData(query);
-			return query.FirstOrDefaultAsync(e => ((IEntity<TKey>)e).Id.Equals(id));
+			return query.FirstOrDefaultAsync(e => ((IEntity<TKey>) e).Id.Equals(id));
 		}
 
 		/// <summary>
@@ -393,7 +394,7 @@ namespace Isap.Abp.Extensions.Domain
 		protected virtual IQueryable<TImpl> DefaultSortQuery(IQueryable<TImpl> query)
 		{
 			return query
-					.OrderBy(e => ((IEntity<TKey>)e).Id)
+					.OrderBy(e => ((IEntity<TKey>) e).Id)
 				;
 		}
 	}

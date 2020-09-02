@@ -4,9 +4,9 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Security.Cryptography;
 using System.Text;
+using Isap.CommonCore.Extensions;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Isap.CommonCore.Extensions;
 
 namespace Isap.CommonCore.Caching
 {

@@ -22,11 +22,6 @@ namespace Isap.Abp.BackgroundJobs.Queues
 		{
 		}
 
-		protected override Expression<Func<JobQueue, bool>> CreateUniqueKeyPredicate(JobQueue entry)
-		{
-			return e => e.Name == entry.Name;
-		}
-
 		public async Task<IJobQueue> GetQueue(string name, CancellationToken cancellationToken = default)
 		{
 			return await DataRepository
@@ -42,6 +37,11 @@ namespace Isap.Abp.BackgroundJobs.Queues
 					?? await DataRepository.InsertAsync(new JobQueue(Guid.NewGuid()) { Name = name }, true, cancellationToken)
 				;
 			return jobQueue;
+		}
+
+		protected override Expression<Func<JobQueue, bool>> CreateUniqueKeyPredicate(JobQueue entry)
+		{
+			return e => e.Name == entry.Name;
 		}
 	}
 }

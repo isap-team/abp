@@ -7,15 +7,15 @@ namespace Isap.Abp.BackgroundJobs.Processing
 {
 	public class ExtendedJobExecutionContext: JobExecutionContext
 	{
-		public ILogger Logger { get; }
-		public CancellationToken CancellationToken { get; }
-		public object Result { get; set; }
-
 		public ExtendedJobExecutionContext(IServiceProvider serviceProvider, Type jobType, object jobArgs, ILogger logger, CancellationToken cancellationToken)
 			: base(serviceProvider, jobType, jobArgs)
 		{
 			Logger = logger;
 			CancellationToken = cancellationToken;
 		}
+
+		public ILogger Logger { get; }
+		public CancellationToken CancellationToken { get; }
+		public object Result { get; set; }
 	}
 }

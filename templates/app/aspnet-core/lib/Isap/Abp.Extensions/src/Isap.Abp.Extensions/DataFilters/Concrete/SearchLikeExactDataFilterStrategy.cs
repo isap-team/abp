@@ -106,7 +106,8 @@ namespace Isap.Abp.Extensions.DataFilters.Concrete
 			return CompleteExpression(options, searchValue, CreateExpression(options.CaseSensitive, options.PropertyName, $"%{searchValue}%"));
 		}
 
-		private Expression<Func<TEntity, bool>> CompleteExpression(SearchLikeDataFilterOptions options, string searchValue, Expression<Func<TEntity, bool>> expression)
+		private Expression<Func<TEntity, bool>> CompleteExpression(SearchLikeDataFilterOptions options, string searchValue,
+			Expression<Func<TEntity, bool>> expression)
 		{
 			if (searchValue.EndsWith(" "))
 			{

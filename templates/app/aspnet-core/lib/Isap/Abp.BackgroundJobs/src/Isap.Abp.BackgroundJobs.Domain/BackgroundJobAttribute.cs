@@ -49,10 +49,10 @@ namespace Isap.Abp.BackgroundJobs
 			Check.NotNull(jobArgsType, nameof(jobArgsType));
 
 			return jobArgsType
-					.GetCustomAttributes(true)
-					.OfType<IBackgroundJobQueueNameProvider>()
-					.FirstOrDefault()
-					?.QueueName;
+				.GetCustomAttributes(true)
+				.OfType<IBackgroundJobQueueNameProvider>()
+				.FirstOrDefault()
+				?.QueueName;
 		}
 	}
 }

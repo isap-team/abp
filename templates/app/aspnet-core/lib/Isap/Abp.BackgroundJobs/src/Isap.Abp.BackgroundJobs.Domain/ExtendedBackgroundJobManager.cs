@@ -38,24 +38,28 @@ namespace Isap.Abp.BackgroundJobs
 			return EnqueueAsync(GetJobQueueName<TArgs>(), args, priority, delay, cancellationToken);
 		}
 
-		public Task<string> EnqueueAsync<TArgs>(TArgs args, string concurrencyKey, BackgroundJobPriority priority = BackgroundJobPriority.Normal, TimeSpan? delay = null,
+		public Task<string> EnqueueAsync<TArgs>(TArgs args, string concurrencyKey, BackgroundJobPriority priority = BackgroundJobPriority.Normal,
+			TimeSpan? delay = null,
 			CancellationToken cancellationToken = default)
 		{
 			return EnqueueAsync(GetJobQueueName<TArgs>(), args, concurrencyKey, priority, delay, cancellationToken);
 		}
 
-		public Task<string> EnqueueAsync<TArgs>(string queueName, TArgs args, BackgroundJobPriority priority = BackgroundJobPriority.Normal, TimeSpan? delay = null,
+		public Task<string> EnqueueAsync<TArgs>(string queueName, TArgs args, BackgroundJobPriority priority = BackgroundJobPriority.Normal,
+			TimeSpan? delay = null,
 			CancellationToken cancellationToken = default)
 		{
 			return EnqueueAsync(queueName, args, null, priority, delay, cancellationToken);
 		}
 
-		public async Task<string> EnqueueAsync<TArgs>(string queueName, TArgs args, string concurrencyKey, BackgroundJobPriority priority = BackgroundJobPriority.Normal,
+		public async Task<string> EnqueueAsync<TArgs>(string queueName, TArgs args, string concurrencyKey,
+			BackgroundJobPriority priority = BackgroundJobPriority.Normal,
 			TimeSpan? delay = null, CancellationToken cancellationToken = default)
 		{
 			IJobQueueBase queue = await GetJobQueue(queueName);
 			IJobArguments arguments = await JobDataManager.GetOrCreateArguments(args);
-			IJobData jobData = await JobDataManager.CreateJob(CurrentTenant.Id, queue.Id, GetJobName<TArgs>(), arguments, concurrencyKey, priority, delay, cancellationToken);
+			IJobData jobData = await JobDataManager.CreateJob(CurrentTenant.Id, queue.Id, GetJobName<TArgs>(), arguments, concurrencyKey, priority, delay,
+				cancellationToken);
 			return jobData.Id.ToString();
 		}
 
@@ -65,13 +69,15 @@ namespace Isap.Abp.BackgroundJobs
 			return EnqueueAsync(GetJobQueueName<TArgs>(), args, null, nextTryTime, priority, cancellationToken);
 		}
 
-		public Task<string> EnqueueAsync<TArgs>(TArgs args, string concurrencyKey, DateTime nextTryTime, BackgroundJobPriority priority = BackgroundJobPriority.Normal,
+		public Task<string> EnqueueAsync<TArgs>(TArgs args, string concurrencyKey, DateTime nextTryTime,
+			BackgroundJobPriority priority = BackgroundJobPriority.Normal,
 			CancellationToken cancellationToken = default)
 		{
 			return EnqueueAsync(GetJobQueueName<TArgs>(), args, concurrencyKey, nextTryTime, priority, cancellationToken);
 		}
 
-		public Task<string> EnqueueAsync<TArgs>(string queueName, TArgs args, DateTime nextTryTime, BackgroundJobPriority priority = BackgroundJobPriority.Normal,
+		public Task<string> EnqueueAsync<TArgs>(string queueName, TArgs args, DateTime nextTryTime,
+			BackgroundJobPriority priority = BackgroundJobPriority.Normal,
 			CancellationToken cancellationToken = default)
 		{
 			return EnqueueAsync(queueName, args, null, nextTryTime, priority, cancellationToken);
@@ -82,7 +88,8 @@ namespace Isap.Abp.BackgroundJobs
 		{
 			IJobQueueBase queue = await GetJobQueue(queueName);
 			IJobArguments arguments = await JobDataManager.GetOrCreateArguments(args);
-			IJobData jobData = await JobDataManager.CreateJob(CurrentTenant.Id, queue.Id, GetJobName<TArgs>(), arguments, concurrencyKey, priority, nextTryTime, cancellationToken);
+			IJobData jobData = await JobDataManager.CreateJob(CurrentTenant.Id, queue.Id, GetJobName<TArgs>(), arguments, concurrencyKey, priority, nextTryTime,
+				cancellationToken);
 			return jobData.Id.ToString();
 		}
 
@@ -104,19 +111,22 @@ namespace Isap.Abp.BackgroundJobs
 			return EnsureAsync(GetJobQueueName<TArgs>(), args, priority, delay, cancellationToken);
 		}
 
-		public Task<string> EnsureAsync<TArgs>(TArgs args, string concurrencyKey, BackgroundJobPriority priority = BackgroundJobPriority.Normal, TimeSpan? delay = null,
+		public Task<string> EnsureAsync<TArgs>(TArgs args, string concurrencyKey, BackgroundJobPriority priority = BackgroundJobPriority.Normal,
+			TimeSpan? delay = null,
 			CancellationToken cancellationToken = default)
 		{
 			return EnsureAsync(GetJobQueueName<TArgs>(), args, concurrencyKey, priority, delay, cancellationToken);
 		}
 
-		public Task<string> EnsureAsync<TArgs>(string queueName, TArgs args, BackgroundJobPriority priority = BackgroundJobPriority.Normal, TimeSpan? delay = null,
+		public Task<string> EnsureAsync<TArgs>(string queueName, TArgs args, BackgroundJobPriority priority = BackgroundJobPriority.Normal,
+			TimeSpan? delay = null,
 			CancellationToken cancellationToken = default)
 		{
 			return EnsureAsync(queueName, args, null, priority, delay, cancellationToken);
 		}
 
-		public async Task<string> EnsureAsync<TArgs>(string queueName, TArgs args, string concurrencyKey, BackgroundJobPriority priority = BackgroundJobPriority.Normal,
+		public async Task<string> EnsureAsync<TArgs>(string queueName, TArgs args, string concurrencyKey,
+			BackgroundJobPriority priority = BackgroundJobPriority.Normal,
 			TimeSpan? delay = null, CancellationToken cancellationToken = default)
 		{
 			if (UnitOfWorkManager.Current == null)
@@ -128,7 +138,8 @@ namespace Isap.Abp.BackgroundJobs
 
 			(IJobData jobData, IJobArguments arguments) = await JobDataManager.FindJobWithArguments(CurrentTenant.Id, queue.Id, args, cancellationToken);
 			if (jobData == null)
-				jobData = await JobDataManager.CreateJob(CurrentTenant.Id, queue.Id, GetJobName<TArgs>(), arguments, concurrencyKey, priority, delay, cancellationToken);
+				jobData = await JobDataManager.CreateJob(CurrentTenant.Id, queue.Id, GetJobName<TArgs>(), arguments, concurrencyKey, priority, delay,
+					cancellationToken);
 			else
 				jobData = await JobDataManager.Update(jobData.Id, e => e.ConcurrencyKey = e.ConcurrencyKey ?? concurrencyKey, cancellationToken);
 
@@ -141,13 +152,15 @@ namespace Isap.Abp.BackgroundJobs
 			return EnsureAsync(GetJobQueueName<TArgs>(), args, null, nextTryTime, priority, cancellationToken);
 		}
 
-		public Task<string> EnsureAsync<TArgs>(TArgs args, string concurrencyKey, DateTime nextTryTime, BackgroundJobPriority priority = BackgroundJobPriority.Normal,
+		public Task<string> EnsureAsync<TArgs>(TArgs args, string concurrencyKey, DateTime nextTryTime,
+			BackgroundJobPriority priority = BackgroundJobPriority.Normal,
 			CancellationToken cancellationToken = default)
 		{
 			return EnsureAsync(GetJobQueueName<TArgs>(), args, concurrencyKey, nextTryTime, priority, cancellationToken);
 		}
 
-		public Task<string> EnsureAsync<TArgs>(string queueName, TArgs args, DateTime nextTryTime, BackgroundJobPriority priority = BackgroundJobPriority.Normal,
+		public Task<string> EnsureAsync<TArgs>(string queueName, TArgs args, DateTime nextTryTime,
+			BackgroundJobPriority priority = BackgroundJobPriority.Normal,
 			CancellationToken cancellationToken = default)
 		{
 			return EnsureAsync(queueName, args, null, nextTryTime, priority, cancellationToken);
@@ -159,7 +172,8 @@ namespace Isap.Abp.BackgroundJobs
 			IJobQueueBase queue = await GetJobQueue(queueName);
 			(IJobData jobData, IJobArguments arguments) = await JobDataManager.FindJobWithArguments(CurrentTenant.Id, queue.Id, args, cancellationToken);
 			if (jobData == null)
-				jobData = await JobDataManager.CreateJob(CurrentTenant.Id, queue.Id, GetJobName<TArgs>(), arguments, concurrencyKey, priority, nextTryTime, cancellationToken);
+				jobData = await JobDataManager.CreateJob(CurrentTenant.Id, queue.Id, GetJobName<TArgs>(), arguments, concurrencyKey, priority, nextTryTime,
+					cancellationToken);
 			else
 				jobData = await JobDataManager.Update(jobData.Id, e => e.ConcurrencyKey = e.ConcurrencyKey ?? concurrencyKey, cancellationToken);
 

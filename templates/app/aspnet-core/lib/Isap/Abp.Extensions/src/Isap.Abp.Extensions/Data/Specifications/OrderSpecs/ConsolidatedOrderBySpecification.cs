@@ -15,6 +15,16 @@ namespace Isap.Abp.Extensions.Data.Specifications.OrderSpecs
 
 		public override bool IsEmpty => _specifications.Count == 0;
 
+		IEnumerator<IOrderSpecification<TEntity>> IEnumerable<IOrderSpecification<TEntity>>.GetEnumerator()
+		{
+			return _specifications.GetEnumerator();
+		}
+
+		IEnumerator IEnumerable.GetEnumerator()
+		{
+			return _specifications.GetEnumerator();
+		}
+
 		public override IOrderedQueryable<TEntity> OrderBy(IQueryable<TEntity> query)
 		{
 			return IsEmpty
@@ -34,16 +44,6 @@ namespace Isap.Abp.Extensions.Data.Specifications.OrderSpecs
 		public void Add(IOrderSpecification<TEntity> item)
 		{
 			_specifications.Add(item);
-		}
-
-		IEnumerator<IOrderSpecification<TEntity>> IEnumerable<IOrderSpecification<TEntity>>.GetEnumerator()
-		{
-			return _specifications.GetEnumerator();
-		}
-
-		IEnumerator IEnumerable.GetEnumerator()
-		{
-			return _specifications.GetEnumerator();
 		}
 	}
 }

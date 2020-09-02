@@ -56,7 +56,7 @@ namespace Isap.Abp.Extensions
 
 		public static void CustomMapFrom<TSource, TDestination, TSourceMember, TMember>(this IMemberConfigurationExpression<TSource, TDestination, TMember> opt,
 			Func<TSource, TSourceMember> getSourceMember, Func<TSource, TSourceMember, TDestination, TMember> createMember)
-			where TMember : class
+			where TMember: class
 		{
 			opt.MapFrom((source, destination, member, resolutionContext) =>
 				{
@@ -68,7 +68,7 @@ namespace Isap.Abp.Extensions
 
 		public static void CustomMapFrom<TSource, TDestination, TSourceMember, TMember>(this IMemberConfigurationExpression<TSource, TDestination, TMember> opt,
 			Func<TSource, TSourceMember> getSourceMember, Func<TSourceMember, TDestination, TMember> createMember)
-			where TMember : class
+			where TMember: class
 		{
 			opt.MapFrom((source, destination, member, resolutionContext) =>
 				{

@@ -9,13 +9,13 @@ using System.Threading.Tasks;
 using Isap.Abp.Extensions.Data;
 using Isap.Abp.Extensions.Expressions;
 using Isap.Abp.Extensions.Locks;
+using Isap.CommonCore.DependencyInjection;
+using Isap.CommonCore.Extensions;
+using Isap.CommonCore.Services;
 using Isap.Converters.Extensions;
 using JetBrains.Annotations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Isap.CommonCore.DependencyInjection;
-using Isap.CommonCore.Extensions;
-using Isap.CommonCore.Services;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities;
 using Volo.Abp.Domain.Repositories;
@@ -402,7 +402,7 @@ namespace Isap.Abp.Extensions.Domain
 	/// <typeparam name="TEntityBuilder">Тип, использующийся для создания нового экземпляра сущности.</typeparam>
 	public abstract class DomainManagerBase<TIntf, TImpl, TKey, TDataRepository, TEntityBuilder>: DomainManagerBase<TIntf, TImpl, TKey>
 		where TIntf: class, ICommonEntity<TKey>
-		where TImpl: class, IAssignable<TKey, TIntf>, TIntf, IEntity<TKey>//, new()
+		where TImpl: class, IAssignable<TKey, TIntf>, TIntf, IEntity<TKey> //, new()
 		where TDataRepository: class, IRepository<TImpl, TKey>
 		where TEntityBuilder: IEntityBuilder<TIntf, TImpl>
 	{
@@ -448,9 +448,9 @@ namespace Isap.Abp.Extensions.Domain
 		{
 			TImpl existingEntry;
 			using (DataFilter.Disable<ISoftDelete>())
-				existingEntry = ((IEntity<TKey>)entry).Id.IsDefaultValue()
+				existingEntry = ((IEntity<TKey>) entry).Id.IsDefaultValue()
 					? await FindByUniqueKey(entry)
-					: await GetEditable(((IEntity<TKey>)entry).Id);
+					: await GetEditable(((IEntity<TKey>) entry).Id);
 
 			if (existingEntry == null)
 			{
@@ -709,7 +709,8 @@ namespace Isap.Abp.Extensions.Domain
 	/// <typeparam name="TImpl">Класс сущности, реализующий интерфейс <see cref="TIntf" />.</typeparam>
 	/// <typeparam name="TKey">Тип значений первичного ключа.</typeparam>
 	/// <typeparam name="TDataRepository">Тип интерфейса репозитория для работы с БД.</typeparam>
-	public abstract class DomainManagerBase<TIntf, TImpl, TKey, TDataRepository>: DomainManagerBase<TIntf, TImpl, TKey, TDataRepository, DefaultEntityBuilder<TIntf, TImpl>>
+	public abstract class DomainManagerBase<TIntf, TImpl, TKey, TDataRepository>
+		: DomainManagerBase<TIntf, TImpl, TKey, TDataRepository, DefaultEntityBuilder<TIntf, TImpl>>
 		where TIntf: class, ICommonEntity<TKey>
 		where TImpl: class, IAssignable<TKey, TIntf>, TIntf, IEntity<TKey>, new()
 		where TDataRepository: class, IRepository<TImpl, TKey>

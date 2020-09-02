@@ -108,13 +108,6 @@ namespace Isap.Abp.BackgroundJobs.Processing
 			return false;
 		}
 
-		public void Attach(IJobQueueBase jobQueue)
-		{
-			Queue = jobQueue;
-			QueueOptions = _backgroundJobsConfig.Queues.Single(i => i.Name == jobQueue.Name);
-			Timer.Period = QueueOptions.JobPollInterval;
-		}
-
 		public override async Task StartAsync(CancellationToken cancellationToken = new CancellationToken())
 		{
 			await base.StartAsync(cancellationToken);
@@ -125,6 +118,13 @@ namespace Isap.Abp.BackgroundJobs.Processing
 		{
 			_activityTimer.Stop(cancellationToken);
 			return base.StopAsync(cancellationToken);
+		}
+
+		public void Attach(IJobQueueBase jobQueue)
+		{
+			Queue = jobQueue;
+			QueueOptions = _backgroundJobsConfig.Queues.Single(i => i.Name == jobQueue.Name);
+			Timer.Period = QueueOptions.JobPollInterval;
 		}
 
 		protected override async Task DoWorkAsync(PeriodicBackgroundWorkerContext workerContext)
@@ -204,7 +204,8 @@ namespace Isap.Abp.BackgroundJobs.Processing
 				try
 				{
 					BackgroundJobConfiguration jobConfiguration = JobOptions.GetJob(jobData.Name);
-					var context = new ExtendedJobExecutionContext(workerContext.ServiceProvider, jobConfiguration.JobType, arguments, logger, cancellationToken);
+					var context = new ExtendedJobExecutionContext(workerContext.ServiceProvider, jobConfiguration.JobType, arguments, logger,
+						cancellationToken);
 
 					try
 					{

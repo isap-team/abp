@@ -1,10 +1,10 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Isap.CommonCore.Configuration;
+using Isap.CommonCore.Extensions;
 using Isap.CommonCore.Utils;
 using Isap.Converters;
 using Microsoft.Extensions.Configuration;
-using Isap.CommonCore.Extensions;
 
 namespace Isap.CommonCore.Integrations
 {

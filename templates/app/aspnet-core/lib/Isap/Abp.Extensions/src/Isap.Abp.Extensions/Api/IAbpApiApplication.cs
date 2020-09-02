@@ -1,6 +1,5 @@
 using System;
 using Isap.Abp.Extensions.Api.Clients;
-using Microsoft.Extensions.Options;
 
 namespace Isap.Abp.Extensions.Api
 {
@@ -15,7 +14,7 @@ namespace Isap.Abp.Extensions.Api
 		IAbpApiSession CreateSession();
 		IAbpApiSession CreateSession(int nodeKey);
 
-		TApiClient CreateClient(IOptions<TApiOptions> options);
+		TApiClient CreateClient(TApiOptions options);
 		TApiClient CreateClient(Uri baseUrl);
 		TApiClient CreateClient(string baseUrl);
 		void Release(TApiClient client);

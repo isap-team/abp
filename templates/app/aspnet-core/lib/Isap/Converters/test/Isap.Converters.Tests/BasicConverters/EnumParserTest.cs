@@ -1,8 +1,7 @@
 using System;
 using System.Reflection;
-using Isap.Converters;
-using Moq;
 using Isap.Converters.BasicConverters;
+using Moq;
 using Shouldly;
 using Xunit;
 

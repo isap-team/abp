@@ -9,6 +9,16 @@ namespace Isap.CommonCore.Tests.Extensions
 {
 	public class UrlHelpersTest
 	{
+		public class GetInput
+		{
+			public GetInput(int[] idList)
+			{
+				IdList = idList;
+			}
+
+			public int[] IdList { get; set; }
+		}
+
 		[Theory]
 		[InlineData("ws://wapi.local:5000/ws", "tenantId", 2, "ws://wapi.local:5000/ws?tenantId=2")]
 		[InlineData("ws://wapi.local:5000/ws/", "tenantId", 3, "ws://wapi.local:5000/ws/?tenantId=3")]
@@ -23,16 +33,6 @@ namespace Isap.CommonCore.Tests.Extensions
 		{
 			string actualUrl = url.SetQueryString(paramName, paramValue).ToString();
 			Assert.Equal(expectedUrl, actualUrl);
-		}
-
-		public class GetInput
-		{
-			public GetInput(int[] idList)
-			{
-				IdList = idList;
-			}
-
-			public int[] IdList { get; set; }
 		}
 
 		[Fact]

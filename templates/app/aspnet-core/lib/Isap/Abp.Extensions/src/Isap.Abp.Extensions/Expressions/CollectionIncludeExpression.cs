@@ -18,15 +18,15 @@ namespace Isap.Abp.Extensions.Expressions
 		where TEntity: class, IEntity
 		where TProperty: class, IEntity
 	{
-		[NotNull]
-		public IIsapDbContextProvider DbContextProvider { get; }
-
 		public CollectionIncludeExpression([NotNull] IIsapDbContextProvider dbContextProvider, Expression<Func<TEntity, IEnumerable<TProperty>>> expression)
 			: base(expression)
 		{
 			DbContextProvider = dbContextProvider ?? throw new ArgumentNullException(nameof(dbContextProvider));
 			IncludeRegistry = new IncludeExpressionRegistry<TTopEntity, TProperty>(dbContextProvider);
 		}
+
+		[NotNull]
+		public IIsapDbContextProvider DbContextProvider { get; }
 
 		public IIncludeExpressionRegistry<TProperty> IncludeRegistry { get; }
 

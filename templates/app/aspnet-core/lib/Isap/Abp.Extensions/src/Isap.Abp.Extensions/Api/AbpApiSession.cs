@@ -57,6 +57,15 @@ namespace Isap.Abp.Extensions.Api
 			NodeKey = nodeKey;
 		}
 
+		protected virtual void Assign(DateTime now, AuthToken authToken, string tenantId, string userId, int? nodeKey = null)
+		{
+			AuthToken = authToken;
+			TenantId = tenantId;
+			UserId = userId;
+			NodeKey = nodeKey;
+			IsAuthenticated = AuthToken != null && AuthToken.ExpireAt > DateTime.Now || !string.IsNullOrEmpty(userId);
+		}
+
 		#region Implementation of IAbpApiSessionBuilder
 
 		public void Assign(DateTime now, int? tenantId, IAbpAuthResponse authResponse)
@@ -105,14 +114,5 @@ namespace Isap.Abp.Extensions.Api
 		public IAbpApiSessionBuilder GetBuilder() => this;
 
 		#endregion
-
-		protected virtual void Assign(DateTime now, AuthToken authToken, string tenantId, string userId, int? nodeKey = null)
-		{
-			AuthToken = authToken;
-			TenantId = tenantId;
-			UserId = userId;
-			NodeKey = nodeKey;
-			IsAuthenticated = AuthToken != null && AuthToken.ExpireAt > DateTime.Now || !string.IsNullOrEmpty(userId);
-		}
 	}
 }

@@ -2,8 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Isap.Converters;
 using Isap.CommonCore.Extensions;
+using Isap.Converters;
 
 namespace Isap.CommonCore.Expressions.Evaluation
 {

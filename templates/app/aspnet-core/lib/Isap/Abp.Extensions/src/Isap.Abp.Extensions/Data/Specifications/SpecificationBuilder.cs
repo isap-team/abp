@@ -16,7 +16,8 @@ namespace Isap.Abp.Extensions.Data.Specifications
 			return new OrderByDescendingSpecification<TEntity>(expression);
 		}
 
-		public static IOrderSpecification<TEntity> ThenBy<TEntity>(this IOrderSpecification<TEntity> specification, Expression<Func<TEntity, object>> expression)
+		public static IOrderSpecification<TEntity> ThenBy<TEntity>(this IOrderSpecification<TEntity> specification,
+			Expression<Func<TEntity, object>> expression)
 		{
 			IOrderSpecification<TEntity> newSpecification = new OrderBySpecification<TEntity>(expression);
 
@@ -29,7 +30,8 @@ namespace Isap.Abp.Extensions.Data.Specifications
 			return new ConsolidatedOrderBySpecification<TEntity>(new[] { specification, newSpecification });
 		}
 
-		public static IOrderSpecification<TEntity> ThenByDescending<TEntity>(this IOrderSpecification<TEntity> specification, Expression<Func<TEntity, object>> expression)
+		public static IOrderSpecification<TEntity> ThenByDescending<TEntity>(this IOrderSpecification<TEntity> specification,
+			Expression<Func<TEntity, object>> expression)
 		{
 			IOrderSpecification<TEntity> newSpecification = new OrderByDescendingSpecification<TEntity>(expression);
 

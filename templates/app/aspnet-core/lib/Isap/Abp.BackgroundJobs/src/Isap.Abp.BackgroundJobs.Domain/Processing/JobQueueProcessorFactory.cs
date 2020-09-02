@@ -11,12 +11,12 @@ namespace Isap.Abp.BackgroundJobs.Processing
 
 	public class JobQueueProcessorFactory: IJobQueueProcessorFactory, ISingletonDependency
 	{
-		protected IServiceProvider ServiceProvider { get; }
-
 		public JobQueueProcessorFactory(IServiceProvider serviceProvider)
 		{
 			ServiceProvider = serviceProvider;
 		}
+
+		protected IServiceProvider ServiceProvider { get; }
 
 		public IJobQueueProcessor Create(IJobQueueBase jobQueue)
 		{

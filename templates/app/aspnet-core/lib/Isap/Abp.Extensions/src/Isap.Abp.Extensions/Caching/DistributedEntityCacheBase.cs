@@ -65,7 +65,8 @@ namespace Isap.Abp.Extensions.Caching
 		protected abstract Task<TCacheItemImpl> TryLoadItem(TKey id);
 	}
 
-	public abstract class DistributedEntityCacheBase<TCacheItemIntf, TCacheItemImpl, TKey, TAppService>: DistributedEntityCacheBase<TCacheItemIntf, TCacheItemImpl, TKey>
+	public abstract class DistributedEntityCacheBase<TCacheItemIntf, TCacheItemImpl, TKey, TAppService>
+		: DistributedEntityCacheBase<TCacheItemIntf, TCacheItemImpl, TKey>
 		where TCacheItemIntf: class, ICommonEntity<TKey>
 		where TCacheItemImpl: class, ICommonEntityDto<TKey>, TCacheItemIntf
 		where TAppService: IReferenceAppService<TCacheItemImpl, TKey>
@@ -93,9 +94,9 @@ namespace Isap.Abp.Extensions.Caching
 					return null;
 
 				// ReSharper disable once AccessToModifiedClosure
-				entry = Cache.GetOrAdd(((ICommonEntity<TKey>)entry).Id, () => entry);
+				entry = Cache.GetOrAdd(((ICommonEntity<TKey>) entry).Id, () => entry);
 
-				cacheRef = new CacheRef<TCacheItemImpl, TKey>(((ICommonEntity<TKey>)entry).Id);
+				cacheRef = new CacheRef<TCacheItemImpl, TKey>(((ICommonEntity<TKey>) entry).Id);
 				cacheRef = await index.GetOrAddAsync(name, () => Task.FromResult(cacheRef));
 			}
 

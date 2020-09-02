@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Concurrent;
 using System.Linq;
-using Isap.Converters;
 
 namespace Isap.Converters
 {

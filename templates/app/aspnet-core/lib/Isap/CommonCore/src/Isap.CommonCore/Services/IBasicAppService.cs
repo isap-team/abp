@@ -41,7 +41,8 @@ namespace Isap.CommonCore.Services
 		Task Delete(TKey id);
 
 		/// <summary>
-		///     Восстанавливает в БД информацию о сущности. Фактически для записи сбрасывается отметка "IsDeleted" в значение false.
+		///     Восстанавливает в БД информацию о сущности. Фактически для записи сбрасывается отметка "IsDeleted" в значение
+		///     false.
 		/// </summary>
 		/// <param name="id">Идентификатор записи.</param>
 		/// <returns></returns>

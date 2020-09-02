@@ -1,5 +1,3 @@
-using Isap.Converters;
-
 namespace Isap.Converters.BasicConverters
 {
 	public delegate bool TryParseDelegate<T>(string value, out T result);

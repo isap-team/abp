@@ -3,14 +3,13 @@ using System.Linq;
 using System.Threading.Tasks;
 using Isap.Abp.Extensions.Data.Specifications;
 using Isap.Abp.Extensions.Data.Specifications.FilterSpecs;
-using Isap.Abp.Extensions.Data.Specifications.FilterSpecs.Concrete;
 using Isap.Abp.Extensions.Data.Specifications.OrderSpecs;
 using Isap.Abp.Extensions.DataFilters;
 using Isap.Abp.Extensions.Domain;
 using Isap.Abp.Extensions.Querying;
-using Isap.Converters.Extensions;
 using Isap.CommonCore;
 using Isap.CommonCore.Services;
+using Isap.Converters.Extensions;
 using Volo.Abp.Domain.Entities;
 
 namespace Isap.Abp.Extensions.Services
@@ -101,7 +100,8 @@ namespace Isap.Abp.Extensions.Services
 				}
 			}
 
-			List<ISpecification<TImpl>> allSpecs = SpecificationHelpers.BuildSpecifications<TImpl>(SpecificationBuildingContext, DomainManager.DbContextProvider, specifications);
+			List<ISpecification<TImpl>> allSpecs =
+				SpecificationHelpers.BuildSpecifications<TImpl>(SpecificationBuildingContext, DomainManager.DbContextProvider, specifications);
 
 			IFilterSpecification<TImpl> filterSpec = allSpecs.ToFilterSpecification();
 			IOrderSpecification<TImpl> orderSpec = allSpecs.ToOrderSpecification();

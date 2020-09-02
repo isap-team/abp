@@ -1,7 +1,7 @@
 using System;
+using Isap.CommonCore.Integrations;
 using Isap.Converters;
 using Microsoft.Extensions.Configuration;
-using Isap.CommonCore.Integrations;
 
 namespace Isap.CommonCore.Configuration
 {

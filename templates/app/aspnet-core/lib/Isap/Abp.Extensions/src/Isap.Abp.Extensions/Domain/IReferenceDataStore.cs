@@ -7,9 +7,9 @@ using Isap.Abp.Extensions.Data.Specifications.FilterSpecs;
 using Isap.Abp.Extensions.Data.Specifications.OrderSpecs;
 using Isap.Abp.Extensions.DataFilters;
 using Isap.Abp.Extensions.Querying;
-using JetBrains.Annotations;
 using Isap.CommonCore;
 using Isap.CommonCore.Services;
+using JetBrains.Annotations;
 
 namespace Isap.Abp.Extensions.Domain
 {

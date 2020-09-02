@@ -37,14 +37,15 @@ namespace Isap.Abp.Extensions.Collections
 		{
 			Expression<Func<TEntity, bool>> predicate = await DataFilterProvider.ToExpressionAsync<TEntity>(filterValues);
 			IEnumerable<TEntity> entities = GetAll()
-				.Where(predicate.Compile())
+					.Where(predicate.Compile())
 				;
 			if (sortOptions?.Count > 0)
 			{
 				IEnumerableSortProvider<TEntity> sortProvider = new SortOptionsSortProvider<TEntity>(sortOptions);
 				entities = sortProvider.Apply(entities);
 			}
-			return entities.ToResultSet(pageNumber, pageSize, countTotal ? GetCount() : (int?)null);
+
+			return entities.ToResultSet(pageNumber, pageSize, countTotal ? GetCount() : (int?) null);
 		}
 	}
 }

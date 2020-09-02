@@ -1,5 +1,3 @@
-using Isap.Converters;
-
 namespace Isap.Converters
 {
 	public class CachedValueConverterProvider: IValueConverterProvider

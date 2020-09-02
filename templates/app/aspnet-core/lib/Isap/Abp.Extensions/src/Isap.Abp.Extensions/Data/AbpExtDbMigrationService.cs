@@ -1,6 +1,8 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Isap.CommonCore.Extensions;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 using Volo.Abp.Data;
@@ -12,7 +14,17 @@ namespace Isap.Abp.Extensions.Data
 {
 	public interface IAbpExtDbMigrationService
 	{
-		Task MigrateAsync();
+		Task MigrateAsync(object args = null);
+	}
+
+	public static class IsapDataSeederExtensions
+	{
+		public static Task SeedAsync(this IDataSeeder seeder, Guid? tenantId, object args)
+		{
+			var context = new DataSeedContext(tenantId);
+			context.Properties.Assign(args.AsNameToObjectMap());
+			return seeder.SeedAsync(context);
+		}
 	}
 
 	public class AbpExtDbMigrationService: IAbpExtDbMigrationService, ITransientDependency
@@ -38,12 +50,12 @@ namespace Isap.Abp.Extensions.Data
 
 		public ILogger<AbpExtDbMigrationService> Logger { get; set; }
 
-		public async Task MigrateAsync()
+		public async Task MigrateAsync(object args = null)
 		{
 			Logger.LogInformation("Started database migrations...");
 
 			await MigrateDatabaseSchemaAsync();
-			await SeedDataAsync();
+			await SeedDataAsync(null, args);
 
 			Logger.LogInformation($"Successfully completed host database migrations.");
 
@@ -68,7 +80,7 @@ namespace Isap.Abp.Extensions.Data
 						}
 					}
 
-					await SeedDataAsync(tenant);
+					await SeedDataAsync(tenant, args);
 				}
 
 				Logger.LogInformation($"Successfully completed {tenant.Name} tenant database migrations.");
@@ -88,11 +100,11 @@ namespace Isap.Abp.Extensions.Data
 			}
 		}
 
-		private async Task SeedDataAsync(Tenant tenant = null)
+		private async Task SeedDataAsync(Tenant tenant, object args)
 		{
 			Logger.LogInformation($"Executing {(tenant == null ? "host" : tenant.Name + " tenant")} database seed...");
 
-			await _dataSeeder.SeedAsync(tenant?.Id);
+			await _dataSeeder.SeedAsync(tenant?.Id, args);
 		}
 	}
 }

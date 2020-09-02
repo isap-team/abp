@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using IdentityModel;
 using Isap.Abp.Extensions.Logging;
 using Isap.CommonCore.Integrations;
 using Isap.CommonCore.Web.Middlewares.RequestLogging;
@@ -30,6 +31,7 @@ using Volo.Abp.AspNetCore.Mvc.UI;
 using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Basic;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
+using Volo.Abp.AspNetCore.Security.Claims;
 using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.Autofac;
 using Volo.Abp.AutoMapper;
@@ -42,6 +44,7 @@ using Volo.Abp.Modularity;
 using Volo.Abp.MultiTenancy;
 using Volo.Abp.MultiTenancy.ConfigurationStore;
 using Volo.Abp.PermissionManagement.Web;
+using Volo.Abp.Security.Claims;
 using Volo.Abp.TenantManagement.Web;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.UI;
@@ -165,33 +168,45 @@ namespace MyCompanyName.MyProjectName.Web
 
         private void ConfigureAuthentication(ServiceConfigurationContext context, IConfiguration configuration)
         {
-            context.Services.AddAuthentication(options =>
-                {
-                    options.DefaultScheme = "Cookies";
-                    options.DefaultChallengeScheme = "oidc";
-                })
+            context.Services
+                .AddAuthentication(options =>
+                    {
+                        options.DefaultScheme = "Cookies";
+                        options.DefaultChallengeScheme = "oidc";
+                    })
                 .AddCookie("Cookies", options =>
-                {
-                    options.ExpireTimeSpan = TimeSpan.FromDays(365);
-                })
+                    {
+                        options.ExpireTimeSpan = TimeSpan.FromDays(365);
+                    })
                 .AddOpenIdConnect("oidc", options =>
+                    {
+                        options.Authority = configuration["AuthServer:Authority"];
+                        options.RequireHttpsMetadata = true;
+                        options.ResponseType = OpenIdConnectResponseType.CodeIdToken;
+
+                        options.ClientId = configuration["AuthServer:ClientId"];
+                        options.ClientSecret = configuration["AuthServer:ClientSecret"];
+
+                        options.SaveTokens = true;
+                        options.GetClaimsFromUserInfoEndpoint = true;
+
+                        options.Scope.Add("role");
+                        options.Scope.Add("email");
+                        options.Scope.Add("phone");
+                        options.Scope.Add("MyProjectName");
+
+                        options.ClaimActions.MapAbpClaimTypes();
+                    })
+                ;
+
+            Configure<AbpClaimsMapOptions>(options =>
                 {
-                    options.Authority = configuration["AuthServer:Authority"];
-                    options.RequireHttpsMetadata = true;
-                    options.ResponseType = OpenIdConnectResponseType.CodeIdToken;
-
-                    options.ClientId = configuration["AuthServer:ClientId"];
-                    options.ClientSecret = configuration["AuthServer:ClientSecret"];
-
-                    options.SaveTokens = true;
-                    options.GetClaimsFromUserInfoEndpoint = true;
-
-                    options.Scope.Add("role");
-                    options.Scope.Add("email");
-                    options.Scope.Add("phone");
-                    options.Scope.Add("MyProjectName");
-
-                    options.ClaimActions.MapAbpClaimTypes();
+                    //options.Maps.Add(JwtClaimTypes.Subject, () => AbpClaimTypes.UserId);
+                    //options.Maps.Add(JwtClaimTypes.PreferredUserName, () => AbpClaimTypes.UserName);
+                    //options.Maps.Add(JwtClaimTypes.Email, () => AbpClaimTypes.Email);
+                    options.Maps.Add(JwtClaimTypes.EmailVerified, () => AbpClaimTypes.EmailVerified);
+                    options.Maps.Add(JwtClaimTypes.PhoneNumber, () => AbpClaimTypes.PhoneNumber);
+                    options.Maps.Add(JwtClaimTypes.PhoneNumberVerified, () => AbpClaimTypes.PhoneNumberVerified);
                 });
         }
 
@@ -303,6 +318,7 @@ namespace MyCompanyName.MyProjectName.Web
             app.UseRouting();
             app.UseCors(DefaultCorsPolicyName);
             app.UseAuthentication();
+            app.UseAbpClaimsMap();
 
             if (MultiTenancyConsts.IsEnabled)
             {

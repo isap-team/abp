@@ -54,6 +54,7 @@ namespace Isap.CommonCore.Services.InMemoryServices
 			}
 			else
 				Entries.TryRemove(id, out _);
+
 			return Task.CompletedTask;
 		}
 

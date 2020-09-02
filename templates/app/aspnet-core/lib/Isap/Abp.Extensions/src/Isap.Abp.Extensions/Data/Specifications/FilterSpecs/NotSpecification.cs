@@ -8,13 +8,13 @@ namespace Isap.Abp.Extensions.Data.Specifications.FilterSpecs
 	{
 		private readonly IFilterSpecification<TEntity> _specification;
 
-		public override bool IsIgnoreSafeDeleteFilter => _specification.IsIgnoreSafeDeleteFilter;
-		public override bool IsIgnoreMultiTenantFilter => _specification.IsIgnoreMultiTenantFilter;
-
 		public NotSpecification(IFilterSpecification<TEntity> specification)
 		{
 			_specification = specification;
 		}
+
+		public override bool IsIgnoreSafeDeleteFilter => _specification.IsIgnoreSafeDeleteFilter;
+		public override bool IsIgnoreMultiTenantFilter => _specification.IsIgnoreMultiTenantFilter;
 
 		public override Expression<Func<TEntity, bool>> IsSatisfiedBy()
 		{

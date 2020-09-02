@@ -9,10 +9,10 @@ using System.Threading.Tasks;
 using Abp.Web.Models;
 using Isap.CommonCore.API;
 using Isap.CommonCore.Configuration;
+using Isap.CommonCore.Extensions;
 using JetBrains.Annotations;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
-using Isap.CommonCore.Extensions;
 
 namespace Isap.Abp.Extensions.Api.Clients
 {
@@ -155,7 +155,8 @@ namespace Isap.Abp.Extensions.Api.Clients
 					{
 						if (string.IsNullOrEmpty(details))
 							return new AjaxResponse<TResponse>(new ErrorInfo((int) responseMessage.StatusCode, responseMessage.ReasonPhrase, details));
-						var ajaxResponse = JsonConvert.DeserializeObject<AjaxResponse>(details, JsonSerializerSettings) ?? throw new InvalidOperationException();
+						var ajaxResponse = JsonConvert.DeserializeObject<AjaxResponse>(details, JsonSerializerSettings)
+							?? throw new InvalidOperationException();
 						return new AjaxResponse<TResponse>(ajaxResponse.Error, ajaxResponse.UnAuthorizedRequest);
 					}
 					catch (Exception)

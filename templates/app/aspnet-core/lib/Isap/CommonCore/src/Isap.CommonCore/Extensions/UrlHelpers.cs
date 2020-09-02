@@ -118,12 +118,14 @@ namespace Isap.CommonCore.Extensions
 						break;
 				}
 			}
+
 			if (replaceUrlParams)
 			{
 				query = query.GroupBy(pair => pair.Key)
 					.Select(g => new KeyValuePair<string, string>(g.Key, g.Select(pair => pair.Value).Last()))
 					.ToList();
 			}
+
 			string newQueryString = query.ToQueryString().WithPrefixIfNotNullOrEmpty("?");
 			string result = $"{url.Scheme}://{url.Authority}{path}{newQueryString}";
 			return new Uri(result);

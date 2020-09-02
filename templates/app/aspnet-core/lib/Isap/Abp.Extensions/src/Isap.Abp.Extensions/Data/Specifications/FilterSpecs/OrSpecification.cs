@@ -10,9 +10,6 @@ namespace Isap.Abp.Extensions.Data.Specifications.FilterSpecs
 	{
 		private readonly IFilterSpecification<TEntity>[] _specifications;
 
-		public override bool IsIgnoreSafeDeleteFilter => _specifications?.Any(s => s.IsIgnoreSafeDeleteFilter) ?? base.IsIgnoreSafeDeleteFilter;
-		public override bool IsIgnoreMultiTenantFilter => _specifications?.Any(s => s.IsIgnoreMultiTenantFilter) ?? base.IsIgnoreMultiTenantFilter;
-
 		public OrSpecification([NotNull] params IFilterSpecification<TEntity>[] specifications)
 		{
 			if (specifications == null)
@@ -21,6 +18,9 @@ namespace Isap.Abp.Extensions.Data.Specifications.FilterSpecs
 				throw new ArgumentException("Parameter should not be empty.", nameof(specifications));
 			_specifications = specifications;
 		}
+
+		public override bool IsIgnoreSafeDeleteFilter => _specifications?.Any(s => s.IsIgnoreSafeDeleteFilter) ?? base.IsIgnoreSafeDeleteFilter;
+		public override bool IsIgnoreMultiTenantFilter => _specifications?.Any(s => s.IsIgnoreMultiTenantFilter) ?? base.IsIgnoreMultiTenantFilter;
 
 		public override Expression<Func<TEntity, bool>> IsSatisfiedBy()
 		{

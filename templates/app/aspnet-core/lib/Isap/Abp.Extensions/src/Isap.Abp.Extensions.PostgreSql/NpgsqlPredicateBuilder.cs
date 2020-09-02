@@ -15,7 +15,7 @@ namespace Isap.Abp.Extensions.PostgreSql
 			ParameterExpression parameter = Expression.Parameter(typeof(T), "entry");
 
 			propertyExpression =
-				(Expression<Func<T,string>>) ParameterUpdateVisitor.ReplaceParameter(propertyExpression.Parameters.First(), parameter, propertyExpression);
+				(Expression<Func<T, string>>) ParameterUpdateVisitor.ReplaceParameter(propertyExpression.Parameters.First(), parameter, propertyExpression);
 			var memberExpression = (MemberExpression) propertyExpression.Body;
 
 			value = FixValueForProperty(memberExpression.Type, value);

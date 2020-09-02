@@ -4,17 +4,13 @@ using System.Collections.Generic;
 using System.Linq;
 using Isap.Abp.Extensions.DataFilters;
 using Isap.Abp.Extensions.Querying;
-using Microsoft.Extensions.DependencyInjection;
 using Isap.CommonCore.Services;
+using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp.Application.Services;
 
 namespace Isap.Abp.Extensions.Services
 {
 	public abstract class AppServiceBase: ApplicationService
-	{
-	}
-
-	public abstract class AppServiceBase<TEntityDto, TIntf>: AppServiceBase
 	{
 		private readonly ConcurrentDictionary<Type, object> _serviceReferenceMap = new ConcurrentDictionary<Type, object>();
 
@@ -32,7 +28,10 @@ namespace Isap.Abp.Extensions.Services
 		{
 			return sortOptions?.Select(e => ObjectMapper.Map<SortOptionDto, SortOption>(e)).ToList();
 		}
+	}
 
+	public abstract class AppServiceBase<TEntityDto, TIntf>: AppServiceBase
+	{
 		protected virtual TEntityDto ToDto(TIntf entry)
 		{
 			return ObjectMapper.Map<TIntf, TEntityDto>(entry);

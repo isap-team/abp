@@ -1,5 +1,3 @@
-using Isap.Converters;
-
 namespace Isap.Converters.BasicConverters
 {
 	public class ValueTypeToStringConverter<T>: BasicValueConverterBase<T, string>

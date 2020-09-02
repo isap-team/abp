@@ -84,6 +84,8 @@ namespace Isap.Abp.BackgroundJobs.Jobs
 
 		public JsonDocument Result { get; set; }
 
+		object ICommonEntity.GetId() => Id;
+
 		protected override void InternalAssign(IJobData source)
 		{
 			TenantId = source.TenantId;
@@ -103,7 +105,5 @@ namespace Isap.Abp.BackgroundJobs.Jobs
 			ResultType = source.ResultTypeName;
 			Result = source.Result;
 		}
-
-		object ICommonEntity.GetId() => Id;
 	}
 }

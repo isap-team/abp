@@ -6,8 +6,6 @@ namespace Isap.Abp.Extensions.Data.Specifications
 	public abstract class SpecificationBuilderBase<TEntity, TParams>: ISpecificationBuilder<TEntity>
 		where TParams: class
 	{
-		public abstract ISpecification<TEntity> Create(ISpecificationBuildingContext context, TParams parameters);
-
 		public Type EntityType => typeof(TEntity);
 
 		ISpecification<TEntity> ISpecificationBuilder<TEntity>.Create(ISpecificationBuildingContext context, JToken data)
@@ -19,5 +17,7 @@ namespace Isap.Abp.Extensions.Data.Specifications
 		{
 			return Create(context, data?.ToObject<TParams>());
 		}
+
+		public abstract ISpecification<TEntity> Create(ISpecificationBuildingContext context, TParams parameters);
 	}
 }

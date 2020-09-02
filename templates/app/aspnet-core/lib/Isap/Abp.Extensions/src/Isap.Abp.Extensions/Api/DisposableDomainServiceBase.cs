@@ -8,6 +8,15 @@ namespace Isap.Abp.Extensions.Api
 	{
 		private bool IsDisposed { get; set; }
 
+		public void Dispose()
+		{
+			if (!IsDisposed)
+			{
+				InternalDispose();
+				IsDisposed = true;
+			}
+		}
+
 		~DisposableDomainServiceBase()
 		{
 			if (!IsDisposed)
@@ -16,15 +25,6 @@ namespace Isap.Abp.Extensions.Api
 			}
 
 			Dispose();
-		}
-
-		public void Dispose()
-		{
-			if (!IsDisposed)
-			{
-				InternalDispose();
-				IsDisposed = true;
-			}
 		}
 
 		protected abstract void InternalDispose();

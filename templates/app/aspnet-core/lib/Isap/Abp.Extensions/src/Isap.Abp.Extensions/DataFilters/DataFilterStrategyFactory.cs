@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using Isap.Abp.Extensions.DataFilters.Concrete;
 using Isap.Abp.Extensions.DataFilters.Converters;
 using Isap.Abp.Extensions.Expressions.Predicates;
@@ -92,8 +93,8 @@ namespace Isap.Abp.Extensions.DataFilters
 			public string Options { get; }
 		}
 
-		private readonly System.Collections.Generic.Dictionary<DataFilterType, Func<CreationParameters, IDataFilterStrategy<TEntity>>> _ctorMap =
-			new System.Collections.Generic.Dictionary<DataFilterType, Func<CreationParameters, IDataFilterStrategy<TEntity>>>
+		private readonly Dictionary<DataFilterType, Func<CreationParameters, IDataFilterStrategy<TEntity>>> _ctorMap =
+			new Dictionary<DataFilterType, Func<CreationParameters, IDataFilterStrategy<TEntity>>>
 				{
 					{
 						DataFilterType.SelectOne,

@@ -16,11 +16,6 @@ namespace Isap.Abp.BackgroundJobs.Logging
 	{
 		protected IRepository<JobExecutionLogEntry, Guid> DataRepository => LazyGetRequiredService<IRepository<JobExecutionLogEntry, Guid>>();
 
-		protected override IQueryable<JobExecutionLogEntry> GetQuery()
-		{
-			return DataRepository;
-		}
-
 		public async Task<IJobExecutionLogEntry> MakeExecutionLogEntry(IJobData jobData, string log)
 		{
 			DateTime now = Clock.Now;
@@ -36,6 +31,11 @@ namespace Isap.Abp.BackgroundJobs.Logging
 					Log = log,
 				});
 			return entry;
+		}
+
+		protected override IQueryable<JobExecutionLogEntry> GetQuery()
+		{
+			return DataRepository;
 		}
 	}
 }

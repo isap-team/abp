@@ -7,11 +7,11 @@ using System.Threading;
 using System.Threading.Tasks;
 using Isap.Abp.BackgroundJobs.Jobs;
 using Isap.Abp.Extensions.Domain;
+using Isap.CommonCore.Extensions;
+using Isap.CommonCore.Utils;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using Isap.CommonCore.Extensions;
-using Isap.CommonCore.Utils;
 using Volo.Abp.BackgroundJobs;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.MultiTenancy;
@@ -24,11 +24,6 @@ namespace Isap.Abp.BackgroundJobs.EntityFrameworkCore
 		protected JobDataManagerBase(IRepository<JobData, Guid> dataRepository)
 			: base(dataRepository)
 		{
-		}
-
-		protected override Expression<Func<JobData, bool>> CreateUniqueKeyPredicate(JobData entry)
-		{
-			return null;
 		}
 
 		public async Task<IJobArguments> GetOrCreateArguments<TArgs>(TArgs args)
@@ -122,7 +117,8 @@ namespace Isap.Abp.BackgroundJobs.EntityFrameworkCore
 			return jobData;
 		}
 
-		public async Task<(IJobData, IJobArguments)> FindJobWithArguments<TArgs>(Guid? tenantId, Guid queueId, TArgs args, CancellationToken cancellationToken = default)
+		public async Task<(IJobData, IJobArguments)> FindJobWithArguments<TArgs>(Guid? tenantId, Guid queueId, TArgs args,
+			CancellationToken cancellationToken = default)
 		{
 			IJobArguments arguments = await GetOrCreateArguments(args);
 			IJobData jobData = await FindJob(tenantId, queueId, arguments.Key, cancellationToken);
@@ -206,6 +202,11 @@ namespace Isap.Abp.BackgroundJobs.EntityFrameworkCore
 		public async Task RemoveObsoleteJobs(DateTime removeBefore, CancellationToken cancellationToken = default)
 		{
 			await Perform(db => RemoveObsoleteJobs(db, removeBefore, cancellationToken));
+		}
+
+		protected override Expression<Func<JobData, bool>> CreateUniqueKeyPredicate(JobData entry)
+		{
+			return null;
 		}
 
 		private string GetKey<TArgs>(TArgs args, out string arguments)

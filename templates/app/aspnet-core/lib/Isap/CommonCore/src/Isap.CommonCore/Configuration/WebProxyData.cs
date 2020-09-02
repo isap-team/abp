@@ -1,6 +1,5 @@
 using System;
 using System.Net;
-using Isap.CommonCore.Configuration;
 
 namespace Isap.CommonCore.Configuration
 {

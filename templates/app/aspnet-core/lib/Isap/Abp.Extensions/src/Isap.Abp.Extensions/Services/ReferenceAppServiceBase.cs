@@ -21,7 +21,9 @@ namespace Isap.Abp.Extensions.Services
 		public abstract Task<Dictionary<TKey, TEntityDto>> GetMany(TKey[] idList);
 
 		public abstract Task<ResultSet<TEntityDto>> GetPage(int pageNumber, int pageSize, bool countTotal = false, QueryOptionsDto queryOptions = null);
-		public abstract Task<ResultSet<TEntityDto>> GetPage(int pageNumber, int pageSize, bool countTotal = false, List<SpecificationParameters> specifications = null);
+
+		public abstract Task<ResultSet<TEntityDto>> GetPage(int pageNumber, int pageSize, bool countTotal = false,
+			List<SpecificationParameters> specifications = null);
 
 		Task<ResultSet<TEntityDto>> IReferenceAppService<TEntityDto, TKey>.GetPage(int pageNumber, int pageSize, bool countTotal,
 			ICollection<DataFilterValueDto> filterValues)
@@ -101,7 +103,8 @@ namespace Isap.Abp.Extensions.Services
 				}
 			}
 
-			List<ISpecification<TImpl>> allSpecs = SpecificationHelpers.BuildSpecifications<TImpl>(SpecificationBuildingContext, DataStore.DbContextProvider, specifications);
+			List<ISpecification<TImpl>> allSpecs =
+				SpecificationHelpers.BuildSpecifications<TImpl>(SpecificationBuildingContext, DataStore.DbContextProvider, specifications);
 
 			IFilterSpecification<TImpl> filterSpec = allSpecs.ToFilterSpecification();
 			IOrderSpecification<TImpl> orderSpec = allSpecs.ToOrderSpecification();

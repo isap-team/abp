@@ -120,6 +120,7 @@ namespace Isap.CommonCore
 				TResult convertedEntry = await convert(entry);
 				result.Add(convertedEntry);
 			}
+
 			return new ResultSet<TResult>(result, PageNumber, PageSize, TotalCount)
 				{
 					IsLastPage = IsLastPage,

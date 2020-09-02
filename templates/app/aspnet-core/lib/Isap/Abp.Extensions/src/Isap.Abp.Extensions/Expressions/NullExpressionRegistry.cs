@@ -5,7 +5,6 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Volo.Abp.Domain.Entities;
-using Volo.Abp.Domain.Repositories;
 
 namespace Isap.Abp.Extensions.Expressions
 {
@@ -20,18 +19,8 @@ namespace Isap.Abp.Extensions.Expressions
 			return query;
 		}
 
-		public void RegisterPropertyInclude<TProperty>(Expression<Func<TEntity, TProperty>> expression) where TProperty: class, IEntity
-		{
-			throw new InvalidOperationException("Incorrect includes registration.");
-		}
-
 		public void RegisterPropertyInclude<TProperty>(Expression<Func<TEntity, TProperty>> expression,
 			Action<IIncludeExpressionRegistry<TProperty>> registerChildIncludes) where TProperty: class, IEntity
-		{
-			throw new InvalidOperationException("Incorrect includes registration.");
-		}
-
-		public void RegisterCollectionInclude<TProperty>(Expression<Func<TEntity, IEnumerable<TProperty>>> expression) where TProperty: class, IEntity
 		{
 			throw new InvalidOperationException("Incorrect includes registration.");
 		}
@@ -45,6 +34,16 @@ namespace Isap.Abp.Extensions.Expressions
 		public Task EnsureLoadedAsync(TEntity entry)
 		{
 			return Task.CompletedTask;
+		}
+
+		public void RegisterPropertyInclude<TProperty>(Expression<Func<TEntity, TProperty>> expression) where TProperty: class, IEntity
+		{
+			throw new InvalidOperationException("Incorrect includes registration.");
+		}
+
+		public void RegisterCollectionInclude<TProperty>(Expression<Func<TEntity, IEnumerable<TProperty>>> expression) where TProperty: class, IEntity
+		{
+			throw new InvalidOperationException("Incorrect includes registration.");
 		}
 	}
 }

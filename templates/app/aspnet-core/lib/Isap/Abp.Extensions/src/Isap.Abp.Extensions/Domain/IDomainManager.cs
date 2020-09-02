@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Isap.Abp.Extensions.Locks;
-using JetBrains.Annotations;
 using Isap.CommonCore.Services;
+using JetBrains.Annotations;
 using Volo.Abp.Domain.Entities;
 using Volo.Abp.Uow;
 
@@ -85,7 +85,8 @@ namespace Isap.Abp.Extensions.Domain
 		Task Delete(Expression<Func<TImpl, bool>> predicate);
 
 		/// <summary>
-		///     Восстанавливает в БД информацию о сущности. Фактически для записи сбрасывается отметка "IsDeleted" в значение false.
+		///     Восстанавливает в БД информацию о сущности. Фактически для записи сбрасывается отметка "IsDeleted" в значение
+		///     false.
 		/// </summary>
 		/// <param name="id">Идентификатор записи.</param>
 		/// <returns></returns>

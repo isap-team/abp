@@ -54,14 +54,16 @@ namespace Isap.CommonCore.Services.InMemoryServices
 		}
 
 #pragma warning disable 1066
-		Task<ResultSet<TEntityDto>> IReferenceAppService<TEntityDto, TKey>.GetPage(int pageNumber, int pageSize, bool countTotal = false, ICollection<DataFilterValueDto> filterValues = null)
+		Task<ResultSet<TEntityDto>> IReferenceAppService<TEntityDto, TKey>.GetPage(int pageNumber, int pageSize, bool countTotal = false,
+			ICollection<DataFilterValueDto> filterValues = null)
 #pragma warning restore 1066
 		{
 			return GetPage(pageNumber, pageSize, countTotal, new QueryOptionsDto(filterValues));
 		}
 
 #pragma warning disable 1066
-		Task<ResultSet<TEntityDto>> IReferenceAppService<TEntityDto, TKey>.QueryPage(int pageNumber, int pageSize, bool countTotal = false, QueryOptionsDto queryOptions = null)
+		Task<ResultSet<TEntityDto>> IReferenceAppService<TEntityDto, TKey>.QueryPage(int pageNumber, int pageSize, bool countTotal = false,
+			QueryOptionsDto queryOptions = null)
 #pragma warning restore 1066
 		{
 			return GetPage(pageNumber, pageSize, countTotal, queryOptions);

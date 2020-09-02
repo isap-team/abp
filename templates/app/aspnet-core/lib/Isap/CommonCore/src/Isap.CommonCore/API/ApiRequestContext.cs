@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Threading;
+using Isap.CommonCore.Extensions;
 using Isap.Converters;
 using JetBrains.Annotations;
-using Isap.CommonCore.Extensions;
 
 namespace Isap.CommonCore.API
 {

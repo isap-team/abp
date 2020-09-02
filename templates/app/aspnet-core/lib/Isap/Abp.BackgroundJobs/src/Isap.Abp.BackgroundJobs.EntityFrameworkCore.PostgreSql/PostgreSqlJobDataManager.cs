@@ -21,7 +21,8 @@ namespace Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql
 		protected string TablePrefix => BackgroundJobsDbProperties.DbTablePrefix;
 		protected string Schema => BackgroundJobsDbProperties.DbSchema ?? "public";
 
-		protected override async Task<IJobConcurrencyLock> GetOrCreateConcurrencyLock(IBackgroundJobsDbContext db, Guid? tenantId, Guid queueId, string concurrencyKey,
+		protected override async Task<IJobConcurrencyLock> GetOrCreateConcurrencyLock(IBackgroundJobsDbContext db, Guid? tenantId, Guid queueId,
+			string concurrencyKey,
 			Guid lockId, CancellationToken cancellationToken = default)
 		{
 			if (concurrencyKey.IsNullOrEmpty()) return null;
@@ -100,7 +101,8 @@ WHERE	NULL IS NULL
 			return rowCount > 0;
 		}
 
-		protected override async Task<IJobData> DequeueJob(IBackgroundJobsDbContext db, Guid queueId, Guid lockId, List<Guid> tenants, CancellationToken cancellationToken = default)
+		protected override async Task<IJobData> DequeueJob(IBackgroundJobsDbContext db, Guid queueId, Guid lockId, List<Guid> tenants,
+			CancellationToken cancellationToken = default)
 		{
 			string sql = $@"
 UPDATE	{Schema}.""{TablePrefix}Jobs""
@@ -164,7 +166,8 @@ WHERE	""Id"" =
 					if (jobData.ConcurrencyKey.IsNullOrEmpty())
 						return jobData;
 
-					IJobConcurrencyLock existingLock = await GetOrCreateConcurrencyLock(db, jobData.TenantId, queueId, jobData.ConcurrencyKey, lockId, cancellationToken);
+					IJobConcurrencyLock existingLock =
+						await GetOrCreateConcurrencyLock(db, jobData.TenantId, queueId, jobData.ConcurrencyKey, lockId, cancellationToken);
 
 					for (int i = 0; i < 10 && existingLock == null; i++)
 					{

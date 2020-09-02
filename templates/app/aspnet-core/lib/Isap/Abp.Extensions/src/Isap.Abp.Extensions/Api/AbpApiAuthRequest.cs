@@ -1,3 +1,4 @@
+using System;
 using System.ComponentModel.DataAnnotations;
 
 namespace Isap.Abp.Extensions.Api
@@ -7,7 +8,8 @@ namespace Isap.Abp.Extensions.Api
 		public const int MaxEmailAddressLength = 256;
 		public const int MaxApiKeyLength = 32;
 
-		[Required]
+		public Guid? UserUid { get; set; }
+
 		[StringLength(MaxEmailAddressLength)]
 		public string UserNameOrEmailAddress { get; set; }
 

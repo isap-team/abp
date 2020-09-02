@@ -29,10 +29,10 @@ namespace Isap.Abp.BackgroundJobs.Processing
 		/// </summary>
 		internal const int ResetUncompletedJobsInterval = 10000;
 
-		private int _timerCounter = -1;
-
 		private readonly IBackgroundProcessingConfiguration _backgroundJobsConfig;
 		private readonly List<IJobQueueProcessor> _queueProcessors;
+
+		private int _timerCounter = -1;
 
 		public ExtendedBackgroundJobWorker(
 			AbpTimer timer,

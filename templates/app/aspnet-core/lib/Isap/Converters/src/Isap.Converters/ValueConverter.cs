@@ -1,7 +1,6 @@
 using System;
-using Isap.Converters;
-using Isap.Converters.Extensions;
 using Isap.Converters.BasicConverters;
+using Isap.Converters.Extensions;
 
 namespace Isap.Converters
 {

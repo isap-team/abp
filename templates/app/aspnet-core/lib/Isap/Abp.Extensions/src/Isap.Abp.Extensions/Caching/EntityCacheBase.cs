@@ -2,10 +2,10 @@ using System;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Isap.Abp.Extensions.Domain;
-using JetBrains.Annotations;
-using Microsoft.Extensions.Caching.Distributed;
 using Isap.CommonCore.DependencyInjection;
 using Isap.CommonCore.Services;
+using JetBrains.Annotations;
+using Microsoft.Extensions.Caching.Distributed;
 using Volo.Abp;
 using Volo.Abp.Caching;
 using Volo.Abp.Domain.Entities;
@@ -78,7 +78,7 @@ namespace Isap.Abp.Extensions.Caching
 
 		protected override Task<TItemImpl> InternalGetOrNullAsync(TKey id)
 		{
-			return GetOrNullAsync(e => ((IEntity<TKey>)e).Id.Equals(id));
+			return GetOrNullAsync(e => ((IEntity<TKey>) e).Id.Equals(id));
 		}
 
 		protected virtual async Task<TItemImpl> GetOrNullAsync(Expression<Func<TImpl, bool>> predicate)

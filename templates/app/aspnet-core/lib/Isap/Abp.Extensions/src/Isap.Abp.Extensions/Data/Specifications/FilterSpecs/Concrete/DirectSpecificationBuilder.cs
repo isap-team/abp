@@ -7,7 +7,8 @@ namespace Isap.Abp.Extensions.Data.Specifications.FilterSpecs.Concrete
 	{
 		private readonly Func<ISpecificationBuildingContext, DirectSpecificationParameters<TValue>, Expression<Func<TEntity, bool>>> _getExpression;
 
-		public DirectSpecificationBuilder(Func<ISpecificationBuildingContext, DirectSpecificationParameters<TValue>, Expression<Func<TEntity, bool>>> getExpression)
+		public DirectSpecificationBuilder(
+			Func<ISpecificationBuildingContext, DirectSpecificationParameters<TValue>, Expression<Func<TEntity, bool>>> getExpression)
 		{
 			_getExpression = getExpression;
 		}

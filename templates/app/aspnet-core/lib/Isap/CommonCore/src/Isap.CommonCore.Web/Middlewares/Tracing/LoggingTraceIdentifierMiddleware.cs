@@ -1,7 +1,7 @@
 using System.Threading.Tasks;
 using Castle.Core.Logging;
-using Microsoft.AspNetCore.Http;
 using Isap.CommonCore.Logging;
+using Microsoft.AspNetCore.Http;
 
 namespace Isap.CommonCore.Web.Middlewares.Tracing
 {
@@ -16,11 +16,13 @@ namespace Isap.CommonCore.Web.Middlewares.Tracing
 			_loggerFactory = loggerFactory;
 		}
 
-		public Task Invoke(HttpContext context)
+		public async Task Invoke(HttpContext context)
 		{
 			ILogger logger = _loggerFactory.Create(typeof(LoggingTraceIdentifierMiddleware));
 			using (LoggingContext.Current.WithLogicalProperty(logger, "TraceId", context.TraceIdentifier))
-				return _next(context);
+			{
+				await _next(context);
+			}
 		}
 	}
 }

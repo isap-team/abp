@@ -33,7 +33,7 @@ namespace Isap.CommonCore.Web.Middlewares.RequestLogging
 		{
 			if (!IsEnabled) return false;
 			if (BasePaths.Count == 0) return true;
-			RequestLoggingPath requestLoggingPath = BasePaths.LastOrDefault(i => requestPath.StartsWithSegments(i.Path));
+			RequestLoggingPath requestLoggingPath = BasePaths.LastOrDefault(i => i.Path.Value == "/" || requestPath.StartsWithSegments(i.Path));
 			return requestLoggingPath != null && requestLoggingPath.Include;
 		}
 

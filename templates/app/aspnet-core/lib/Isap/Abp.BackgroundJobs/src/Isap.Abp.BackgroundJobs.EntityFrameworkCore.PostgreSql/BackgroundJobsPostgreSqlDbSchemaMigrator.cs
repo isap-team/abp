@@ -25,7 +25,8 @@ namespace Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql
 			try
 			{
 				var dbContext = _serviceProvider.GetRequiredService<BackgroundJobsPostgreSqlMigrationsDbContext>();
-				Logger.LogInformation($"Migrating PostgreSQL background jobs database using connection string: {dbContext.Database.GetDbConnection().ConnectionString}...");
+				Logger.LogInformation(
+					$"Migrating PostgreSQL background jobs database using connection string: {dbContext.Database.GetDbConnection().ConnectionString}...");
 				await dbContext.Database.MigrateAsync();
 			}
 			catch (Exception exception)

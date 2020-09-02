@@ -1,6 +1,5 @@
 using System;
 using System.Threading.Tasks;
-using Isap.Converters;
 using Isap.Converters.Middlewares;
 using Shouldly;
 using Xunit;

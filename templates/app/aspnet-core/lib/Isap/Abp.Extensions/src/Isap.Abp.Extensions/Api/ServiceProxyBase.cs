@@ -19,8 +19,8 @@ namespace Isap.Abp.Extensions.Api
 			_lazyApiClient = new Lazy<TApiClient>(() => ApiApplication.CreateClient(ApiOptions));
 		}
 
-		public IOptions<TApiOptions> ApiOptions { protected get; set; }
-		public TApiApplication ApiApplication { protected get; set; }
+		protected TApiOptions ApiOptions => LazyGetRequiredService<IOptions<TApiOptions>>().Value;
+		protected TApiApplication ApiApplication => LazyGetRequiredService<TApiApplication>();
 		protected TApiClient ApiClient => _lazyApiClient.Value;
 
 		protected override void InternalDispose()
@@ -61,6 +61,7 @@ namespace Isap.Abp.Extensions.Api
 						code = -1;
 					throw new UserFriendlyException(abpIoResponse.Error.Message, code.ToString(), abpIoResponse.Error.Details);
 				}
+
 				throw new UserFriendlyException(response.Error.Message, response.Error.Code.ToString(), response.Error.Details);
 			}
 		}

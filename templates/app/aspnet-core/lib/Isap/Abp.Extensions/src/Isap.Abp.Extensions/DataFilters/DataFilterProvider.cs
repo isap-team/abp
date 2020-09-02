@@ -37,7 +37,8 @@ namespace Isap.Abp.Extensions.DataFilters
 				{
 					IDataFilterDef dataFilter = tuple.Item1;
 					IDataFilterStrategyFactory<TEntity> dataFilterStrategyFactory =
-						DataFilterStrategyFactory.GetOrCreate<TEntity>(Converter, PredicateBuilder, DataFilterValueConverterFactory, CustomPredicateBuilderFactory);
+						DataFilterStrategyFactory.GetOrCreate<TEntity>(Converter, PredicateBuilder, DataFilterValueConverterFactory,
+							CustomPredicateBuilderFactory);
 					IDataFilterStrategy<TEntity> dataFilterStrategy = dataFilterStrategyFactory.Create(dataFilter);
 					Dictionary<string, object> filterOptions =
 						DataFilterOptionsExtensions.Deserialize(dataFilter.Options).Replace(DataFilterOptionsExtensions.Deserialize(tuple.Item2));

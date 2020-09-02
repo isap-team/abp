@@ -1,5 +1,4 @@
 using System;
-using Isap.Abp.Extensions.Data;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -13,12 +12,6 @@ namespace MyCompanyName.MyProjectName.Web
         {
             services.AddApplication<MyProjectNameWebModule>(options =>
                 {
-                    options.Services.Configure<AbpExtDbOptions>(dbOptions =>
-                        {
-                            dbOptions.IsMigrationMode = false;
-                            dbOptions.DataProviderKey = "PostgreSql";
-                        });
-
                     options.Services.Configure<AbpClockOptions>(clockOptions =>
                         {
                             clockOptions.Kind = DateTimeKind.Utc;

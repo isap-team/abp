@@ -49,7 +49,8 @@ namespace Isap.Abp.Extensions.Api
 			return await ComplementResult(await RemoteCall(session => ApiManager.GetPage(session, pageNumber, pageSize, countTotal, queryOptions)));
 		}
 
-		public async Task<ResultSet<TEntityDto>> GetPage(int pageNumber, int pageSize, bool countTotal = false, List<SpecificationParameters> specifications = null)
+		public async Task<ResultSet<TEntityDto>> GetPage(int pageNumber, int pageSize, bool countTotal = false,
+			List<SpecificationParameters> specifications = null)
 		{
 			return await ComplementResult(await RemoteCall(session => ApiManager.GetPage(session, pageNumber, pageSize, countTotal, specifications)));
 		}

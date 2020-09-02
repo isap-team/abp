@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using Isap.Abp.Extensions.DataFilters;
-using Newtonsoft.Json;
 
 namespace Isap.Abp.Extensions.Metadata
 {
