@@ -15,6 +15,8 @@ namespace Isap.Abp.BackgroundJobs.EntityFrameworkCore
 		{
 		}
 
+		public IBackgroundJobsModelBuilder ModelBuilder { get; set; }
+
 		public DbSet<JobQueue> Queues { get; set; }
 		public DbSet<JobQueue> QueueProcessors { get; set; }
 		public DbSet<JobConcurrencyLock> ConcurrencyLocks { get; set; }
@@ -25,7 +27,7 @@ namespace Isap.Abp.BackgroundJobs.EntityFrameworkCore
 		{
 			base.OnModelCreating(builder);
 
-			builder.ConfigureBackgroundJobs();
+			ModelBuilder.OnModelCreating(builder, this);
 		}
 	}
 }

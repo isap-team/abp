@@ -9,7 +9,7 @@ namespace Isap.CommonCore.Expressions.Evaluation
 			_provider = provider;
 		}
 
-		public bool TryEvaluate(string expression, out string result)
+		public bool TryEvaluate(string expression, out object result)
 		{
 			return _provider.TryGetValue(expression, out result);
 		}

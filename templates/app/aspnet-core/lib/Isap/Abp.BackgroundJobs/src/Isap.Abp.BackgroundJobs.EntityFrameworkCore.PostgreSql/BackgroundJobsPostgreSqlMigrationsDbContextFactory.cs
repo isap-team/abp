@@ -2,6 +2,7 @@ using System.IO;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Design;
 using Microsoft.Extensions.Configuration;
+using Volo.Abp.Data;
 
 namespace Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql
 {
@@ -11,8 +12,11 @@ namespace Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql
 		{
 			var configuration = BuildConfiguration();
 
+			string connectionString = configuration.GetConnectionString(BackgroundJobsDbProperties.ConnectionStringName)
+					?? configuration.GetConnectionString(ConnectionStrings.DefaultConnectionStringName)
+				;
 			var builder = new DbContextOptionsBuilder<BackgroundJobsPostgreSqlMigrationsDbContext>()
-				.UseNpgsql(configuration.GetConnectionString(BackgroundJobsDbProperties.ConnectionStringName));
+				.UseNpgsql(connectionString);
 
 			return new BackgroundJobsPostgreSqlMigrationsDbContext(builder.Options);
 		}

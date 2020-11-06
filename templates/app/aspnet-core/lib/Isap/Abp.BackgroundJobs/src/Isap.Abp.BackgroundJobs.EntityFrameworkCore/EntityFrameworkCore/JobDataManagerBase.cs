@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Isap.Abp.BackgroundJobs.Jobs;
+using Isap.Abp.BackgroundJobs.Queues;
 using Isap.Abp.Extensions.Domain;
 using Isap.CommonCore.Extensions;
 using Isap.CommonCore.Utils;
@@ -25,6 +26,8 @@ namespace Isap.Abp.BackgroundJobs.EntityFrameworkCore
 			: base(dataRepository)
 		{
 		}
+
+		protected IJobQueueCache JobQueueCache => LazyGetRequiredService<IJobQueueCache>();
 
 		public async Task<IJobArguments> GetOrCreateArguments<TArgs>(TArgs args)
 		{
@@ -89,6 +92,15 @@ namespace Isap.Abp.BackgroundJobs.EntityFrameworkCore
 		public async Task<IJobData> FindJob(Guid? tenantId, Guid jobId, CancellationToken cancellationToken = default)
 		{
 			return await FindJobInternal(tenantId, jobId, cancellationToken);
+		}
+
+		public async Task<IJobData> FindJob<TArgs>(Guid? tenantId, string queueName, TArgs args, CancellationToken cancellationToken = default)
+		{
+			IJobQueueBase queue = await JobQueueCache.GetAsync(queueName, cancellationToken);
+			if (queue == null)
+				throw new KeyNotFoundException($"Queue with name {queueName} not found in cache!");
+
+			return await FindJob(tenantId, queue.Id, args, cancellationToken);
 		}
 
 		public async Task<IJobData> FindJob(Guid? tenantId, Guid queueId, string argumentsKey, CancellationToken cancellationToken = default)

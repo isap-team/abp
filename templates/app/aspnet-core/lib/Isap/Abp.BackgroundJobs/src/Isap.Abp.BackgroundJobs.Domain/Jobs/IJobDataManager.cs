@@ -21,6 +21,7 @@ namespace Isap.Abp.BackgroundJobs.Jobs
 		Task<IJobData> FindJob(Guid? tenantId, Guid jobId, CancellationToken cancellationToken = default);
 		Task<IJobData> FindJob(Guid? tenantId, Guid queueId, string argumentsKey, CancellationToken cancellationToken = default);
 		Task<IJobData> FindJob<TArgs>(Guid? tenantId, Guid queueId, TArgs args, CancellationToken cancellationToken = default);
+		Task<IJobData> FindJob<TArgs>(Guid? tenantId, string queueName, TArgs args, CancellationToken cancellationToken = default);
 		Task<(IJobData, IJobArguments)> FindJobWithArguments<TArgs>(Guid? tenantId, Guid queueId, TArgs args, CancellationToken cancellationToken = default);
 
 		Task<IJobData> Update(Guid jobId, Action<JobData> update, CancellationToken cancellationToken = default);

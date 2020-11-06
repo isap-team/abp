@@ -2,6 +2,7 @@ using System;
 using System.Text;
 using System.Threading.Tasks;
 using Castle.Core.Logging;
+using Isap.CommonCore.Logging;
 using Microsoft.AspNetCore.Http;
 
 namespace Isap.CommonCore.Web.Middlewares.RequestLogging
@@ -14,18 +15,21 @@ namespace Isap.CommonCore.Web.Middlewares.RequestLogging
 		{
 			Options = options;
 			_next = next;
-			Logger = loggerFactory.Create("RequestLogging");
+			Logger = loggerFactory.Create(GetType());
 		}
 
 		public IsapRequestLoggingOptions Options { get; }
 
 		protected ILogger Logger { get; }
 
-		public virtual Task Invoke(HttpContext context)
+		public virtual async Task Invoke(HttpContext context)
 		{
 			if (Options.IsRequestLoggingEnabled(context.Request.Path))
-				return InternalInvoke(context);
-			return _next(context);
+			{
+				await InternalInvoke(context);
+			}
+			else
+				await _next(context);
 		}
 
 		protected virtual Task InternalInvoke(HttpContext context)
@@ -35,7 +39,9 @@ namespace Isap.CommonCore.Web.Middlewares.RequestLogging
 
 		protected void Log(string message)
 		{
-			Logger.Info(message);
+			using (LoggingContext.Current.WithLogicalProperty(Logger, "LoggingArea", "RequestLogging"))
+			using (LoggingContext.Current.WithLogicalProperty(Logger, "LoggingSource", GetType().Name))
+				Logger.Info(message);
 		}
 
 		protected string FormatMessage(Action<StringBuilder> format)

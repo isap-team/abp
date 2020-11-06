@@ -24,13 +24,17 @@ namespace Isap.Abp.BackgroundJobs
 
 		protected virtual async Task<TResult> ImpersonateAsync(string userName, Func<Task<TResult>> action)
 		{
+			Guid? currentTenantId = CurrentTenant.Id;
 			List<Claim> claims = new List<Claim>
 				{
-					new Claim(AbpClaimTypes.TenantId, CurrentTenant.Id?.ToString()),
 					//new Claim(AbpClaimTypes.UserId, user.Id.ToString()),
 					new Claim(AbpClaimTypes.UserName, userName),
 					//user.UserRoles.ForEach(role => claims.Add(new Claim(AbpClaimTypes.Role, role)));
 				};
+			if (currentTenantId.HasValue)
+			{
+				claims.Add(new Claim(AbpClaimTypes.TenantId, currentTenantId?.ToString()));
+			}
 			var principal = new ClaimsPrincipal(new ClaimsIdentity(claims));
 
 			using (CurrentPrincipalAccessor.Change(principal))

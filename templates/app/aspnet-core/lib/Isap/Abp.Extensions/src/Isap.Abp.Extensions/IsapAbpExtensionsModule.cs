@@ -19,6 +19,7 @@ using Volo.Abp.AutoMapper;
 using Volo.Abp.Caching;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.EntityFrameworkCore;
+using Volo.Abp.Identity;
 using Volo.Abp.Localization;
 using Volo.Abp.Modularity;
 using Volo.Abp.TenantManagement;
@@ -31,6 +32,7 @@ namespace Isap.Abp.Extensions
 		typeof(AbpDddApplicationModule),
 		typeof(AbpAutoMapperModule),
 		typeof(AbpCachingModule),
+		typeof(AbpIdentityDomainModule),
 		typeof(AbpTenantManagementDomainModule),
 		typeof(AbpEntityFrameworkCoreModule)
 	)]
@@ -40,6 +42,10 @@ namespace Isap.Abp.Extensions
 		{
 			IConfiguration config = context.Services.GetConfiguration();
 			Configure<AbpClusterNodeOptions>(config.GetSection("ClusterNode"));
+
+			context.Services.AddSingleton(MetadataProvider.Instance);
+			context.Services.AddSingleton<IMetadataProvider>(x => x.GetRequiredService<MetadataProvider>());
+			context.Services.AddSingleton<IMetadataRegistrar>(x => x.GetRequiredService<MetadataProvider>());
 
 			context.Services.AddSingleton(new SpecificationBuilderRepository());
 			context.Services.AddSingleton<ISpecificationBuilderRepository>(x => x.GetRequiredService<SpecificationBuilderRepository>());
@@ -65,16 +71,20 @@ namespace Isap.Abp.Extensions
 						;
 				});
 
+			ObjectAccessor<IServiceProvider> serviceProviderAccessor = context.Services.GetSingletonInstance<ObjectAccessor<IServiceProvider>>();
+
 			Configure<AbpAutoMapperOptions>(options =>
 				{
 					options.AddMaps<IsapAbpExtensionsModule>(validate: true);
+					options.Configurators.Add(ctx =>
+						{
+							ctx.MapperConfiguration.ConstructServicesUsing(type => serviceProviderAccessor.Value.GetService(type));
+						});
 				});
 
 			context.Services.Replace(ServiceDescriptor.Transient<IMethodInvocationValidator, IsapMethodInvocationValidator>());
 
 			Assembly thisAssembly = GetType().Assembly;
-
-			ObjectAccessor<IServiceProvider> serviceProviderAccessor = context.Services.GetSingletonInstance<ObjectAccessor<IServiceProvider>>();
 
 			context.Services.AddSingleton(new ShutdownCancellationTokenProvider());
 			context.Services.AddSingleton<IShutdownCancellationTokenProvider>(x => x.GetRequiredService<ShutdownCancellationTokenProvider>());

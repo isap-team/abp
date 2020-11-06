@@ -2,6 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Autofac;
+using Isap.CommonCore.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Volo.Abp.Autofac;
@@ -12,6 +13,8 @@ namespace Isap.Hosting
 	{
 		public static async Task BuildAndRunAsync(this IHostBuilder hostBuilder)
 		{
+			LoggingContext.SetDefault(new LoggingContext(new SerilogLoggerContextPropertyFactory()));
+
 			if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
 			{
 				if (Environment.UserInteractive)

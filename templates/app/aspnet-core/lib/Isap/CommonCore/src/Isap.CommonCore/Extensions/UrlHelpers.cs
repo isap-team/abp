@@ -144,6 +144,20 @@ namespace Isap.CommonCore.Extensions
 		{
 			if (string.IsNullOrEmpty(queryString))
 				return Enumerable.Empty<KeyValuePair<string, string>>();
+
+			string[] urlItems = queryString.Split(new[] { '?' }, 2, StringSplitOptions.RemoveEmptyEntries);
+			switch (urlItems.Length)
+			{
+				case 1:
+					queryString = urlItems[0];
+					break;
+				case 2:
+					queryString = urlItems[1];
+					break;
+				default:
+					throw new InvalidOperationException();
+			}
+
 			return queryString.Split('&').Select(ParseQueryParameter);
 		}
 

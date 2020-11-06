@@ -9,6 +9,8 @@ using Isap.Abp.BackgroundJobs.Jobs;
 using Isap.Abp.BackgroundJobs.Logging;
 using Isap.Abp.Extensions;
 using Isap.Abp.Extensions.Clustering;
+using Isap.Abp.Extensions.Logging;
+using Isap.CommonCore.Logging;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -22,6 +24,7 @@ using Volo.Abp.MultiTenancy;
 using Volo.Abp.Threading;
 using Volo.Abp.Timing;
 using Volo.Abp.Uow;
+using ILoggerFactory = Castle.Core.Logging.ILoggerFactory;
 
 namespace Isap.Abp.BackgroundJobs.Processing
 {
@@ -60,6 +63,7 @@ namespace Isap.Abp.BackgroundJobs.Processing
 		private readonly AbpTimer _activityTimer;
 		private readonly IBackgroundProcessingConfiguration _backgroundJobsConfig;
 		private RunningJobInfo _runningJob;
+		private ILoggerFactory _castleLoggerFactory;
 
 		public JobQueueProcessor(
 			IOptions<AbpBackgroundJobOptions> jobOptions,
@@ -96,6 +100,8 @@ namespace Isap.Abp.BackgroundJobs.Processing
 
 		public ICurrentTenant CurrentTenant { get; set; }
 
+		protected ILoggerFactory CastleLoggerFactory => LazyGetRequiredService(ref _castleLoggerFactory);
+
 		public async Task<bool> CancelJobIfRunning(Guid jobId)
 		{
 			var job = GetRunningJob();
@@ -106,6 +112,13 @@ namespace Isap.Abp.BackgroundJobs.Processing
 			}
 
 			return false;
+		}
+
+		public void Attach(IJobQueueBase jobQueue)
+		{
+			Queue = jobQueue;
+			QueueOptions = _backgroundJobsConfig.Queues.Single(i => i.Name == jobQueue.Name);
+			Timer.Period = QueueOptions.JobPollInterval;
 		}
 
 		public override async Task StartAsync(CancellationToken cancellationToken = new CancellationToken())
@@ -120,44 +133,42 @@ namespace Isap.Abp.BackgroundJobs.Processing
 			return base.StopAsync(cancellationToken);
 		}
 
-		public void Attach(IJobQueueBase jobQueue)
-		{
-			Queue = jobQueue;
-			QueueOptions = _backgroundJobsConfig.Queues.Single(i => i.Name == jobQueue.Name);
-			Timer.Period = QueueOptions.JobPollInterval;
-		}
-
 		protected override async Task DoWorkAsync(PeriodicBackgroundWorkerContext workerContext)
 		{
 			CancellationToken cancellationToken = ShutdownCancellationTokenProvider.CancellationToken;
-			//using (LoggingContext.Current.WithLogicalProperty(Logger, "LoggingArea", "BackgroundProcessing"))
-			//using (LoggingContext.Current.WithLogicalProperty(Logger, "LoggingSource", GetType().Name))
-			//using (LoggingContext.Current.WithLogicalProperty(Logger, "LockId", LockId))
-			//using (LoggingContext.Current.WithLogicalProperty(Logger, "JobQueueName", Queue.Name))
-			while (!cancellationToken.IsCancellationRequested)
+			var logger = new MsToCastleLogger(CastleLoggerFactory, Logger, GetType());
+			using (LoggingContext.Current.WithLogicalProperty(logger, "LoggingArea", "BackgroundProcessing"))
+			using (LoggingContext.Current.WithLogicalProperty(logger, "LoggingSource", GetType().Name))
+			using (LoggingContext.Current.WithLogicalProperty(logger, "LockId", LockId))
+			using (LoggingContext.Current.WithLogicalProperty(logger, "JobQueueName", Queue.Name))
 			{
-				List<Guid> tenants = await NodeTenantListProvider.GetCurrentNodeTenants();
-				IJobData jobData = await JobDataManager.DequeueJob(Queue.Id, LockId, tenants, cancellationToken);
-				if (jobData == null)
-					return;
-
-				var runningJobInfo = new RunningJobInfo(jobData, cancellationToken);
-
-				lock (this)
-					_runningJob = runningJobInfo;
-
-				try
+				while (!cancellationToken.IsCancellationRequested)
 				{
-					using (var uow = UnitOfWorkManager.Begin(true, true))
-					using (CurrentTenant.Change(jobData.TenantId))
+					List<Guid> tenants = await NodeTenantListProvider.GetCurrentNodeTenants();
+					IJobData jobData = await JobDataManager.DequeueJob(Queue.Id, LockId, tenants, cancellationToken);
+					if (jobData == null)
+						return;
+
+					var runningJobInfo = new RunningJobInfo(jobData, cancellationToken);
+
+					lock (this)
+						_runningJob = runningJobInfo;
+
+					try
 					{
-						await ExecuteAsync(workerContext, runningJobInfo, runningJobInfo.JobData, runningJobInfo.CancellationToken);
-						await uow.CompleteAsync(cancellationToken);
+						using (LoggingContext.Current.WithLogicalProperty(logger, "JobId", jobData.Id))
+						using (LoggingContext.Current.WithLogicalProperty(logger, "TenantId", jobData.TenantId))
+						using (var uow = UnitOfWorkManager.Begin(true, true))
+						using (CurrentTenant.Change(jobData.TenantId))
+						{
+							await ExecuteAsync(workerContext, runningJobInfo, runningJobInfo.JobData, runningJobInfo.CancellationToken);
+							await uow.CompleteAsync(cancellationToken);
+						}
 					}
-				}
-				finally
-				{
-					lock (this) _runningJob = null;
+					finally
+					{
+						lock (this) _runningJob = null;
+					}
 				}
 			}
 		}
@@ -204,8 +215,7 @@ namespace Isap.Abp.BackgroundJobs.Processing
 				try
 				{
 					BackgroundJobConfiguration jobConfiguration = JobOptions.GetJob(jobData.Name);
-					var context = new ExtendedJobExecutionContext(workerContext.ServiceProvider, jobConfiguration.JobType, arguments, logger,
-						cancellationToken);
+					var context = new ExtendedJobExecutionContext(workerContext.ServiceProvider, jobConfiguration.JobType, arguments, logger, cancellationToken);
 
 					try
 					{

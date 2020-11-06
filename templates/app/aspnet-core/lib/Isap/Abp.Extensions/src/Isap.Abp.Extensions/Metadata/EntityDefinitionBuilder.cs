@@ -9,7 +9,8 @@ namespace Isap.Abp.Extensions.Metadata
 	public interface IEntityDefinitionBuilder
 	{
 		IEntityDefinitionBuilder Register(Action<EntityDefinition> buildAction);
-		EntityDefinition Build();
+		IEntityDefinition Build();
+		IEntityDefinition BuildAndRegister(bool replace = true);
 	}
 
 	public class EntityDefinitionBuilder: IEntityDefinitionBuilder
@@ -28,13 +29,15 @@ namespace Isap.Abp.Extensions.Metadata
 			_entityType = entityType;
 		}
 
+		protected IMetadataRegistrar MetadataRegistrar => MetadataProvider.Instance;
+
 		public IEntityDefinitionBuilder Register(Action<EntityDefinition> buildAction)
 		{
 			_buildActions.Add(buildAction);
 			return this;
 		}
 
-		public EntityDefinition Build()
+		public IEntityDefinition Build()
 		{
 			var entityDef = new EntityDefinition
 				{
@@ -47,12 +50,19 @@ namespace Isap.Abp.Extensions.Metadata
 			return entityDef;
 		}
 
+		public IEntityDefinition BuildAndRegister(bool replace = true)
+		{
+			var entityDef = Build();
+			return MetadataRegistrar.Register(entityDef, replace);
+		}
+
 		public static IEntityDefinitionBuilder Create(Type entityType)
 		{
 			EntityDefAttribute attr = entityType.GetAttribute<EntityDefAttribute>();
-			if (attr == null)
-				throw new InvalidOperationException($"Entity type '{entityType.FullName}' should be decorated by {nameof(EntityDefAttribute)}.");
-			return new EntityDefinitionBuilder(attr.EntityId, attr.EntityName ?? NormalizeEntityName(entityType), entityType);
+			return attr == null
+					? new EntityDefinitionBuilder(entityType.GUID, NormalizeEntityName(entityType), entityType)
+					: new EntityDefinitionBuilder(entityType.GUID, attr.EntityName ?? NormalizeEntityName(entityType), entityType)
+				;
 		}
 
 		private static string NormalizeEntityName(Type entityType)

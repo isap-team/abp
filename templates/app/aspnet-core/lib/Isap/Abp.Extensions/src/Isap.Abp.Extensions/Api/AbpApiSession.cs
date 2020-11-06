@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net;
+using IdentityModel.Client;
 using JetBrains.Annotations;
 
 namespace Isap.Abp.Extensions.Api
@@ -23,6 +24,8 @@ namespace Isap.Abp.Extensions.Api
 		/// </summary>
 		int? NodeKey { get; }
 
+		object Tag { get; }
+
 		bool IsAuthenticated { get; }
 		AuthToken AuthToken { get; }
 
@@ -36,9 +39,10 @@ namespace Isap.Abp.Extensions.Api
 
 	public interface IAbpApiSessionBuilder
 	{
-		void Assign(DateTime now, int? tenantId, IAbpAuthResponse authResponse);
-		void Assign(DateTime now, Guid? tenantId, Guid userId, int? nodeKey = null);
-		void Assign(DateTime now, string tenantId, string userId, int? nodeKey = null);
+		void Assign(DateTime now, Guid? tenantId, TokenResponse tokenResponse, object tag = null);
+		void Assign(DateTime now, int? tenantId, IAbpAuthResponse authResponse, object tag = null);
+		void Assign(DateTime now, Guid? tenantId, Guid userId, int? nodeKey = null, object tag = null);
+		void Assign(DateTime now, string tenantId, string userId, int? nodeKey = null, object tag = null);
 
 		//void Assign(ExternalAccountDto externalAccount);
 	}
@@ -57,31 +61,28 @@ namespace Isap.Abp.Extensions.Api
 			NodeKey = nodeKey;
 		}
 
-		protected virtual void Assign(DateTime now, AuthToken authToken, string tenantId, string userId, int? nodeKey = null)
-		{
-			AuthToken = authToken;
-			TenantId = tenantId;
-			UserId = userId;
-			NodeKey = nodeKey;
-			IsAuthenticated = AuthToken != null && AuthToken.ExpireAt > DateTime.Now || !string.IsNullOrEmpty(userId);
-		}
-
 		#region Implementation of IAbpApiSessionBuilder
 
-		public void Assign(DateTime now, int? tenantId, IAbpAuthResponse authResponse)
+		public void Assign(DateTime now, Guid? tenantId, TokenResponse tokenResponse, object tag = null)
+		{
+			var authToken = new AuthToken(tokenResponse.AccessToken, null, now.AddSeconds(tokenResponse.ExpiresIn));
+			Assign(now, authToken, tenantId?.ToString(), null, null, tag);
+		}
+
+		public void Assign(DateTime now, int? tenantId, IAbpAuthResponse authResponse, object tag = null)
 		{
 			var authToken = new AuthToken(authResponse.AccessToken, authResponse.EncryptedAccessToken, now.AddSeconds(authResponse.ExpireInSeconds));
-			Assign(now, authToken, tenantId?.ToString(), authResponse.UserId.ToString(), authResponse.NodeKey);
+			Assign(now, authToken, tenantId?.ToString(), authResponse.UserId.ToString(), authResponse.NodeKey, tag);
 		}
 
-		public void Assign(DateTime now, Guid? tenantId, Guid userId, int? nodeKey = null)
+		public void Assign(DateTime now, Guid? tenantId, Guid userId, int? nodeKey = null, object tag = null)
 		{
-			Assign(now, null, tenantId?.ToString(), userId.ToString(), nodeKey);
+			Assign(now, null, tenantId?.ToString(), userId.ToString(), nodeKey, tag);
 		}
 
-		public void Assign(DateTime now, string tenantId, string userId, int? nodeKey = null)
+		public void Assign(DateTime now, string tenantId, string userId, int? nodeKey = null, object tag = null)
 		{
-			Assign(now, null, tenantId, userId, nodeKey);
+			Assign(now, null, tenantId, userId, nodeKey, tag);
 		}
 
 		#endregion
@@ -103,6 +104,8 @@ namespace Isap.Abp.Extensions.Api
 		/// </summary>
 		public int? NodeKey { get; private set; }
 
+		public object Tag { get; set; }
+
 		public bool IsAuthenticated { get; private set; }
 
 		public AuthToken AuthToken { get; private set; }
@@ -114,5 +117,15 @@ namespace Isap.Abp.Extensions.Api
 		public IAbpApiSessionBuilder GetBuilder() => this;
 
 		#endregion
+
+		protected virtual void Assign(DateTime now, AuthToken authToken, string tenantId, string userId, int? nodeKey = null, object tag = null)
+		{
+			AuthToken = authToken;
+			TenantId = tenantId;
+			UserId = userId;
+			NodeKey = nodeKey;
+			Tag = tag;
+			IsAuthenticated = AuthToken != null && AuthToken.ExpireAt > DateTime.Now || !string.IsNullOrEmpty(userId);
+		}
 	}
 }

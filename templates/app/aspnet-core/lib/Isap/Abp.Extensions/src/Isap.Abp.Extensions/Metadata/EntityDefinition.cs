@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Isap.Abp.Extensions.DataFilters;
 using Isap.CommonCore.Metadata;
 using Isap.CommonCore.Services;
@@ -40,7 +41,8 @@ namespace Isap.Abp.Extensions.Metadata
 		ICollection<IDataFilterDefinition> DataFilters { get; }
 	}
 
-	[EntityDef("8FDBD3F6-4D05-411C-BAE2-E286367E2F58", "Entity")]
+	[Guid("8FDBD3F6-4D05-411C-BAE2-E286367E2F58")]
+	[EntityDef("Entity")]
 	public class EntityDefinition: CommonEntityBase<Guid, IEntityDefinition>, IEntityDefinition
 	{
 		public string Name { get; set; }

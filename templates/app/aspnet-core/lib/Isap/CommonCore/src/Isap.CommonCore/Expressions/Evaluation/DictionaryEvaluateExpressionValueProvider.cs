@@ -24,7 +24,7 @@ namespace Isap.CommonCore.Expressions.Evaluation
 			_values = values.ToDictionary(pair => pair.Key, pair => converter.ConvertTo<string>(pair.Value), values.Comparer);
 		}
 
-		public bool TryGetValue(string id, out string result)
+		public bool TryGetValue(string id, out object result)
 		{
 			Match match = _idRegex.Match(id);
 			if (!match.Success)

@@ -9,6 +9,7 @@ namespace Isap.CommonCore.Integrations
 		T GetValue<T>(string key, Func<T> getDefaultValue);
 		T GetValue<T>(string key, T defaultValue = default(T));
 		List<T> GetList<T>(string key, Func<IConfigValueProvider, T> convert);
+		Dictionary<string, string> GetMap(string key, Func<IConfigValueProvider, KeyValuePair<string, string>> convert = null);
 		IConfigValueProvider GetValueProvider(string key);
 	}
 }

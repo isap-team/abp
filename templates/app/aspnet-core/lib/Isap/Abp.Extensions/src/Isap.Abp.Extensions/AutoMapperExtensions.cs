@@ -33,12 +33,12 @@ namespace Isap.Abp.Extensions
 
 		public static object GetService(this ResolutionContext context, Type serviceType)
 		{
-			return context.GetRequiredService(serviceType);
+			return context.Options.ServiceCtor(serviceType);
 		}
 
 		public static T GetService<T>(this ResolutionContext context)
 		{
-			return context.GetRequiredService<T>();
+			return (T) context.GetService(typeof(T));
 		}
 
 		public static object GetRequiredService(this ResolutionContext context, Type serviceType)
