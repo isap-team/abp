@@ -22,8 +22,7 @@ namespace Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql
 		protected string Schema => BackgroundJobsDbProperties.DbSchema ?? "public";
 
 		protected override async Task<IJobConcurrencyLock> GetOrCreateConcurrencyLock(IBackgroundJobsDbContext db, Guid? tenantId, Guid queueId,
-			string concurrencyKey,
-			Guid lockId, CancellationToken cancellationToken = default)
+			string concurrencyKey, Guid lockId, CancellationToken cancellationToken = default)
 		{
 			if (concurrencyKey.IsNullOrEmpty()) return null;
 

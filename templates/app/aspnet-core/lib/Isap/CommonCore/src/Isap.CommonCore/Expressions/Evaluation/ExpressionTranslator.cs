@@ -1,8 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Text.RegularExpressions;
+using Isap.Converters;
+using Isap.Converters.Extensions;
 
 namespace Isap.CommonCore.Expressions.Evaluation
 {
@@ -16,6 +17,7 @@ namespace Isap.CommonCore.Expressions.Evaluation
 			MacroSplitRegex = new Regex(macroSplitRegex, RegexOptions.Compiled | RegexOptions.Singleline);
 			string macroDefRegex = String.Format(@"{0}(?<expression>[^{1}]+){1}", EscapeChars(macroBegin), EscapeChars(macroEnd));
 			MacroDefRegex = new Regex(macroDefRegex, RegexOptions.Compiled | RegexOptions.Singleline);
+			Converter = ValueConverterProviders.Default.GetConverter();
 		}
 
 		public string MacroBegin { get; }
@@ -25,22 +27,27 @@ namespace Isap.CommonCore.Expressions.Evaluation
 
 		public Regex MacroDefRegex { get; }
 
-		public string Translate(string input, IExpressionEvaluator evaluator)
+		public IValueConverter Converter { get; }
+
+		public object Translate(string input, IExpressionEvaluator evaluator)
 		{
 			if (input == null)
 				return null;
 
-			string result = input;
+			object result = input;
 			do
 			{
-				input = result;
+				if (result is string strResult)
+					input = strResult;
+				else
+					break;
 				result = TranslateNext(input, evaluator);
-			} while (!string.Equals(input, result));
+			} while (!Converter.AreEquals(input, result));
 
 			return result;
 		}
 
-		public string Translate(string input, IEvaluateExpressionValueProvider valueProvider)
+		public object Translate(string input, IEvaluateExpressionValueProvider valueProvider)
 		{
 			return Translate(input, new ExpressionEvaluatorCollection
 				{
@@ -49,12 +56,12 @@ namespace Isap.CommonCore.Expressions.Evaluation
 				});
 		}
 
-		public string Translate(string input, Dictionary<string, string> values)
+		public object Translate(string input, Dictionary<string, string> values)
 		{
 			return Translate(input, new DictionaryEvaluateExpressionValueProvider(values));
 		}
 
-		public string Translate(string input, Dictionary<string, object> values)
+		public object Translate(string input, Dictionary<string, object> values)
 		{
 			return Translate(input, new DictionaryEvaluateExpressionValueProvider(values));
 		}
@@ -64,9 +71,9 @@ namespace Isap.CommonCore.Expressions.Evaluation
 			return chars.Select(ch => "\\" + ch).Aggregate(String.Empty, (seed, item) => seed + item);
 		}
 
-		private string TranslateNext(string input, IExpressionEvaluator evaluator)
+		private object TranslateNext(string input, IExpressionEvaluator evaluator)
 		{
-			var result = new StringBuilder();
+			var result = new ExpressionResultBuilder();
 			string[] strings = MacroSplitRegex.Split(input);
 			bool isMacro = false;
 			foreach (string s in strings)
@@ -77,8 +84,7 @@ namespace Isap.CommonCore.Expressions.Evaluation
 					if (!match.Success)
 						throw new InvalidOperationException();
 					string expr = match.Groups["expression"].Value;
-					string value;
-					result.Append(evaluator.TryEvaluate(expr, out value) ? value : s);
+					result.Append(evaluator.TryEvaluate(expr, out object value) ? value : s);
 				}
 				else
 					result.Append(s);
@@ -86,7 +92,31 @@ namespace Isap.CommonCore.Expressions.Evaluation
 				isMacro = !isMacro;
 			}
 
-			return result.ToString();
+			return result.Build();
+		}
+	}
+
+	public class ExpressionResultBuilder
+	{
+		private readonly List<object> _values = new List<object>();
+
+		public void Append(object value)
+		{
+			_values.Add(value);
+		}
+
+		public object Build()
+		{
+			_values.RemoveAll(v => v is string s && string.IsNullOrEmpty(s));
+			switch (_values.Count)
+			{
+				case 0:
+					return null;
+				case 1:
+					return _values.First();
+				default:
+					return string.Join(string.Empty, _values.Select(i => i?.ToString()));
+			}
 		}
 	}
 }

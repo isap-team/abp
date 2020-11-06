@@ -80,5 +80,14 @@ namespace Isap.Converters.Extensions
 		{
 			return IfNotDefault(value, oldValue => newValue);
 		}
+
+		public static bool AreEquals(this IValueConverter converter, object first, object second)
+		{
+			if (first == null)
+				return second == null;
+
+			ConvertAttempt attempt = converter.TryConvertTo(first.GetType(), second);
+			return attempt.IsSuccess && Equals(first, attempt.Result);
+		}
 	}
 }

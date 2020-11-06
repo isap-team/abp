@@ -8,11 +8,11 @@ namespace Isap.CommonCore.Utils
 	/// </summary>
 	public static class PhoneNumbers
 	{
-		private static readonly Regex __phoneNumberLikeRegex =
+		private static readonly Regex _phoneNumberLikeRegex =
 			new Regex(@"^\s*\+?\s*[0-9]+\s*(\([0-9]+\))?\s*([0-9]+)((\s+|(\s*\-\s*))[0-9]+)*\s*$",
 				RegexOptions.Compiled | RegexOptions.Singleline);
 
-		private static readonly Regex __nonSignificantCharsRegex = new Regex(@"[^\+\d]", RegexOptions.Compiled | RegexOptions.Singleline);
+		private static readonly Regex _nonSignificantCharsRegex = new Regex(@"[^\+\d]", RegexOptions.Compiled | RegexOptions.Singleline);
 
 		/// <summary>
 		///     Checks that value is phone number like.
@@ -21,7 +21,7 @@ namespace Isap.CommonCore.Utils
 		/// <returns></returns>
 		public static bool IsPhoneNumberLike(string value)
 		{
-			return __phoneNumberLikeRegex.IsMatch(value);
+			return _phoneNumberLikeRegex.IsMatch(value);
 		}
 
 		/// <summary>
@@ -31,7 +31,7 @@ namespace Isap.CommonCore.Utils
 		/// <returns>Output phone number in format like +79151234567.</returns>
 		public static string RemoveNonSignificantChars(string phoneNumber)
 		{
-			return __nonSignificantCharsRegex.Replace(phoneNumber, String.Empty);
+			return _nonSignificantCharsRegex.Replace(phoneNumber, String.Empty);
 		}
 
 		/// <summary>

@@ -39,15 +39,13 @@ namespace Isap.Abp.BackgroundJobs
 		}
 
 		public Task<string> EnqueueAsync<TArgs>(TArgs args, string concurrencyKey, BackgroundJobPriority priority = BackgroundJobPriority.Normal,
-			TimeSpan? delay = null,
-			CancellationToken cancellationToken = default)
+			TimeSpan? delay = null, CancellationToken cancellationToken = default)
 		{
 			return EnqueueAsync(GetJobQueueName<TArgs>(), args, concurrencyKey, priority, delay, cancellationToken);
 		}
 
 		public Task<string> EnqueueAsync<TArgs>(string queueName, TArgs args, BackgroundJobPriority priority = BackgroundJobPriority.Normal,
-			TimeSpan? delay = null,
-			CancellationToken cancellationToken = default)
+			TimeSpan? delay = null, CancellationToken cancellationToken = default)
 		{
 			return EnqueueAsync(queueName, args, null, priority, delay, cancellationToken);
 		}
@@ -112,15 +110,13 @@ namespace Isap.Abp.BackgroundJobs
 		}
 
 		public Task<string> EnsureAsync<TArgs>(TArgs args, string concurrencyKey, BackgroundJobPriority priority = BackgroundJobPriority.Normal,
-			TimeSpan? delay = null,
-			CancellationToken cancellationToken = default)
+			TimeSpan? delay = null, CancellationToken cancellationToken = default)
 		{
 			return EnsureAsync(GetJobQueueName<TArgs>(), args, concurrencyKey, priority, delay, cancellationToken);
 		}
 
 		public Task<string> EnsureAsync<TArgs>(string queueName, TArgs args, BackgroundJobPriority priority = BackgroundJobPriority.Normal,
-			TimeSpan? delay = null,
-			CancellationToken cancellationToken = default)
+			TimeSpan? delay = null, CancellationToken cancellationToken = default)
 		{
 			return EnsureAsync(queueName, args, null, priority, delay, cancellationToken);
 		}

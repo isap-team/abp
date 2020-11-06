@@ -122,5 +122,10 @@ namespace Isap.CommonCore.Extensions
 				return null;
 			return source as ICollection<T> ?? source.ToList();
 		}
+
+		public static IEnumerable<T> Include<T>(this IEnumerable<T> source, params T[] items)
+		{
+			return source == null ? items : source.Concat(items);
+		}
 	}
 }

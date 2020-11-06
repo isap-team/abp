@@ -6,6 +6,7 @@ namespace Isap.Converters
 {
 	public class ValueConverterProvider: IValueConverterProvider, IBasicValueConverterProvider
 	{
+		private readonly ConcurrentDictionary<Type, Guid> _typeIdMap = new ConcurrentDictionary<Type, Guid>();
 		private readonly ConcurrentDictionary<string, IBasicValueConverter> _converterMap;
 
 		public ValueConverterProvider(ValueConverterProvider baseProvider)
@@ -48,13 +49,17 @@ namespace Isap.Converters
 
 		private string GetTypeKey(Type type)
 		{
+			Guid typeId = type.GUID;
+			if (Equals(typeId, Guid.Empty))
+				typeId = _typeIdMap.GetOrAdd(type, _ => Guid.NewGuid());
+
 			if (type.IsGenericType)
 			{
 				string argumentsKey = string.Join(",", type.GetGenericArguments().Select(GetTypeKey));
-				return $"{type.GUID:N}<{argumentsKey}>";
+				return $"{typeId:N}<{argumentsKey}>";
 			}
 
-			return type.GUID.ToString("N");
+			return typeId.ToString("N");
 		}
 	}
 }

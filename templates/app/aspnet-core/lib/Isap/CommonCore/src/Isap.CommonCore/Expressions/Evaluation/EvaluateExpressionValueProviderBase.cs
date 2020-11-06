@@ -27,16 +27,21 @@ namespace Isap.CommonCore.Expressions.Evaluation
 
 		public TIntf Entry { get; }
 
-		public bool TryGetValue(string id, out string result)
+		public bool TryGetValue(string id, out object result)
 		{
 			if (PropertyAccessorMap.TryGetValue(id, out IPropertyGetAccessor<TIntf> accessor))
 			{
-				result = Converter.TryConvertTo<string>(accessor.GetValue(Entry)).AsDefaultIfNotSuccess();
+				result = accessor.GetValue(Entry);
 				return true;
 			}
 
 			result = null;
 			return false;
+		}
+
+		public bool TryGetObject(string id, out object result)
+		{
+			throw new NotImplementedException();
 		}
 	}
 }

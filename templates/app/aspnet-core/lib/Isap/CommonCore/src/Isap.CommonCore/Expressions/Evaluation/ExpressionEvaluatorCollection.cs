@@ -7,7 +7,7 @@ namespace Isap.CommonCore.Expressions.Evaluation
 	{
 		private readonly List<IExpressionEvaluator> _evaluators = new List<IExpressionEvaluator>();
 
-		public bool TryEvaluate(string expression, out string result)
+		public bool TryEvaluate(string expression, out object result)
 		{
 			result = null;
 			foreach (IExpressionEvaluator evaluator in _evaluators)

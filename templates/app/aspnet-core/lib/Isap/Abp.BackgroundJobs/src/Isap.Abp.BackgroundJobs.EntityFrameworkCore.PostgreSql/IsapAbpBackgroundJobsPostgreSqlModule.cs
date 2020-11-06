@@ -1,11 +1,13 @@
 using Isap.Abp.Extensions.Data;
 using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp.EntityFrameworkCore;
+using Volo.Abp.EntityFrameworkCore.PostgreSql;
 using Volo.Abp.Modularity;
 
 namespace Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql
 {
 	[DependsOn(
+		typeof(AbpEntityFrameworkCorePostgreSqlModule),
 		typeof(IsapAbpBackgroundJobsEntityFrameworkCoreModule)
 	)]
 	public class IsapAbpBackgroundJobsPostgreSqlModule: BackgroundJobsDbModuleBase<BackgroundJobsPostgreSqlModelBuilder>

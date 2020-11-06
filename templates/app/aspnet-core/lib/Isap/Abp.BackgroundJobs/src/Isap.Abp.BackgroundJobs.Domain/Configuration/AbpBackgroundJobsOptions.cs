@@ -27,7 +27,6 @@ namespace Isap.Abp.BackgroundJobs.Configuration
 		public TimeSpan ObsoleteJobRemovingTimeout { get; set; } = DefaultObsoleteJobRemovingTimeout;
 
 		public List<JobQueueConfiguration> Queues { get; set; }
-
 		ICollection<IJobQueueConfiguration> IBackgroundProcessingConfiguration.Queues =>
 			Queues?.Cast<IJobQueueConfiguration>().ToReadOnlyCollection() ?? _defaultQueuesConfiguration;
 	}

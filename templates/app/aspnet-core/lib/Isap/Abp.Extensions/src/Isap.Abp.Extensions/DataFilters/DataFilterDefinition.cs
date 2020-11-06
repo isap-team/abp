@@ -1,4 +1,5 @@
 using System;
+using System.Runtime.InteropServices;
 using Isap.Abp.Extensions.Metadata;
 using Isap.CommonCore.Metadata;
 
@@ -12,7 +13,8 @@ namespace Isap.Abp.Extensions.DataFilters
 		bool IsHidden { get; }
 	}
 
-	[EntityDef("A4436767-4CBA-465F-A18F-858C9CD7C4C2", "DataFilter")]
+	[Guid("A4436767-4CBA-465F-A18F-858C9CD7C4C2")]
+	[EntityDef("DataFilter")]
 	public class DataFilterDefinition: CommonEntityBase<Guid, IDataFilterDefinition>, IDataFilterDefinition
 	{
 		public string Title { get; set; }

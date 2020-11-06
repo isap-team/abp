@@ -43,6 +43,11 @@ namespace Isap.CommonCore.Integrations
 			throw new NotImplementedException();
 		}
 
+		public Dictionary<string, string> GetMap(string key, Func<IConfigValueProvider, KeyValuePair<string, string>> convert = null)
+		{
+			throw new NotImplementedException();
+		}
+
 		public IConfigValueProvider GetValueProvider(string key)
 		{
 			throw new NotImplementedException();

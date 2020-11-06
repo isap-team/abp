@@ -1,13 +1,13 @@
 using System;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
+using Isap.Abp.Extensions.Domain;
 using Isap.CommonCore.Services;
 using Microsoft.EntityFrameworkCore;
 using Volo.Abp.Data;
 using Volo.Abp.Domain.Entities;
 using Volo.Abp.Domain.Repositories;
 using Volo.Abp.Guids;
-using Volo.Abp.Uow;
 
 namespace Isap.Abp.Extensions.Data
 {
@@ -22,7 +22,7 @@ namespace Isap.Abp.Extensions.Data
 	{
 	}
 
-	public abstract class EntityDataSeederBase<TEntity, TKey>: IEntityDataSeeder<TEntity, TKey>
+	public abstract class EntityDataSeederBase<TEntity, TKey>: DomainServiceBase, IEntityDataSeeder<TEntity, TKey>
 		where TEntity: class, IEntity<TKey>, ICommonEntity<TKey>, IAssignable<TKey, TEntity>
 	{
 		protected EntityDataSeederBase()
@@ -30,9 +30,7 @@ namespace Isap.Abp.Extensions.Data
 			GuidGenerator = SimpleGuidGenerator.Instance;
 		}
 
-		public IGuidGenerator GuidGenerator { get; set; }
-		public IRepository<TEntity, TKey> Repository { get; set; }
-		public IUnitOfWorkManager UnitOfWorkManager { get; set; }
+		protected IRepository<TEntity, TKey> Repository => LazyGetRequiredService<IRepository<TEntity, TKey>>();
 
 		public abstract bool IsForTenant { get; }
 

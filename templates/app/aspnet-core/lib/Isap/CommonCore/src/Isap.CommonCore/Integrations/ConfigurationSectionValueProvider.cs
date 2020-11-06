@@ -29,8 +29,7 @@ namespace Isap.CommonCore.Integrations
 			Type targetType = typeof(T);
 			if (targetType == typeof(string))
 			{
-				string strValue;
-				return TryGetValue(key, out strValue) ? (T) (object) strValue : getDefaultValue();
+				return TryGetValue(key, out string strValue) ? (T) (object) strValue : getDefaultValue();
 			}
 
 			if (typeof(IEnumerable).IsAssignableFrom(targetType))
@@ -92,6 +91,19 @@ namespace Isap.CommonCore.Integrations
 				.ToList();
 		}
 
+		public Dictionary<string, string> GetMap(string key, Func<IConfigValueProvider, KeyValuePair<string, string>> convert = null)
+		{
+			convert ??= provider => new KeyValuePair<string, string>(provider.GetSectionName(), provider.GetValue<string>(null));
+			IConfiguration cfg = string.IsNullOrEmpty(key) ? _config : _config.GetSection(key);
+			return cfg.GetChildren()
+				.Select((section, i) =>
+					{
+						var provider = new ConfigurationSectionValueProvider(_converter, section);
+						return convert(provider);
+					})
+				.ToDictionary(pair => pair.Key, pair => pair.Value);
+		}
+
 		public IConfigValueProvider GetValueProvider(string key)
 		{
 			return new ConfigurationSectionValueProvider(_converter, _config.GetSection(key));
@@ -99,7 +111,7 @@ namespace Isap.CommonCore.Integrations
 
 		private bool TryGetValue(string key, out string value)
 		{
-			value = _config[key];
+			value = string.IsNullOrEmpty(key) ? _config.Value : _config[key];
 			return value != null;
 		}
 

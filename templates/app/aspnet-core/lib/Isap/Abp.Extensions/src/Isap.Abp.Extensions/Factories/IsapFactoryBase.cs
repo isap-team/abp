@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using Castle.MicroKernel;
 using Isap.CommonCore;
@@ -57,7 +58,9 @@ namespace Isap.Abp.Extensions.Factories
 
 		public TProduct Create(string productKey)
 		{
-			return (TProduct) ServiceProviderAccessor.Value.GetRequiredService(_productMap[productKey]);
+			if (!_productMap.TryGetValue(productKey, out Type serviceType))
+				throw new InvalidOperationException($"There is no registered product with key = '{productKey}'.");
+			return (TProduct) ServiceProviderAccessor.Value.GetRequiredService(serviceType);
 		}
 
 		TProduct IFactory<TProduct>.Create(string productKey, Arguments arguments) => throw new NotSupportedException();
@@ -89,5 +92,35 @@ namespace Isap.Abp.Extensions.Factories
 		}
 
 		protected abstract void RegisterProducts(Assembly assembly, Action<string, Type> registerProduct);
+	}
+
+	public abstract class IsapFactoryBase<TProduct, TMarker>: IsapFactoryBase<TProduct>
+		where TProduct: class
+		where TMarker: Attribute, IFactoryProductMarker
+	{
+		protected IsapFactoryBase(ObjectAccessor<IServiceProvider> serviceProviderAccessor)
+			: base(serviceProviderAccessor)
+		{
+		}
+
+		protected override void RegisterProducts(Assembly assembly, Action<string, Type> registerProduct)
+		{
+			List<string> GetProductKeys(Type type)
+			{
+				return type.GetCustomAttributes<TMarker>()
+					.Cast<IFactoryProductMarker>()
+					.Select(attr => attr.ProductKey)
+					.ToList();
+			}
+
+			List<Tuple<Type, List<string>>> tuples = assembly.GetExportedTypes()
+				.Where(t => t.IsClass && !t.IsGenericTypeDefinition)
+				.Where(t => typeof(TProduct).IsAssignableFrom(t))
+				.Select(t => Tuple.Create(t, GetProductKeys(t)))
+				.ToList();
+			foreach (Tuple<Type, List<string>> tuple in tuples)
+			foreach (string productKey in tuple.Item2)
+				registerProduct(productKey, tuple.Item1);
+		}
 	}
 }

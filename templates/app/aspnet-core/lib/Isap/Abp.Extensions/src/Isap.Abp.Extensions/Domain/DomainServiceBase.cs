@@ -5,7 +5,6 @@ using System.Threading;
 using Isap.CommonCore;
 using Isap.CommonCore.DependencyInjection;
 using Isap.Converters;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -15,14 +14,11 @@ using Volo.Abp.Uow;
 
 namespace Isap.Abp.Extensions.Domain
 {
-	public abstract class DomainServiceBase: DomainService, ICommonInitialize
+	public abstract class DomainServiceBase: DomainService, IDomainServiceBase, ICommonInitialize
 	{
 		private static long _lastObjectInstanceId;
 
 		private static readonly IValueConverter _defaultValueConverter = ValueConverterProviders.Default.GetConverter();
-
-		private readonly ConcurrentDictionary<Type, object> _serviceReferenceMap = new ConcurrentDictionary<Type, object>();
-
 
 		protected DomainServiceBase()
 		{
@@ -30,6 +26,8 @@ namespace Isap.Abp.Extensions.Domain
 			Converter = _defaultValueConverter;
 			//PermissionChecker = NullPermissionChecker.Instance;
 		}
+
+		ConcurrentDictionary<Type, object> IDomainServiceBase.ServiceReferenceMap { get; } = new ConcurrentDictionary<Type, object>();
 
 		public long ObjectInstanceId { get; }
 
@@ -55,7 +53,7 @@ namespace Isap.Abp.Extensions.Domain
 
 		protected TService LazyGetRequiredService<TService>()
 		{
-			return (TService) _serviceReferenceMap.GetOrAdd(typeof(TService), serviceType => ServiceProvider.GetRequiredService(serviceType));
+			return DomainServiceExtensions.LazyGetRequiredService<TService>(this);
 		}
 
 		protected virtual string L(string name, params object[] args)
