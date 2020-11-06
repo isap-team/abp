@@ -38,6 +38,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\lib\Isap\Abp.BackgroundJobs\src\Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql\Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql.csproj" />
+    <ProjectReference Include="..\..\lib\Isap\CommonCore\src\Isap.CommonCore.Web\Isap.CommonCore.Web.csproj" />
+    <ProjectReference Include="..\..\lib\Isap\Hosting\src\Isap.Hosting\Isap.Hosting.csproj" />
     <ProjectReference Include="..\MyCompanyName.MyProjectName.Application\MyCompanyName.MyProjectName.Application.csproj" />
     <ProjectReference Include="..\MyCompanyName.MyProjectName.HttpApi\MyCompanyName.MyProjectName.HttpApi.csproj" />
     <ProjectReference Include="..\MyCompanyName.MyProjectName.EntityFrameworkCore.DbMigrations\MyCompanyName.MyProjectName.EntityFrameworkCore.DbMigrations.csproj" />

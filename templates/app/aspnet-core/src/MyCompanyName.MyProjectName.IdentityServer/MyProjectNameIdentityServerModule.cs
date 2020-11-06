@@ -1,10 +1,17 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Isap.Abp.Extensions.Logging;
+using Isap.CommonCore.Integrations;
+using Isap.CommonCore.Web.Middlewares.RequestLogging;
+using Isap.CommonCore.Web.Middlewares.Tracing;
+using Isap.Converters;
 using Localization.Resources.AbpUi;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MyCompanyName.MyProjectName.EntityFrameworkCore;
@@ -29,6 +36,7 @@ using Volo.Abp.Modularity;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.UI;
 using Volo.Abp.VirtualFileSystem;
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
 
 namespace MyCompanyName.MyProjectName
 {
@@ -49,6 +57,11 @@ namespace MyCompanyName.MyProjectName
         {
             var hostingEnvironment = context.Services.GetHostingEnvironment();
             var configuration = context.Services.GetConfiguration();
+
+            IValueConverter converter = ValueConverterProviders.Default.GetConverter();
+            context.Services.AddSingleton(converter);
+
+            ConfigureRequestLogging(context, converter, configuration);
 
             Configure<AbpLocalizationOptions>(options =>
             {
@@ -136,10 +149,28 @@ namespace MyCompanyName.MyProjectName
             });
         }
 
+        private void ConfigureRequestLogging(ServiceConfigurationContext context, IValueConverter converter, IConfiguration configuration)
+        {
+            context.Services.UseMsToCastleLoggingAdapter();
+
+            Configure<IsapRequestLoggingOptions>(options =>
+                {
+                    IConfigValueProvider config = new ConfigurationSectionValueProvider(converter, configuration.GetSection("RequestLogging"));
+
+                    options.IsEnabled = config.GetValue("IsEnabled", false);
+
+                    List<string> basePaths = config.GetValue("BasePaths", () => new List<string>());
+                    options.AddBasePaths(basePaths.ToArray());
+                });
+        }
+
         public override void OnApplicationInitialization(ApplicationInitializationContext context)
         {
             var app = context.GetApplicationBuilder();
             var env = context.GetEnvironment();
+
+            app.UseMiddleware<LoggingTraceIdentifierMiddleware>();
+            app.UseRequestResponseLogging();
 
             if (env.IsDevelopment())
             {

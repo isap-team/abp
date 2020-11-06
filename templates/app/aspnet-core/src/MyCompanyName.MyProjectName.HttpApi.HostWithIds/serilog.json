@@ -1,0 +1,127 @@
+{
+	"Serilog": {
+		"Using": [ "Serilog.Sinks.File" ],
+		"MinimumLevel": {
+			"Default": "Verbose",
+			"Override": {
+				"Microsoft": "Information",
+				"Microsoft.EntityFrameworkCore": "Warning",
+				"System": "Warning"
+			}
+		},
+		"Enrich": [ "FromLogContext", "WithThreadId" ],
+		"Properties": {
+			"Application": "APM-MAIN-LOCAL"
+		},
+		"WriteTo": [
+			{
+				"Name": "Seq",
+				"Args": {
+					"restrictedToMinimumLevel": "Verbose",
+					"serverUrl": "http://localhost:5341/",
+					"outputTemplate": "{Timestamp:HH:mm:ss.fff} [{Level:u3}] {SourceContext} > {Message:lj}. Application: {Application}{NewLine}{Exception}"
+				}
+			},
+			{
+				"Name": "Logger",
+				"Args": {
+					"configureLogger": {
+						"WriteTo": [
+							{
+								"Name": "File",
+								"Args": {
+									"path": "App_Data/Logs/BackgroundProcessing.txt",
+									//"rollingInterval": "Day",
+									"rollOnFileSizeLimit": true,
+									"fileSizeLimitBytes": "10485760",
+									"retainedFileCountLimit": 10,
+									"outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] ({JobId}) ({LoggingSource}) {Message}{NewLine}{Exception}"
+								}
+							}
+						],
+						"Filter": [
+							{
+								"Name": "ByIncludingOnly",
+								"Args": {
+									"expression": "LoggingArea = 'BackgroundProcessing'"
+								}
+							}
+						]
+					}
+				}
+			},
+			{
+				"Name": "Logger",
+				"Args": {
+					"configureLogger": {
+						"WriteTo": [
+							{
+								"Name": "File",
+								"Args": {
+									"path": "App_Data/Logs/Requests.txt",
+									//"rollingInterval": "Day",
+									"rollOnFileSizeLimit": true,
+									"fileSizeLimitBytes": "10485760",
+									"retainedFileCountLimit": 20,
+									"outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{TraceId}] ({SourceContext}) {Message}{NewLine}{Exception}"
+								}
+							}
+						],
+						"Filter": [
+							{
+								"Name": "ByIncludingOnly",
+								"Args": {
+									"expression": "SourceContext = 'RequestLogging'"
+								}
+							}
+						]
+					}
+				}
+			},
+			{
+				"Name": "Logger",
+				"Args": {
+					"configureLogger": {
+						"WriteTo": [
+							{
+								"Name": "File",
+								"Args": {
+									"path": "App_Data/Logs/Basic.txt",
+									//"rollingInterval": "Day",
+									"rollOnFileSizeLimit": true,
+									"fileSizeLimitBytes": "10485760",
+									"retainedFileCountLimit": 10,
+									"outputTemplate": "{Timestamp:yyyy-MM-dd HH:mm:ss.fff zzz} [{Level:u3}] [{TraceId}] ({SourceContext}) {Message}{NewLine}{Exception}"
+								}
+							}
+						],
+						"Filter": [
+							{
+								"Name": "ByExcluding",
+								"Args": {
+									"expression": "LoggingArea = 'BackgroundProcessing'"
+								}
+							},
+							{
+								"Name": "ByExcluding",
+								"Args": {
+									"expression": "SourceContext = 'RequestLogging'"
+								}
+							}
+						]
+					}
+				}
+			}
+			/*
+			{
+				"Name": "Console",
+				"Args": {
+					"outputTemplate": "{Timestamp:HH:mm:ss.fff} [{Level:u3}] {SourceContext} > {Message:lj}. {NewLine}{Exception}",
+					"theme": "Serilog.Sinks.SystemConsole.Themes.AnsiConsoleTheme::Code, Serilog.Sinks.Console",
+					"restrictedToMinimumLevel": "Warning"
+				}
+			},
+			*/
+		]
+	}
+}
