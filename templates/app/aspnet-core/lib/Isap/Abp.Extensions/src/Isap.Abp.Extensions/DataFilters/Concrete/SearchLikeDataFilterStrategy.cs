@@ -66,7 +66,7 @@ namespace Isap.Abp.Extensions.DataFilters.Concrete
 					return CreateExpression(selectLikeOptions, searchValues[0]);
 				default:
 					return searchValues.Aggregate(PredicateBuilder.False<TEntity>(), (expr, searchValue) =>
-						PredicateExtensions.Or(expr, CreateExpression(selectLikeOptions, searchValue))
+						expr.OrElse(CreateExpression(selectLikeOptions, searchValue))
 					);
 			}
 		}
@@ -110,15 +110,10 @@ namespace Isap.Abp.Extensions.DataFilters.Concrete
 						else
 						{
 							if (fullName.FirstName.IsNullOrEmpty() && fullName.LastName.EndsWith("%"))
-							{
-								Expression<Func<TEntity, bool>> lastNameExpr = CreateExpression(options.CaseSensitive, options.LastNameProperty,
-									fullName.LastName.EnsurePrefix("%"));
-								Expression<Func<TEntity, bool>> firstNameExpr = CreateExpression(options.CaseSensitive, options.FirstNameProperty,
-									fullName.LastName.EnsurePrefix("%"));
-								Expression<Func<TEntity, bool>> middleNameExpr = CreateExpression(options.CaseSensitive, options.MiddleNameProperty,
-									fullName.LastName.EnsurePrefix("%"));
-								expression = PredicateExtensions.Or(PredicateExtensions.Or(lastNameExpr, firstNameExpr), middleNameExpr);
-							}
+								expression = CreateExpression(options.CaseSensitive, options.LastNameProperty, fullName.LastName.EnsurePrefix("%"))
+										.OrElse(CreateExpression(options.CaseSensitive, options.FirstNameProperty, fullName.LastName.EnsurePrefix("%")))
+										.OrElse(CreateExpression(options.CaseSensitive, options.MiddleNameProperty, fullName.LastName.EnsurePrefix("%")))
+									;
 							else
 								expression = CreateExpression(options.CaseSensitive, options.LastNameProperty, fullName.LastName);
 						}
@@ -133,9 +128,9 @@ namespace Isap.Abp.Extensions.DataFilters.Concrete
 						}
 						else
 						{
-							expression = PredicateExtensions.And(expression, fullName.MiddleName.IsNullOrEmpty()
-									? PredicateExtensions.Or(CreateExpression(options.CaseSensitive, options.FirstNameProperty, fullName.FirstName),
-										CreateExpression(options.CaseSensitive, options.MiddleNameProperty, fullName.FirstName))
+							expression = expression.AndAlso(fullName.MiddleName.IsNullOrEmpty()
+									? CreateExpression(options.CaseSensitive, options.FirstNameProperty, fullName.FirstName)
+										.OrElse(CreateExpression(options.CaseSensitive, options.MiddleNameProperty, fullName.FirstName))
 									: CreateExpression(options.CaseSensitive, options.FirstNameProperty, fullName.FirstName))
 								;
 						}
@@ -150,14 +145,14 @@ namespace Isap.Abp.Extensions.DataFilters.Concrete
 						}
 						else
 						{
-							expression = PredicateExtensions.And(expression, CreateExpression(options.CaseSensitive, options.MiddleNameProperty, fullName.MiddleName));
+							expression = expression.AndAlso(CreateExpression(options.CaseSensitive, options.MiddleNameProperty, fullName.MiddleName));
 						}
 
 						break;
 					}
 
 					if (searchByFullNameAlso)
-						expression = PredicateExtensions.And(expression, CreateExpression(options.CaseSensitive, options.PropertyName,
+						expression = expression.AndAlso(CreateExpression(options.CaseSensitive, options.PropertyName,
 							$"{fullName.LastName} {fullName.FirstName} {fullName.MiddleName}".Trim()));
 
 					return expression;

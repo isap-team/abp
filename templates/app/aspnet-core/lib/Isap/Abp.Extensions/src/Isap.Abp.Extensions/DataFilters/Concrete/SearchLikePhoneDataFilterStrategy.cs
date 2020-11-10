@@ -59,13 +59,13 @@ namespace Isap.Abp.Extensions.DataFilters.Concrete
 
 			switch (searchValue)
 			{
-				case string dummy when searchValue.StartsWith(" ") && searchValue.EndsWith(" "):
+				case { } dummy when searchValue.StartsWith(" ") && searchValue.EndsWith(" "):
 					searchValue = searchValue.Trim();
 					break;
-				case string dummy when searchValue.StartsWith(" "):
+				case { } dummy when searchValue.StartsWith(" "):
 					searchValue = $"{searchValue.TrimStart()}%";
 					break;
-				case string dummy when searchValue.EndsWith(" "):
+				case { } dummy when searchValue.EndsWith(" "):
 					searchValue = $"%{searchValue.TrimEnd()}";
 					break;
 				default:
@@ -81,8 +81,8 @@ namespace Isap.Abp.Extensions.DataFilters.Concrete
 			Expression<Func<TEntity, bool>> resultExpression = CreateExpression(propertiesName[0], searchValue, caseSensitive);
 			for (int i = 1; i < propertiesName.Length; i++)
 				resultExpression = containsInAnyField
-					? resultExpression.Or(CreateExpression(propertiesName[i], searchValue, caseSensitive))
-					: resultExpression.And(CreateExpression(propertiesName[i], searchValue, caseSensitive));
+					? resultExpression.OrElse(CreateExpression(propertiesName[i], searchValue, caseSensitive))
+					: resultExpression.AndAlso(CreateExpression(propertiesName[i], searchValue, caseSensitive));
 
 			return resultExpression;
 		}

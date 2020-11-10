@@ -29,7 +29,7 @@ namespace Isap.Abp.Extensions.DataFilters.Concrete
 					return CreateExpression(selectLikeOptions, searchValues[0]);
 				default:
 					return searchValues.Aggregate(PredicateBuilder.False<TEntity>(), (expr, searchValue) =>
-						PredicateExtensions.Or(expr, CreateExpression(selectLikeOptions, searchValue))
+						expr.OrElse(CreateExpression(selectLikeOptions, searchValue))
 					);
 			}
 		}
@@ -74,7 +74,7 @@ namespace Isap.Abp.Extensions.DataFilters.Concrete
 						}
 						else
 						{
-							expression = PredicateExtensions.And(expression, CreateExpression(options.CaseSensitive, options.FirstNameProperty, fullName.FirstName));
+							expression = expression.AndAlso(CreateExpression(options.CaseSensitive, options.FirstNameProperty, fullName.FirstName));
 						}
 
 						if (fullName.MiddleName.IsNullOrEmpty())
@@ -87,14 +87,14 @@ namespace Isap.Abp.Extensions.DataFilters.Concrete
 						}
 						else
 						{
-							expression = PredicateExtensions.And(expression, CreateExpression(options.CaseSensitive, options.MiddleNameProperty, fullName.MiddleName));
+							expression = expression.AndAlso(CreateExpression(options.CaseSensitive, options.MiddleNameProperty, fullName.MiddleName));
 						}
 
 						break;
 					}
 
 					if (searchByFullNameAlso)
-						expression = PredicateExtensions.And(expression, CreateExpression(options.CaseSensitive, options.PropertyName,
+						expression = expression.AndAlso(CreateExpression(options.CaseSensitive, options.PropertyName,
 							$"{fullName.LastName} {fullName.FirstName} {fullName.MiddleName}".Trim()));
 
 					expression = CompleteExpression(options, searchValue, expression);
@@ -112,13 +112,9 @@ namespace Isap.Abp.Extensions.DataFilters.Concrete
 			if (searchValue.EndsWith(" "))
 			{
 				string trimmedValue = searchValue.Trim();
-				return PredicateExtensions.Or(
-					CreateExpression(options.CaseSensitive, options.PropertyName, $"{trimmedValue} %"),
-					PredicateExtensions.Or(
-						CreateExpression(options.CaseSensitive, options.PropertyName, $"% {trimmedValue}"),
-						CreateExpression(options.CaseSensitive, options.PropertyName, $"% {trimmedValue} %")
-					)
-				);
+				return CreateExpression(options.CaseSensitive, options.PropertyName, $"{trimmedValue} %")
+					.OrElse(CreateExpression(options.CaseSensitive, options.PropertyName, $"% {trimmedValue}"))
+					.OrElse(CreateExpression(options.CaseSensitive, options.PropertyName, $"% {trimmedValue} %"));
 			}
 
 			return expression;

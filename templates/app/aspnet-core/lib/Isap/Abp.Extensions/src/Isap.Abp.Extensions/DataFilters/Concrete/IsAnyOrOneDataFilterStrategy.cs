@@ -59,7 +59,7 @@ namespace Isap.Abp.Extensions.DataFilters.Concrete
 						? PredicateBuilder.ILike<TEntity>(optionsWrapper.PropertyName, searchExpr)
 						: */PredicateBuilder.Equal<TEntity>(optionsWrapper.PropertyName, optionsWrapper.Value)
 					;
-				expression = PredicateExtensions.And(expression, secondExpression);
+				expression = expression.AndAlso(secondExpression);
 			}
 
 			return expression;

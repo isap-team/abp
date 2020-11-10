@@ -33,7 +33,16 @@ namespace Isap.Abp.Extensions.Expressions.Predicates
 		/// <summary>
 		///     Combines the first predicate with the second using the logical "and".
 		/// </summary>
+		[Obsolete("Use AndAlso")]
 		public static Expression<Func<T, bool>> And<T>(this Expression<Func<T, bool>> first, Expression<Func<T, bool>> second)
+		{
+			return AndAlso(first, second);
+		}
+
+		/// <summary>
+		///     Combines the first predicate with the second using the logical "and".
+		/// </summary>
+		public static Expression<Func<T, bool>> AndAlso<T>(this Expression<Func<T, bool>> first, Expression<Func<T, bool>> second)
 		{
 			return first.Compose(second, Expression.AndAlso);
 		}
@@ -41,7 +50,16 @@ namespace Isap.Abp.Extensions.Expressions.Predicates
 		/// <summary>
 		///     Combines the first predicate with the second using the logical "or".
 		/// </summary>
+		[Obsolete("Use OrElse")]
 		public static Expression<Func<T, bool>> Or<T>(this Expression<Func<T, bool>> first, Expression<Func<T, bool>> second)
+		{
+			return OrElse(first, second);
+		}
+
+		/// <summary>
+		///     Combines the first predicate with the second using the logical "or".
+		/// </summary>
+		public static Expression<Func<T, bool>> OrElse<T>(this Expression<Func<T, bool>> first, Expression<Func<T, bool>> second)
 		{
 			return first.Compose(second, Expression.OrElse);
 		}

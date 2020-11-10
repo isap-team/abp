@@ -25,7 +25,7 @@ namespace Isap.Abp.Extensions.Data.Specifications.FilterSpecs
 		public override Expression<Func<TEntity, bool>> IsSatisfiedBy()
 		{
 			Expression<Func<TEntity, bool>> result = _specifications.First().IsSatisfiedBy();
-			result = _specifications.Skip(1).Aggregate(result, (expression, specification) => PredicateExtensions.And(expression, specification.IsSatisfiedBy()));
+			result = _specifications.Skip(1).Aggregate(result, (expression, specification) => expression.AndAlso(specification.IsSatisfiedBy()));
 			return result;
 		}
 	}

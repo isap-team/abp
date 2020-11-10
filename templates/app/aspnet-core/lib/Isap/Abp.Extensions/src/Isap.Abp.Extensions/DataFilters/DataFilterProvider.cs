@@ -43,7 +43,7 @@ namespace Isap.Abp.Extensions.DataFilters
 					Dictionary<string, object> filterOptions =
 						DataFilterOptionsExtensions.Deserialize(dataFilter.Options).Replace(DataFilterOptionsExtensions.Deserialize(tuple.Item2));
 					var expression = dataFilterStrategy.CreateFilterExpression(filterOptions);
-					predicate = PredicateExtensions.And(predicate, expression);
+					predicate = predicate.AndAlso(expression);
 				}
 			}
 
