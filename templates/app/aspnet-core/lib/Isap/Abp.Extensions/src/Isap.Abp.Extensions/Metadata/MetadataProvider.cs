@@ -36,11 +36,13 @@ namespace Isap.Abp.Extensions.Metadata
 
 		public IEntityDefinition Register(IEntityDefinition entityDef, bool replace = true)
 		{
+			if (entityDef.Id.Equals(Guid.Empty)) return entityDef;
+
 			if (replace)
 				_entityDefMap.AddOrUpdate(entityDef.Id, entityDef, (id, def) => entityDef);
 			else
 				if (!_entityDefMap.TryAdd(entityDef.Id, entityDef))
-					throw new InvalidOperationException($"Can't register entity definition with id = '{entityDef.Id}'. An entity definition with same id is registered already.");
+					throw new InvalidOperationException($"Can't register entity definition with id = '{entityDef.Id}' and entity type = '{entityDef.EntityTypeName}'. An entity definition with same id is registered already.");
 			return entityDef;
 		}
 	}

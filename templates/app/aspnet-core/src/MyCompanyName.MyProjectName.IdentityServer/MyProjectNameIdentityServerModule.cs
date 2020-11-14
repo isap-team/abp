@@ -2,6 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Isap.Abp.BackgroundJobs.Configuration;
+using Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql;
+using Isap.Abp.Extensions.Clustering;
 using Isap.Abp.Extensions.Logging;
 using Isap.CommonCore.Integrations;
 using Isap.CommonCore.Web.Middlewares.RequestLogging;
@@ -11,6 +14,7 @@ using Localization.Resources.AbpUi;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -21,6 +25,7 @@ using StackExchange.Redis;
 using Volo.Abp;
 using Volo.Abp.Account;
 using Volo.Abp.Account.Web;
+using Volo.Abp.AspNetCore.MultiTenancy;
 using Volo.Abp.AspNetCore.Mvc.UI;
 using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Basic;
@@ -33,10 +38,14 @@ using Volo.Abp.Caching;
 using Volo.Abp.Caching.StackExchangeRedis;
 using Volo.Abp.Localization;
 using Volo.Abp.Modularity;
+using Volo.Abp.MultiTenancy;
+using Volo.Abp.MultiTenancy.ConfigurationStore;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.UI;
 using Volo.Abp.VirtualFileSystem;
+
 // ReSharper disable ConditionIsAlwaysTrueOrFalse
+// ReSharper disable UnusedParameter.Local
 
 namespace MyCompanyName.MyProjectName
 {
@@ -46,6 +55,7 @@ namespace MyCompanyName.MyProjectName
         typeof(AbpAccountWebIdentityServerModule),
         typeof(AbpAccountApplicationModule),
         typeof(AbpAspNetCoreMvcUiBasicThemeModule),
+        typeof(IsapAbpBackgroundJobsPostgreSqlModule),
         typeof(MyProjectNameEntityFrameworkCoreDbMigrationsModule),
         typeof(AbpAspNetCoreSerilogModule)
         )]
@@ -62,6 +72,9 @@ namespace MyCompanyName.MyProjectName
             context.Services.AddSingleton(converter);
 
             ConfigureRequestLogging(context, converter, configuration);
+            ConfigureMultiTenancy();
+
+            ConfigureForwardedHeaders(context);
 
             Configure<AbpLocalizationOptions>(options =>
             {
@@ -147,6 +160,9 @@ namespace MyCompanyName.MyProjectName
                         .AllowCredentials();
                 });
             });
+
+            ConfigureClusterNode(context, configuration);
+            ConfigureBackgroundJobs(context, converter, configuration);
         }
 
         private void ConfigureRequestLogging(ServiceConfigurationContext context, IValueConverter converter, IConfiguration configuration)
@@ -164,6 +180,54 @@ namespace MyCompanyName.MyProjectName
                 });
         }
 
+        private void ConfigureMultiTenancy()
+        {
+            Configure<AbpMultiTenancyOptions>(options =>
+                {
+                    options.IsEnabled = MultiTenancyConsts.IsEnabled;
+                });
+
+            if (MultiTenancyConsts.IsEnabled)
+            {
+                /*
+                Configure<AbpTenantResolveOptions>(options =>
+                    {
+                        options.TenantResolvers.Add(new DefaultTenantResolveContributor());
+                    });
+                */
+
+                Configure<AbpDefaultTenantStoreOptions>(options =>
+                    {
+                        options.Tenants = MultiTenancyConsts.DefaultTenants;
+                    });
+
+                Configure<AbpAspNetCoreMultiTenancyOptions>(options =>
+                    {
+                        //options.TenantKey = ApmRequestHeaderNames.ApmTenantId;
+                    });
+            }
+        }
+
+        private void ConfigureForwardedHeaders(ServiceConfigurationContext context)
+        {
+            context.Services.Configure<ForwardedHeadersOptions>(options =>
+                {
+                    options.ForwardedHeaders = ForwardedHeaders.All;
+                    options.KnownProxies.Clear();
+                    options.KnownNetworks.Clear();
+                });
+        }
+
+        private void ConfigureClusterNode(ServiceConfigurationContext context, IConfiguration configuration)
+        {
+            Configure<AbpClusterNodeOptions>(configuration.GetSection("ClusterNodeOptions"));
+        }
+
+        private void ConfigureBackgroundJobs(ServiceConfigurationContext context, IValueConverter converter, IConfiguration configuration)
+        {
+            Configure<AbpBackgroundJobsOptions>(configuration.GetSection("BackgroundJobProcessing"));
+        }
+
         public override void OnApplicationInitialization(ApplicationInitializationContext context)
         {
             var app = context.GetApplicationBuilder();
@@ -172,9 +236,12 @@ namespace MyCompanyName.MyProjectName
             app.UseMiddleware<LoggingTraceIdentifierMiddleware>();
             app.UseRequestResponseLogging();
 
+            app.UseHttpMethodOverride();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseForwardedHeaders();
             }
 
             app.UseAbpRequestLocalization();
@@ -182,6 +249,8 @@ namespace MyCompanyName.MyProjectName
             if (!env.IsDevelopment())
             {
                 app.UseErrorPage();
+                app.UseForwardedHeaders();
+                //app.UseHsts();
             }
 
             app.UseCorrelationId();

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using IdentityServer4.Models;
@@ -14,6 +14,8 @@ using Volo.Abp.PermissionManagement;
 using Volo.Abp.Uow;
 using ApiResource = Volo.Abp.IdentityServer.ApiResources.ApiResource;
 using Client = Volo.Abp.IdentityServer.Clients.Client;
+
+// ReSharper disable UnusedMethodReturnValue.Local
 
 namespace MyCompanyName.MyProjectName.IdentityServer
 {
