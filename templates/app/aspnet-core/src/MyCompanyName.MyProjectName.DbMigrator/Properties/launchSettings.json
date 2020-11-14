@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "MyCompanyName.MyProjectName.DbMigrator": {
+      "commandName": "Project",
+      "commandLineArgs": "-p=PostgreSql -e=Development"
+    }
+  }
+}

@@ -28,6 +28,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\framework\src\Volo.Abp.Autofac\Volo.Abp.Autofac.csproj" />
+    <ProjectReference Include="..\..\lib\Isap\Abp.BackgroundJobs\src\Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql\Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql.csproj" />
+    <ProjectReference Include="..\..\lib\Isap\Abp.Extensions\src\Isap.Abp.Extensions\Isap.Abp.Extensions.csproj" />
     <ProjectReference Include="..\MyCompanyName.MyProjectName.Application.Contracts\MyCompanyName.MyProjectName.Application.Contracts.csproj" />
     <ProjectReference Include="..\MyCompanyName.MyProjectName.EntityFrameworkCore.DbMigrations\MyCompanyName.MyProjectName.EntityFrameworkCore.DbMigrations.csproj" />
   </ItemGroup>

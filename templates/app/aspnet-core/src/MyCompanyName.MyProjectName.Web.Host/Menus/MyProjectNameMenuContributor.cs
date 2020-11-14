@@ -1,14 +1,16 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Localization;
 using MyCompanyName.MyProjectName.Localization;
 using MyCompanyName.MyProjectName.MultiTenancy;
 using Volo.Abp.Account.Localization;
 using Volo.Abp.TenantManagement.Web.Navigation;
 using Volo.Abp.UI.Navigation;
 using Volo.Abp.Users;
+
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
+// ReSharper disable HeuristicUnreachableCode
 
 namespace MyCompanyName.MyProjectName.Web.Menus
 {
@@ -36,10 +38,12 @@ namespace MyCompanyName.MyProjectName.Web.Menus
         private Task ConfigureMainMenuAsync(MenuConfigurationContext context)
         {
             if (!MultiTenancyConsts.IsEnabled)
+#pragma warning disable 162
             {
                 var administration = context.Menu.GetAdministration();
                 administration.TryRemoveMenuItem(TenantManagementMenuNames.GroupName);
             }
+#pragma warning restore 162
 
             var l = context.GetLocalizer<MyProjectNameResource>();
 

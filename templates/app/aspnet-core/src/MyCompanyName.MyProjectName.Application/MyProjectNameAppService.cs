@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+using Isap.Abp.Extensions.Services;
 using MyCompanyName.MyProjectName.Localization;
-using Volo.Abp.Application.Services;
 
 namespace MyCompanyName.MyProjectName
 {
     /* Inherit your application services from this class.
      */
-    public abstract class MyProjectNameAppService : ApplicationService
+    public abstract class MyProjectNameAppService : AppServiceBase
     {
         protected MyProjectNameAppService()
         {

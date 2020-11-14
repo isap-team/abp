@@ -21,6 +21,9 @@
     <ProjectReference Include="..\..\..\..\..\framework\src\Volo.Abp.AspNetCore.Serilog\Volo.Abp.AspNetCore.Serilog.csproj" />
     <ProjectReference Include="..\..\..\..\..\framework\src\Volo.Abp.Swashbuckle\Volo.Abp.Swashbuckle.csproj" />
     <ProjectReference Include="..\..\..\..\..\modules\account\src\Volo.Abp.Account.Web.IdentityServer\Volo.Abp.Account.Web.IdentityServer.csproj" />
+    <ProjectReference Include="..\..\lib\Isap\Abp.BackgroundJobs\src\Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql\Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql.csproj" />
+    <ProjectReference Include="..\..\lib\Isap\CommonCore\src\Isap.CommonCore.Web\Isap.CommonCore.Web.csproj" />
+    <ProjectReference Include="..\..\lib\Isap\Hosting\src\Isap.Hosting\Isap.Hosting.csproj" />
   </ItemGroup>
 
   <ItemGroup>

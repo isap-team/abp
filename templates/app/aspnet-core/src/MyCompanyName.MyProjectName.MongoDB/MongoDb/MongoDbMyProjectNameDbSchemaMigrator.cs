@@ -1,15 +1,15 @@
-﻿using System;
+using System;
 using System.Threading.Tasks;
+using Isap.Abp.Extensions.Data;
 using Microsoft.Extensions.DependencyInjection;
 using MongoDB.Driver;
-using MyCompanyName.MyProjectName.Data;
 using Volo.Abp.Data;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.MongoDB;
 
 namespace MyCompanyName.MyProjectName.MongoDB
 {
-    public class MongoDbMyProjectNameDbSchemaMigrator : IMyProjectNameDbSchemaMigrator , ITransientDependency
+    public class MongoDbMyProjectNameDbSchemaMigrator : IAbpExtDbSchemaMigrator, ITransientDependency
     {
         private readonly IServiceProvider _serviceProvider;
 
