@@ -8,7 +8,7 @@ namespace Isap.Abp.Extensions.Data.Specifications
 {
 	public class SpecificationBuildingContext: ISpecificationBuildingContext, ITransientDependency
 	{
-		public IIsapDbContextProvider DbContextProvider { get; set; }
+		public IDbSetProvider DbSetProvider { get; set; }
 		public ISpecificationBuilderRepository SpecificationBuilderRepository { get; set; }
 		public IPredicateBuilder PredicateBuilder { get; set; }
 		public IValueConverter Converter { get; set; }

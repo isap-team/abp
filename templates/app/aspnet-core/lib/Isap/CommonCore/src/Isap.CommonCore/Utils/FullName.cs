@@ -2,25 +2,23 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Castle.Core.Internal;
 
 namespace Isap.CommonCore.Utils
 {
 	public class FullName
 	{
-		private static readonly Regex __splitRegex = new Regex(@"\s+", RegexOptions.Compiled | RegexOptions.Singleline);
+		private static readonly Regex _splitRegex = new Regex(@"\s+", RegexOptions.Compiled | RegexOptions.Singleline);
 
-		private static readonly Regex __validNameRegex = new Regex(@"^[\w]+['-]?[\w]+$", RegexOptions.Compiled | RegexOptions.Singleline);
-		private static readonly Regex __validNameForSearchRegex = new Regex(@"^[_%\w]+['-]?[_%\w]+$", RegexOptions.Compiled | RegexOptions.Singleline);
-		private static readonly Regex __invalidCharsRegex = new Regex(@"[_%\d]", RegexOptions.Compiled | RegexOptions.Singleline);
-		private static readonly Regex __invalidCharsForSearchRegex = new Regex(@"[\d]", RegexOptions.Compiled | RegexOptions.Singleline);
+		private static readonly Regex _validNameRegex = new Regex(@"^[\w]+['-]?[\w]+$", RegexOptions.Compiled | RegexOptions.Singleline);
+		private static readonly Regex _validNameForSearchRegex = new Regex(@"^[_%\w]+['-]?[_%\w]+$", RegexOptions.Compiled | RegexOptions.Singleline);
+		private static readonly Regex _invalidCharsRegex = new Regex(@"[_%\d]", RegexOptions.Compiled | RegexOptions.Singleline);
+		private static readonly Regex _invalidCharsForSearchRegex = new Regex(@"[\d]", RegexOptions.Compiled | RegexOptions.Singleline);
 
 		public FullName(string lastName, string firstName, string middleName)
 		{
 			FirstName = firstName;
 			MiddleName = middleName;
 			LastName = lastName;
-			ShortName = ToShortName(lastName, firstName, middleName);
 		}
 
 		public FullName()
@@ -30,31 +28,39 @@ namespace Isap.CommonCore.Utils
 		public string FirstName { get; set; }
 		public string MiddleName { get; set; }
 		public string LastName { get; set; }
-		public string ShortName { get; set; }
+		public string ShortName => ToShortNameString();
 
+		[Obsolete]
 		public string ToShortName(FullName fullName)
 			=> ToShortName(fullName.LastName, fullName.FirstName, fullName.MiddleName);
 
+		[Obsolete]
 		public string ToShortName(string lastName, string firstName, string middleName)
 		{
-			string result = String.Empty;
-			if (!lastName.IsNullOrEmpty())
-				result = lastName;
-
-			if (!firstName.IsNullOrEmpty())
-			{
-				result = string.Format("{0} {1}.", result, firstName[0]);
-
-				if (!middleName.IsNullOrEmpty())
-					result = string.Format("{0} {1}.", result, middleName[0]);
-			}
-
-			return result;
+			return ToShortNameString();
 		}
 
 		public override string ToString()
 		{
 			return string.Join(" ", new[] { LastName, FirstName, MiddleName }.Where(name => !string.IsNullOrWhiteSpace(name)));
+		}
+
+		public string ToShortNameString(bool lastNameOnStart = true)
+		{
+			if (string.IsNullOrEmpty(LastName))
+				return null;
+
+			string result = LastName;
+
+			if (!string.IsNullOrEmpty(FirstName))
+			{
+				result = string.Format("{0} {1}.", result, FirstName[0]);
+
+				if (!string.IsNullOrEmpty(MiddleName))
+					result = string.Format("{0} {1}.", result, MiddleName[0]);
+			}
+
+			return result;
 		}
 
 		public static bool TryParseForSearch(string value, out FullName result)
@@ -66,17 +72,17 @@ namespace Isap.CommonCore.Utils
 		{
 			result = null;
 			if (string.IsNullOrWhiteSpace(value)) return false;
-			if (__invalidCharsForSearchRegex.IsMatch(value)) return false;
+			if (_invalidCharsForSearchRegex.IsMatch(value)) return false;
 
 			if (!value.EndsWith("%"))
 				value = value + "%";
 
-			List<string> items = __splitRegex.Split(value, 4)
+			List<string> items = _splitRegex.Split(value, 4)
 				.Where(item => !string.IsNullOrEmpty(item))
 				.Where(item => item != "%")
 				.ToList();
 
-			if (items.Any(item => !__validNameForSearchRegex.IsMatch(item))) return false;
+			if (items.Any(item => !_validNameForSearchRegex.IsMatch(item))) return false;
 
 			switch (items.Count)
 			{
@@ -108,10 +114,10 @@ namespace Isap.CommonCore.Utils
 		{
 			result = null;
 			if (string.IsNullOrWhiteSpace(value)) return false;
-			if (__invalidCharsRegex.IsMatch(value)) return false;
+			if (_invalidCharsRegex.IsMatch(value)) return false;
 
-			List<string> items = __splitRegex.Split(value).Where(item => !string.IsNullOrEmpty(item)).ToList();
-			if (items.Any(item => !__validNameRegex.IsMatch(item))) return false;
+			List<string> items = _splitRegex.Split(value).Where(item => !string.IsNullOrEmpty(item)).ToList();
+			if (items.Any(item => !_validNameRegex.IsMatch(item))) return false;
 			switch (items.Count)
 			{
 				case 1:

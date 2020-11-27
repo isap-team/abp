@@ -41,6 +41,19 @@ namespace Isap.Abp.Extensions.Data.Specifications.OrderSpecs
 				;
 		}
 
+		public override IOrderedEnumerable<TEntity> OrderBy(IEnumerable<TEntity> query)
+		{
+			return IsEmpty
+					? (IOrderedEnumerable<TEntity>) query
+					: _specifications.Skip(1).Aggregate(_specifications.First().OrderBy(query), (q, spec) => spec.ThenBy(q))
+				;
+		}
+
+		public override IOrderedEnumerable<TEntity> ThenBy(IOrderedEnumerable<TEntity> query)
+		{
+			throw new System.NotImplementedException();
+		}
+
 		public void Add(IOrderSpecification<TEntity> item)
 		{
 			_specifications.Add(item);

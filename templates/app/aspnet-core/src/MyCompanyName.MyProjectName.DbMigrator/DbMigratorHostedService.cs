@@ -1,8 +1,8 @@
 using System;
 using System.Threading;
 using System.Threading.Tasks;
-using Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql;
 using Isap.Abp.Extensions.Data;
+using Isap.Abp.Extensions.PostgreSql;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -33,7 +33,7 @@ namespace MyCompanyName.MyProjectName.DbMigrator
                 options.Services.Configure<AbpExtDbOptions>(dbOptions =>
                     {
                         dbOptions.IsMigrationMode = true;
-                        dbOptions.DataProviderKey = _config[nameof(dbOptions.DataProviderKey)] ?? IsapAbpBackgroundJobsPostgreSqlModule.ProviderKey;
+                        dbOptions.DataProviderKey = _config[nameof(dbOptions.DataProviderKey)] ?? IsapAbpPostgreSqlConsts.DbProviderKey;
                     });
                 options.Configuration.EnvironmentName = _config[nameof(options.Configuration.EnvironmentName)] ?? Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT");
                 options.Services.Configure<AbpDefaultTenantStoreOptions>(storeOptions =>

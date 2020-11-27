@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Isap.Abp.Extensions.Data.Specifications.OrderSpecs
@@ -12,6 +13,16 @@ namespace Isap.Abp.Extensions.Data.Specifications.OrderSpecs
 		}
 
 		public override IOrderedQueryable<TEntity> ThenBy(IOrderedQueryable<TEntity> query)
+		{
+			return query;
+		}
+
+		public override IOrderedEnumerable<TEntity> OrderBy(IEnumerable<TEntity> query)
+		{
+			return (IOrderedEnumerable<TEntity>) query;
+		}
+
+		public override IOrderedEnumerable<TEntity> ThenBy(IOrderedEnumerable<TEntity> query)
 		{
 			return query;
 		}

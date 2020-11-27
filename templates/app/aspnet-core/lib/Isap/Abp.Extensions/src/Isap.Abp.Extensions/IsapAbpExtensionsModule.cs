@@ -5,7 +5,6 @@ using Isap.Abp.Extensions.Data;
 using Isap.Abp.Extensions.Data.Specifications;
 using Isap.Abp.Extensions.DataFilters;
 using Isap.Abp.Extensions.DataFilters.Converters;
-using Isap.Abp.Extensions.Expressions.Predicates;
 using Isap.Abp.Extensions.Localization;
 using Isap.Abp.Extensions.Metadata;
 using Isap.Abp.Extensions.Validation;

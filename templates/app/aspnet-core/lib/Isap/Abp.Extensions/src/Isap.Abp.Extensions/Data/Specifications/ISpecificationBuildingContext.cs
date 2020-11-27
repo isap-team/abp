@@ -7,7 +7,7 @@ namespace Isap.Abp.Extensions.Data.Specifications
 {
 	public interface ISpecificationBuildingContext
 	{
-		// IIsapDbContextProvider DbContextProvider { get; }
+		IDbSetProvider DbSetProvider { get; }
 		ISpecificationBuilderRepository SpecificationBuilderRepository { get; }
 		IPredicateBuilder PredicateBuilder { get; set; }
 		IValueConverter Converter { get; set; }

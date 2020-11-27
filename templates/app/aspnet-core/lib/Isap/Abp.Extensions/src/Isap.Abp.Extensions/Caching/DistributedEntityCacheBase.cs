@@ -18,7 +18,7 @@ namespace Isap.Abp.Extensions.Caching
 
 	public abstract class DistributedEntityCacheBase<TCacheItemIntf, TCacheItemImpl, TKey>: IDistributedEntityCache<TCacheItemIntf, TKey>
 		where TCacheItemIntf: class, ICommonEntity<TKey>
-		where TCacheItemImpl: class, TCacheItemIntf
+		where TCacheItemImpl: class, ICommonEntityDto<TKey>, TCacheItemIntf
 	{
 		protected abstract string EntityName { get; }
 
@@ -63,25 +63,6 @@ namespace Isap.Abp.Extensions.Caching
 		}
 
 		protected abstract Task<TCacheItemImpl> TryLoadItem(TKey id);
-	}
-
-	public abstract class DistributedEntityCacheBase<TCacheItemIntf, TCacheItemImpl, TKey, TAppService>
-		: DistributedEntityCacheBase<TCacheItemIntf, TCacheItemImpl, TKey>
-		where TCacheItemIntf: class, ICommonEntity<TKey>
-		where TCacheItemImpl: class, ICommonEntityDto<TKey>, TCacheItemIntf
-		where TAppService: IReferenceAppService<TCacheItemImpl, TKey>
-	{
-		protected DistributedEntityCacheBase(TAppService appService)
-		{
-			AppService = appService;
-		}
-
-		public TAppService AppService { get; }
-
-		protected override async Task<TCacheItemImpl> TryLoadItem(TKey id)
-		{
-			return await AppService.Get(id);
-		}
 
 		protected virtual async Task<TCacheItemIntf> InternalGetOrNullAsync(IDistributedCache<CacheRef<TCacheItemImpl, TKey>, string> index, string name,
 			Func<string, Task<TCacheItemImpl>> tryLoadItem)
@@ -101,6 +82,25 @@ namespace Isap.Abp.Extensions.Caching
 			}
 
 			return await Cache.GetAsync(cacheRef.Id);
+		}
+	}
+
+	public abstract class DistributedEntityCacheBase<TCacheItemIntf, TCacheItemImpl, TKey, TAppService>
+		: DistributedEntityCacheBase<TCacheItemIntf, TCacheItemImpl, TKey>
+		where TCacheItemIntf: class, ICommonEntity<TKey>
+		where TCacheItemImpl: class, ICommonEntityDto<TKey>, TCacheItemIntf
+		where TAppService: IReferenceAppService<TCacheItemImpl, TKey>
+	{
+		protected DistributedEntityCacheBase(TAppService appService)
+		{
+			AppService = appService;
+		}
+
+		public TAppService AppService { get; }
+
+		protected override async Task<TCacheItemImpl> TryLoadItem(TKey id)
+		{
+			return await AppService.Get(id);
 		}
 	}
 }

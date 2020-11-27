@@ -18,5 +18,17 @@ namespace Isap.Abp.Extensions.Querying
 		{
 			return query.OrderBy(new SortOptionsSortProvider<T>(predicateBuilder, sortOptions));
 		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static IEnumerable<T> OrderBy<T>(this IEnumerable<T> query, IEnumerableSortProvider<T> sortProvider)
+		{
+			return sortProvider.Apply(query);
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static IEnumerable<T> OrderBy<T>(this IEnumerable<T> query, IPredicateBuilder predicateBuilder, ICollection<SortOption> sortOptions)
+		{
+			return query.OrderBy(new SortOptionsSortProvider<T>(predicateBuilder, sortOptions));
+		}
 	}
 }

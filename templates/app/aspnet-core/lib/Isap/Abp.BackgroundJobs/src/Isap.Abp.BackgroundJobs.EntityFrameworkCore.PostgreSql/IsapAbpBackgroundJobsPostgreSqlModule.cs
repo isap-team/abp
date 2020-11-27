@@ -1,4 +1,5 @@
 using Isap.Abp.Extensions.Data;
+using Isap.Abp.Extensions.PostgreSql;
 using Microsoft.Extensions.DependencyInjection;
 using Volo.Abp.EntityFrameworkCore;
 using Volo.Abp.EntityFrameworkCore.PostgreSql;
@@ -8,13 +9,11 @@ namespace Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql
 {
 	[DependsOn(
 		typeof(AbpEntityFrameworkCorePostgreSqlModule),
-		typeof(IsapAbpBackgroundJobsEntityFrameworkCoreModule)
-	)]
+		typeof(IsapAbpBackgroundJobsEntityFrameworkCoreModule),
+		typeof(IsapAbpExtensionsPostgreSqlModule))]
 	public class IsapAbpBackgroundJobsPostgreSqlModule: BackgroundJobsDbModuleBase<BackgroundJobsPostgreSqlModelBuilder>
 	{
-		public const string ProviderKey = "PostgreSql";
-
-		protected override string DbProviderKey => ProviderKey;
+		protected override string DbProviderKey => IsapAbpPostgreSqlConsts.DbProviderKey;
 
 		protected override void ConfigureDbContextOptions(ServiceConfigurationContext context, AbpDbContextOptions options)
 		{

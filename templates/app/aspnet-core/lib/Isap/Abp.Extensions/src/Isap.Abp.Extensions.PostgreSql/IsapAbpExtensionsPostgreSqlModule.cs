@@ -10,7 +10,7 @@ namespace Isap.Abp.Extensions.PostgreSql
 		typeof(AbpEntityFrameworkCorePostgreSqlModule),
 		typeof(IsapAbpExtensionsModule)
 	)]
-	public class PostgreSqlAbpExtensionsModule: AbpModule
+	public class IsapAbpExtensionsPostgreSqlModule: AbpModule
 	{
 		public override void ConfigureServices(ServiceConfigurationContext context)
 		{

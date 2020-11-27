@@ -23,6 +23,7 @@ namespace Isap.CommonCore.Accessors
 
 	public interface IEntityAccessor
 	{
+		IPropertyAccessor TryGetProperty(string memberName);
 		IPropertyAccessor GetProperty(string memberName);
 		object GetValue(object target, string memberName);
 		void SetValue(object target, string memberName, object value);
@@ -31,6 +32,7 @@ namespace Isap.CommonCore.Accessors
 
 	public interface IEntityAccessor<in TEntity>: IEntityAccessor
 	{
+		new IPropertyAccessor<TEntity> TryGetProperty(string memberName);
 		new IPropertyAccessor<TEntity> GetProperty(string memberName);
 		object GetValue(TEntity target, string memberName);
 		void SetValue(TEntity target, string memberName, object value);
@@ -118,6 +120,18 @@ namespace Isap.CommonCore.Accessors
 				.ToDictionary(accessor => accessor.PropertyName, StringComparer.OrdinalIgnoreCase);
 		}
 
+		IPropertyAccessor IEntityAccessor.TryGetProperty(string memberName)
+		{
+			return TryGetProperty(memberName);
+		}
+
+		public IPropertyAccessor<TEntity> TryGetProperty(string memberName)
+		{
+			if (!_memberMap.TryGetValue(memberName, out var accessor))
+				return null;
+			return accessor;
+		}
+
 		IPropertyAccessor IEntityAccessor.GetProperty(string memberName)
 		{
 			return GetProperty(memberName);
@@ -181,18 +195,18 @@ namespace Isap.CommonCore.Accessors
 
 	public static class EntityAccessors
 	{
-		private static readonly IValueConverter __converter = ValueConverterProviders.Default.GetConverter();
-		private static readonly ConcurrentDictionary<Type, IEntityAccessor> __accessorMap = new ConcurrentDictionary<Type, IEntityAccessor>();
+		private static readonly IValueConverter _converter = ValueConverterProviders.Default.GetConverter();
+		private static readonly ConcurrentDictionary<Type, IEntityAccessor> _accessorMap = new ConcurrentDictionary<Type, IEntityAccessor>();
 
 		public static IEntityAccessor<TEntity> Get<TEntity>()
 		{
-			return (IEntityAccessor<TEntity>) __accessorMap.GetOrAdd(typeof(TEntity), _ => new EntityAccessor<TEntity>(__converter));
+			return (IEntityAccessor<TEntity>) _accessorMap.GetOrAdd(typeof(TEntity), _ => new EntityAccessor<TEntity>(_converter));
 		}
 
 		public static IEntityAccessor Get(Type entityType)
 		{
-			return __accessorMap.GetOrAdd(entityType,
-				_ => (IEntityAccessor) Activator.CreateInstance(typeof(EntityAccessor<>).MakeGenericType(entityType), __converter));
+			return _accessorMap.GetOrAdd(entityType,
+				_ => (IEntityAccessor) Activator.CreateInstance(typeof(EntityAccessor<>).MakeGenericType(entityType), _converter));
 		}
 	}
 }

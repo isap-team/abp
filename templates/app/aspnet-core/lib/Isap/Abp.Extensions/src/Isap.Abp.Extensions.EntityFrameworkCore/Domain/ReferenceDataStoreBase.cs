@@ -12,7 +12,6 @@ using Isap.Abp.Extensions.Expressions.Predicates;
 using Isap.Abp.Extensions.Querying;
 using Isap.CommonCore;
 using Isap.CommonCore.EntityFrameworkCore.Extensions;
-using Isap.CommonCore.Extensions;
 using Isap.CommonCore.Services;
 using Microsoft.EntityFrameworkCore;
 using Volo.Abp;
@@ -172,8 +171,7 @@ namespace Isap.Abp.Extensions.Domain
 
 		public async Task<ResultSet<TIntf>> GetPage(int pageNumber, int pageSize, List<SpecificationParameters> specifications, bool countTotal = false)
 		{
-			List<ISpecification<TImpl>> allSpecs =
-				SpecificationHelpers.BuildSpecifications<TImpl>(SpecificationBuildingContext, DbContextProvider, specifications);
+			List<ISpecification<TImpl>> allSpecs = SpecificationHelpers.BuildSpecifications<TImpl>(SpecificationBuildingContext, specifications);
 
 			IFilterSpecification<TImpl> filterSpec = allSpecs.ToFilterSpecification();
 			IOrderSpecification<TImpl> orderSpec = allSpecs.ToOrderSpecification();

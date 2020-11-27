@@ -12,6 +12,7 @@ namespace Isap.Abp.Extensions.Data
 {
 	public interface IEntityDataSeeder
 	{
+		bool IsForHost { get; }
 		bool IsForTenant { get; }
 		Task SeedAsync(DataSeedContext context);
 	}
@@ -31,11 +32,12 @@ namespace Isap.Abp.Extensions.Data
 
 		protected IRepository<TEntity, TKey> Repository => LazyGetRequiredService<IRepository<TEntity, TKey>>();
 
+		public abstract bool IsForHost { get; }
 		public abstract bool IsForTenant { get; }
 
 		public async Task SeedAsync(DataSeedContext context)
 		{
-			if (IsForTenant && !context.TenantId.HasValue || !IsForTenant && context.TenantId.HasValue)
+			if ((!IsForHost || context.TenantId.HasValue) && (!IsForTenant || !context.TenantId.HasValue))
 				return;
 
 			TEntity[] entries = await InternalCreateStandardEntries(context);
