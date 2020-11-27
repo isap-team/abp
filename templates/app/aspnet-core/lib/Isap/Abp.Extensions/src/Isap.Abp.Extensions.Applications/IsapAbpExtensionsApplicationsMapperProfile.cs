@@ -2,6 +2,7 @@ using System;
 using AutoMapper;
 using Isap.Abp.Extensions.Domain;
 using Isap.CommonCore.Services;
+using Volo.Abp;
 using Volo.Abp.AutoMapper;
 using Volo.Abp.Domain.Entities;
 using Volo.Abp.MultiTenancy;
@@ -57,6 +58,14 @@ namespace Isap.Abp.Extensions
 				;
 
 			CreateMap<IDocumentEntity<TKey>, DocumentEntityDto<TKey>>()
+				.ForMember(e => e.IsDeleted, opt => opt.MapFrom((src, dest) =>
+					{
+						if (src is ISoftDelete softDelete)
+							return softDelete.IsDeleted;
+						if (src is ICommonSoftDelete commonSoftDelete)
+							return commonSoftDelete.IsDeleted;
+						return false;
+					}))
 				.ForMember(e => e.LastModificationTime, opt => opt.MapFrom(src => src.LastModificationTime ?? src.CreationTime))
 				;
 			CreateMap<DocumentEntityDto<TKey>, DocumentEntity<TKey>>()
