@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.CompilerServices;
+using Castle.Components.DictionaryAdapter;
 
 namespace Isap.CommonCore.Extensions
 {
@@ -96,6 +98,12 @@ namespace Isap.CommonCore.Extensions
 		{
 			foreach (KeyValuePair<TKey, TValue> pair in source)
 				destination[pair.Key] = pair.Value;
+		}
+
+		[MethodImpl(MethodImplOptions.AggressiveInlining)]
+		public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> collection)
+		{
+			return collection.ToDictionary(pair => pair.Key, pair => pair.Value);
 		}
 	}
 }

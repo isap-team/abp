@@ -193,6 +193,13 @@ namespace Isap.Abp.Extensions.Domain
 			return resultSet.Data;
 		}
 
+		/// <inheritdoc cref="IReferenceDataStore{TIntf,TImpl,TKey}.CountAsync" />
+		public async Task<int> CountAsync(Expression<Func<TImpl, bool>> predicate = null)
+		{
+			predicate = predicate ?? (e => true);
+			return await GetQuery().Where(predicate).CountAsync();
+		}
+
 		/// <summary>
 		///     Возвращает первый элемент подпадающий под условия фильтрации.
 		/// </summary>

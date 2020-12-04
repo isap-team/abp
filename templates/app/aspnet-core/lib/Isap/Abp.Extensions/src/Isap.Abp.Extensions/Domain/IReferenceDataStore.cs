@@ -104,6 +104,13 @@ namespace Isap.Abp.Extensions.Domain
 		Task<List<TIntf>> GetAll(Expression<Func<TImpl, bool>> predicate = null, ICollection<SortOption> sortOptions = null, bool asNoTracking = false);
 
 		/// <summary>
+		///     Возвращает количество записей, отвечающих критериям поиска.
+		/// </summary>
+		/// <param name="predicate"></param>
+		/// <returns></returns>
+		Task<int> CountAsync(Expression<Func<TImpl, bool>> predicate = null);
+
+		/// <summary>
 		///     Возвращает первый элемент подпадающий под условия фильтрации.
 		/// </summary>
 		/// <param name="predicate">Выражение для фильтрации списка.</param>

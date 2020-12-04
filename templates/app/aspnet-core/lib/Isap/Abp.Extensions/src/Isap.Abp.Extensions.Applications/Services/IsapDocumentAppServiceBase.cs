@@ -134,6 +134,7 @@ namespace Isap.Abp.Extensions.Services
 		[Route("getOrCreateDraft")]
 		public override async Task<TEntityDto> GetOrCreateDraft(TCreateDraftInput input)
 		{
+			await CheckQueryPermission();
 			TIntf result = await DomainManager.GetOrCreateDraft(input);
 			return ToDto(result);
 		}
@@ -150,6 +151,7 @@ namespace Isap.Abp.Extensions.Services
 		[DisableValidation]
 		public override async Task<TEntityDto> SaveDraft(TEntityDto entry)
 		{
+			await CheckCreatePermission(entry);
 			return await InternalSave(entry);
 		}
 
@@ -157,6 +159,7 @@ namespace Isap.Abp.Extensions.Services
 		[Route("deleteDraft")]
 		public override async Task DeleteDraft(TKey id)
 		{
+			await CheckQueryPermission();
 			TIntf document = await DomainManager.Get(id);
 			if (document != null)
 			{
@@ -171,6 +174,7 @@ namespace Isap.Abp.Extensions.Services
 		[DisableValidation]
 		public override async Task DeleteDraft(TEntityDto entry)
 		{
+			await CheckCreatePermission(entry);
 			TIntf document = await DomainManager.Get(entry.Id);
 			if (document != null)
 			{
@@ -184,6 +188,7 @@ namespace Isap.Abp.Extensions.Services
 		[Route("save")]
 		public override async Task<TEntityDto> Save(TEntityDto entry)
 		{
+			await CheckUpdatePermission(entry);
 			return await InternalSave(entry);
 		}
 

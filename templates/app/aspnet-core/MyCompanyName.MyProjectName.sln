@@ -117,6 +117,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Isap.Abp.Extensions.Applica
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Isap.Abp.Extensions.HttpApi", "lib\Isap\Abp.Extensions\src\Isap.Abp.Extensions.HttpApi\Isap.Abp.Extensions.HttpApi.csproj", "{7C178495-324A-4A53-930F-3C399492FB4C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Isap.Abp.Extensions.HttpApi.Client", "lib\Isap\Abp.Extensions\src\Isap.Abp.Extensions.HttpApi.Client\Isap.Abp.Extensions.HttpApi.Client.csproj", "{9123DC57-BED2-48C4-95B7-E2F57494654B}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Isap.Abp.Extensions.RemoteSettings", "lib\Isap\Abp.Extensions\src\Isap.Abp.Extensions.RemoteSettings\Isap.Abp.Extensions.RemoteSettings.csproj", "{EEC11B1A-D161-4FEE-8A69-D73102C852DC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Isap.Abp.Extensions.Web", "lib\Isap\Abp.Extensions\src\Isap.Abp.Extensions.Web\Isap.Abp.Extensions.Web.csproj", "{C769BD41-DF5E-4679-8EAC-494E5A7668E0}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -283,6 +289,18 @@ Global
 		{7C178495-324A-4A53-930F-3C399492FB4C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7C178495-324A-4A53-930F-3C399492FB4C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7C178495-324A-4A53-930F-3C399492FB4C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9123DC57-BED2-48C4-95B7-E2F57494654B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9123DC57-BED2-48C4-95B7-E2F57494654B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9123DC57-BED2-48C4-95B7-E2F57494654B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9123DC57-BED2-48C4-95B7-E2F57494654B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEC11B1A-D161-4FEE-8A69-D73102C852DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEC11B1A-D161-4FEE-8A69-D73102C852DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEC11B1A-D161-4FEE-8A69-D73102C852DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEC11B1A-D161-4FEE-8A69-D73102C852DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C769BD41-DF5E-4679-8EAC-494E5A7668E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C769BD41-DF5E-4679-8EAC-494E5A7668E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C769BD41-DF5E-4679-8EAC-494E5A7668E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C769BD41-DF5E-4679-8EAC-494E5A7668E0}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -342,6 +360,9 @@ Global
 		{AFF5EBE3-2A76-4675-9034-4B35CF095B34} = {12083659-AC6D-4258-8D26-EC5AA81DC4D0}
 		{1B35A636-FAC7-4930-854E-799110880113} = {12083659-AC6D-4258-8D26-EC5AA81DC4D0}
 		{7C178495-324A-4A53-930F-3C399492FB4C} = {12083659-AC6D-4258-8D26-EC5AA81DC4D0}
+		{9123DC57-BED2-48C4-95B7-E2F57494654B} = {12083659-AC6D-4258-8D26-EC5AA81DC4D0}
+		{EEC11B1A-D161-4FEE-8A69-D73102C852DC} = {12083659-AC6D-4258-8D26-EC5AA81DC4D0}
+		{C769BD41-DF5E-4679-8EAC-494E5A7668E0} = {12083659-AC6D-4258-8D26-EC5AA81DC4D0}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {28315BFD-90E7-4E14-A2EA-F3D23AF4126F}

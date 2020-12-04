@@ -5,6 +5,8 @@ namespace Isap.CommonCore.Extensions
 {
 	public static class DateTimeExtensions
 	{
+		public static readonly DateTime MinSupportedDate = new DateTime(1, 1, 1);
+		public static readonly DateTime MaxSupportedDate = new DateTime(9999, 12, 31);
 		public static readonly DateTime UnixTimestampZeroDate = new DateTime(1970, 1, 1);
 
 		public static int ToUnixTimestamp(this DateTime value, DateTimeKind? checkKindWhenHasValue = null)

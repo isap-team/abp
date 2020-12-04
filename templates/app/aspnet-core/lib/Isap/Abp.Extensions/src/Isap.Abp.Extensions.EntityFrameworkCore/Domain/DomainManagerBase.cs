@@ -506,7 +506,7 @@ namespace Isap.Abp.Extensions.Domain
 				.ToList();
 
 			if (validationResults.Any())
-				throw new AbpValidationException(L("CouldNotValidateOnCreating{0}", typeof(TImpl).Name), validationResults);
+				throw new AbpValidationException(L["CouldNotValidateOnCreating{0}", typeof(TImpl).Name], validationResults);
 
 			if (((IEntity<TKey>) entry).Id.IsDefaultValue())
 			{
@@ -530,7 +530,7 @@ namespace Isap.Abp.Extensions.Domain
 				.Where(r => r != ValidationResult.Success)
 				.ToList();
 			if (validationResults.Any())
-				throw new AbpValidationException(L("CouldNotValidateOnUpdating{0}", typeof(TImpl).Name), validationResults);
+				throw new AbpValidationException(L["CouldNotValidateOnUpdating{0}", typeof(TImpl).Name], validationResults);
 			if (!ReferenceEquals(existingEntry, entry))
 				existingEntry.Assign(entry);
 
@@ -671,7 +671,7 @@ namespace Isap.Abp.Extensions.Domain
 		/// <returns>Сформированный резальтат валидации для последующей обработки.</returns>
 		protected Task<ValidationResult> PropertiesShouldNotBeEmptyValidationResult(params string[] propertyNames)
 		{
-			return CreateValidationResult(names => L("PropertiesShouldNotBeEmpty", names), propertyNames);
+			return CreateValidationResult(names => L["PropertiesShouldNotBeEmpty", names], propertyNames);
 		}
 
 		public override TRelatedImpl AddRelatedEntry<TRelatedImpl>(Func<ICollection<TRelatedImpl>> getCollection, TRelatedImpl entry)

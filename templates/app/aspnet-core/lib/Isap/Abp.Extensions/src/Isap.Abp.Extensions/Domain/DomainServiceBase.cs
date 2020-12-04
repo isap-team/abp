@@ -1,24 +1,27 @@
 using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 using Isap.CommonCore;
 using Isap.CommonCore.DependencyInjection;
 using Isap.Converters;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
+using Volo.Abp;
 using Volo.Abp.Domain.Services;
-using Volo.Abp.Localization.ExceptionHandling;
+using Volo.Abp.Localization;
 using Volo.Abp.Uow;
 
 namespace Isap.Abp.Extensions.Domain
 {
-	public abstract class DomainServiceBase: DomainService, IDomainServiceBase, ICommonInitialize
+	public abstract class DomainServiceBase: DomainService, IDomainServiceBase, ISupportsLazyServices, ICommonInitialize
 	{
 		private static long _lastObjectInstanceId;
 
 		private static readonly IValueConverter _defaultValueConverter = ValueConverterProviders.Default.GetConverter();
+
+		private IStringLocalizer _localizer;
+		private Type _localizationResource = typeof(DefaultResource);
 
 		protected DomainServiceBase()
 		{
@@ -27,7 +30,9 @@ namespace Isap.Abp.Extensions.Domain
 			//PermissionChecker = NullPermissionChecker.Instance;
 		}
 
-		ConcurrentDictionary<Type, object> IDomainServiceBase.ServiceReferenceMap { get; } = new ConcurrentDictionary<Type, object>();
+		object ISupportsLazyServices.ServiceProviderLock => ServiceProviderLock;
+
+		ConcurrentDictionary<Type, object> ISupportsLazyServices.ServiceReferenceMap { get; } = new ConcurrentDictionary<Type, object>();
 
 		public long ObjectInstanceId { get; }
 
@@ -40,43 +45,48 @@ namespace Isap.Abp.Extensions.Domain
 
 		public IUnitOfWork CurrentUnitOfWork => UnitOfWorkManager.Current;
 
-		public IOptions<AbpExceptionLocalizationOptions> LocalizationOptions => LazyGetRequiredService<IOptions<AbpExceptionLocalizationOptions>>();
-
 		public IStringLocalizerFactory StringLocalizerFactory => LazyGetRequiredService<IStringLocalizerFactory>();
 
 		protected ILogger DomainLogger { get; private set; }
 
+		protected IStringLocalizer L => _localizer ?? (_localizer = CreateLocalizer());
+
+		protected Type LocalizationResource
+		{
+			get => _localizationResource;
+			set
+			{
+				_localizationResource = value;
+				_localizer = null;
+			}
+		}
+
 		public virtual void Initialize()
 		{
+			Debug.Assert(ServiceProvider != null);
 			DomainLogger = Logger;
 		}
 
 		protected TService LazyGetRequiredService<TService>()
 		{
-			return DomainServiceExtensions.LazyGetRequiredService<TService>(this);
+			return SupportsLazyServicesExtensions.LazyGetRequiredService<TService>(this);
 		}
 
-		protected virtual string L(string name, params object[] args)
+		protected virtual IStringLocalizer CreateLocalizer()
 		{
-			if (name.IsNullOrWhiteSpace() || !name.Contains(":"))
-				return name;
-
-			string[] nameItems = name.Split(new[] { ':' }, 2);
-			string @namespace = nameItems[0];
-			string key = nameItems[1];
-
-			Type localizationResourceType = LocalizationOptions.Value.ErrorCodeNamespaceMappings.GetOrDefault(@namespace);
-			if (localizationResourceType == null)
-				return name;
-
-			var stringLocalizer = StringLocalizerFactory.Create(localizationResourceType);
-			var localizedString = stringLocalizer[key, args];
-			if (localizedString.ResourceNotFound)
+			if (LocalizationResource != null)
 			{
-				return name;
+				return StringLocalizerFactory.Create(LocalizationResource);
 			}
 
-			return localizedString.Value;
+			var localizer = StringLocalizerFactory.CreateDefaultOrNull();
+			if (localizer == null)
+			{
+				throw new AbpException(
+					$"Set {nameof(LocalizationResource)} or define the default localization resource type (by configuring the {nameof(AbpLocalizationOptions)}.{nameof(AbpLocalizationOptions.DefaultResourceType)}) to be able to use the {nameof(L)} object!");
+			}
+
+			return localizer;
 		}
 	}
 }

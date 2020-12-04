@@ -37,12 +37,12 @@ INTO	{Schema}.""{TablePrefix}JobConcurrencyLocks""
 	,	""LockTime""
 	)
 VALUES
-	(	@id
-	,	@tenantId
-	,	@queueId
-	,	@concurrencyKey
-	,	@lockId
-	,	@lockTime
+	(	{{0}}
+	,	{{1}}
+	,	{{2}}
+	,	{{3}}
+	,	{{4}}
+	,	{{5}}
 	)
 ON CONFLICT (""TenantId"", ""QueueId"", ""ConcurrencyKey"")
 DO
@@ -56,19 +56,19 @@ SELECT	""Id""
 	,	""LockTime""
 FROM	{Schema}.""{TablePrefix}JobConcurrencyLocks""
 WHERE	NULL IS NULL
-	AND	""TenantId"" = @tenantId
-	AND	""QueueId"" = @queueId
-	AND	""ConcurrencyKey"" = @concurrencyKey
+	AND	""TenantId"" = {{1}}
+	AND	""QueueId"" = {{2}}
+	AND	""ConcurrencyKey"" = {{3}}
 	;
 ";
 			IQueryable<JobConcurrencyLock> concurrencyLocks = db.Set<JobConcurrencyLock>()
 				.FromSqlRaw(sql,
-					new NpgsqlParameter<Guid>("@id", Guid.NewGuid()),
-					new NpgsqlParameter<Guid>("@tenantId", tenantId ?? Guid.Empty),
-					new NpgsqlParameter<Guid>("@queueId", queueId),
-					new NpgsqlParameter<string>("@concurrencyKey", concurrencyKey),
-					new NpgsqlParameter<Guid>("@lockId", lockId),
-					new NpgsqlParameter<DateTime>("@lockTime", Clock.Now)
+					Guid.NewGuid(),
+					tenantId ?? Guid.Empty,
+					queueId,
+					concurrencyKey,
+					lockId,
+					Clock.Now
 				);
 			return await concurrencyLocks.FirstOrDefaultAsync(cancellationToken);
 		}
@@ -81,20 +81,20 @@ WHERE	NULL IS NULL
 DELETE
 FROM	{Schema}.""{TablePrefix}ConcurrencyLocks""
 WHERE	NULL IS NULL
-	AND	""TenantId"" = @tenantId
-	AND	""QueueId"" = @queueId
-	AND	""ConcurrencyKey"" = @concurrencyKey
-	AND	""LockId"" = @lockId
+	AND	""TenantId"" = {{0}}
+	AND	""QueueId"" = {{1}}
+	AND	""ConcurrencyKey"" = {{2}}
+	AND	""LockId"" = {{3}}
 ";
 
 			int rowCount = await db.Database
 				.ExecuteSqlRawAsync(sql,
 					new List<object>
 						{
-							new NpgsqlParameter<Guid>("@tenantId", jobData.TenantId ?? Guid.Empty),
-							new NpgsqlParameter<Guid>("@queueId", jobData.QueueId),
-							new NpgsqlParameter<string>("@concurrencyKey", jobData.ConcurrencyKey),
-							new NpgsqlParameter<Guid>("@lockId", jobData.LockId.Value),
+							jobData.TenantId ?? Guid.Empty,
+							jobData.QueueId,
+							jobData.ConcurrencyKey,
+							jobData.LockId.Value,
 						},
 					cancellationToken);
 			return rowCount > 0;
@@ -105,28 +105,28 @@ WHERE	NULL IS NULL
 		{
 			string sql = $@"
 UPDATE	{Schema}.""{TablePrefix}Jobs""
-	SET	""LockId"" = @lockId
-	,	""LockTime"" = @lockTime
+	SET	""LockId"" = {{1}}
+	,	""LockTime"" = {{2}}
 WHERE	""Id"" =
 		(
 			SELECT	""Id""
 			FROM	{Schema}.""{TablePrefix}Jobs""
 			WHERE	NULL IS NULL
-				AND	""QueueId"" = @queueId
+				AND	""QueueId"" = {{0}}
 				AND	""State"" = 1
-				AND ""NextTryTime"" < @now
-				AND	COALESCE(""LockId"", @lockId) = @lockId
+				AND ""NextTryTime"" < {{3}}
+				AND	COALESCE(""LockId"", {{1}}) = {{1}}
 				AND	COALESCE(""ConcurrencyKey"", '#####') NOT IN
 					(	SELECT	l.""ConcurrencyKey""
 						FROM	{Schema}.""{TablePrefix}JobConcurrencyLocks"" AS l
 						WHERE	NULL IS NULL
-							AND	l.""LockId"" != @lockId
-							AND	(	@withSpecificTenants = FALSE
-								OR	COALESCE(l.""TenantId"", '00000000-0000-0000-0000-000000000000'::uuid) = ANY(@tenants)
+							AND	l.""LockId"" != {{1}}
+							AND	(	{{4}} = FALSE
+								OR	COALESCE(l.""TenantId"", '00000000-0000-0000-0000-000000000000'::uuid) = ANY({{5}})
 								)
 					)
-				AND	(	@withSpecificTenants = FALSE
-					OR	COALESCE(""TenantId"", '00000000-0000-0000-0000-000000000000'::uuid) = ANY(@tenants)
+				AND	(	{{4}} = FALSE
+					OR	COALESCE(""TenantId"", '00000000-0000-0000-0000-000000000000'::uuid) = ANY({{5}})
 					)
 			ORDER
 				BY	""Priority"" DESC
@@ -143,12 +143,12 @@ WHERE	""Id"" =
 				{
 					int affectedRowsCount = await db.Database.ExecuteSqlRawAsync(sql, new object[]
 						{
-							new NpgsqlParameter<Guid>("@queueId", queueId),
-							new NpgsqlParameter<Guid>("@lockId", lockId),
-							new NpgsqlParameter<DateTime>("@lockTime", lockTime),
-							new NpgsqlParameter<DateTime>("@now", Clock.Now),
-							new NpgsqlParameter<bool>("@withSpecificTenants", tenants != null),
-							new NpgsqlParameter<List<Guid>>("@tenants", tenants),
+							queueId,
+							lockId,
+							lockTime,
+							Clock.Now,
+							tenants != null,
+							tenants,
 						}, cancellationToken);
 
 					if (affectedRowsCount == 0)
@@ -211,7 +211,7 @@ WHERE	""Id"" IN
 				AND	j.""LockId"" IS NOT NULL
 				AND j.""State"" = 1
 				--AND	COALESCE(NULLIF(q.""NodeId"", -1), NULLIF(p.""NodeId"", -1), -1) = COALESCE(NULLIF(p.""NodeId"", -1), NULLIF(q.""NodeId"", -1), -1)
-				AND	COALESCE(p.""LastActivityTime"", j.""LockTime"") < @resetBefore
+				AND	COALESCE(p.""LastActivityTime"", j.""LockTime"") < {{0}}
 			FOR UPDATE OF j SKIP LOCKED
 		)
 	;
@@ -229,7 +229,7 @@ WHERE	""Id"" IN
 						AND	p.""Id"" = j.""LockId""
 			WHERE	NULL IS NULL
 				--AND	COALESCE(NULLIF(q.""NodeId"", -1), NULLIF(p.""NodeId"", -1), -1) = COALESCE(NULLIF(p.""NodeId"", -1), NULLIF(q.""NodeId"", -1), -1)
-				AND	COALESCE(p.""LastActivityTime"", j.""LockTime"") < @resetBefore
+				AND	COALESCE(p.""LastActivityTime"", j.""LockTime"") < {{0}}
 			FOR UPDATE OF j SKIP LOCKED
 		)
 	;
@@ -237,14 +237,14 @@ WHERE	""Id"" IN
 DELETE
 FROM	{Schema}.""{TablePrefix}JobQueueProcessors""
 WHERE	NULL IS NULL
-	AND	""LastActivityTime"" < @resetBefore
+	AND	""LastActivityTime"" < {{0}}
 	;
 ";
 			return await db.Database
 				.ExecuteSqlRawAsync(sql,
 					new List<object>
 						{
-							new NpgsqlParameter<DateTime>("@resetBefore", resetBefore),
+							resetBefore,
 						},
 					cancellationToken);
 		}
@@ -258,21 +258,21 @@ FROM	{Schema}.""{TablePrefix}JobExecutionLog""
 USING	{Schema}.""{TablePrefix}Jobs"" AS j
 WHERE	""JobId"" = j.""Id""
 	AND	j.""State"" = 2
-	AND	j.""LastTryTime"" < @removeBefore
+	AND	j.""LastTryTime"" < {{0}}
 ;
 
 DELETE
 FROM	{Schema}.""{TablePrefix}Jobs"" AS j
 WHERE	NULL IS NULL
 	AND	j.""State"" = 2
-	AND	j.""LastTryTime"" < @removeBefore
+	AND	j.""LastTryTime"" < {{0}}
 ;
 ";
 			return await db.Database
 				.ExecuteSqlRawAsync(sql,
 					new List<object>
 						{
-							new NpgsqlParameter<DateTime>("@removeBefore", removeBefore),
+							removeBefore,
 						},
 					cancellationToken);
 		}

@@ -101,6 +101,16 @@ namespace Isap.Abp.Extensions.Collections
 			return entities.ToList();
 		}
 
+		public Task<int> CountAsync(Expression<Func<TImpl, bool>> predicate = null)
+		{
+			predicate = predicate ?? PredicateBuilder.True<TImpl>();
+			IEnumerable<TIntf> entities = base.GetAll()
+					.Cast<TImpl>()
+					.Where(predicate.Compile())
+				;
+			return Task.FromResult(entities.Count());
+		}
+
 		public async Task<TIntf> GetFirst(Expression<Func<TImpl, bool>> predicate = null, ICollection<SortOption> sortOptions = null)
 		{
 			IEnumerable<TIntf> entities = await GetAll(predicate, sortOptions);

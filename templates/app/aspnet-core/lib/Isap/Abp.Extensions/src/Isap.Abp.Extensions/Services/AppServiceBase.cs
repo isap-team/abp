@@ -2,51 +2,39 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using Isap.Abp.Extensions.DataFilters;
+using Isap.Abp.Extensions.Domain;
+using Isap.Abp.Extensions.MultiTenancy;
 using Isap.Abp.Extensions.Querying;
 using Isap.CommonCore.Services;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Identity;
 using Volo.Abp.Application.Services;
-using Volo.Abp.Localization.ExceptionHandling;
+using Volo.Abp.Authorization;
+using Volo.Abp.Authorization.Permissions;
+using Volo.Abp.Identity;
+using Volo.Abp.Security.Claims;
+using Volo.Abp.Threading;
 
 namespace Isap.Abp.Extensions.Services
 {
-	public abstract class AppServiceBase: ApplicationService
+	public abstract class AppServiceBase: ApplicationService, ISupportsLazyServices
 	{
-		private readonly ConcurrentDictionary<Type, object> _serviceReferenceMap = new ConcurrentDictionary<Type, object>();
+		object ISupportsLazyServices.ServiceProviderLock => ServiceProviderLock;
 
-		public IOptions<AbpExceptionLocalizationOptions> LocalizationOptions => LazyGetRequiredService<IOptions<AbpExceptionLocalizationOptions>>();
+		ConcurrentDictionary<Type, object> ISupportsLazyServices.ServiceReferenceMap { get; } = new ConcurrentDictionary<Type, object>();
+
+		protected ICurrentPrincipalAccessor CurrentPrincipalAccessor => LazyGetRequiredService<ICurrentPrincipalAccessor>();
+		protected IdentityUserManager UserManager => LazyGetRequiredService<IdentityUserManager>();
+		protected ITenantCache TenantCache => LazyGetRequiredService<ITenantCache>();
+		protected IUserClaimsPrincipalFactory<IdentityUser> UserClaimsPrincipalFactory => LazyGetRequiredService<IUserClaimsPrincipalFactory<IdentityUser>>();
+		protected IPermissionChecker PermissionChecker => LazyGetRequiredService<IPermissionChecker>();
 
 		protected TService LazyGetRequiredService<TService>()
 		{
-			return (TService) _serviceReferenceMap.GetOrAdd(typeof(TService), serviceType => ServiceProvider.GetRequiredService(serviceType));
+			return SupportsLazyServicesExtensions.LazyGetRequiredService<TService>(this);
 		}
-
-		/*
-		protected virtual string L(string name, params object[] args)
-		{
-			if (name.IsNullOrWhiteSpace() || !name.Contains(":"))
-				return name;
-
-			string[] nameItems = name.Split(new[] { ':' }, 2);
-			string @namespace = nameItems[0];
-			string key = nameItems[1];
-
-			Type localizationResourceType = LocalizationOptions.Value.ErrorCodeNamespaceMappings.GetOrDefault(@namespace);
-			if (localizationResourceType == null)
-				return name;
-
-			var stringLocalizer = StringLocalizerFactory.Create(localizationResourceType);
-			var localizedString = stringLocalizer[key, args];
-			if (localizedString.ResourceNotFound)
-			{
-				return name;
-			}
-
-			return localizedString.Value;
-		}
-		*/
 
 		protected virtual List<DataFilterValue> ToDataFilterValues(ICollection<DataFilterValueDto> filterValues)
 		{
@@ -57,10 +45,137 @@ namespace Isap.Abp.Extensions.Services
 		{
 			return sortOptions?.Select(e => ObjectMapper.Map<SortOptionDto, SortOption>(e)).ToList();
 		}
+
+		protected void Impersonate(Guid? tenantId, Guid? userId, Action action)
+		{
+			if (action == null)
+				return;
+
+			using (CurrentTenant.Change(tenantId))
+			{
+				ClaimsPrincipal principal = AsyncHelper.RunSync(async () =>
+					{
+						// userId ??= await GetUnregisteredUserId(tenantId);
+						IdentityUser user = await GetUserOrNull(userId);
+						return await UserClaimsPrincipalFactory.CreateAsync(user);
+					});
+
+				using (CurrentPrincipalAccessor.Change(principal))
+					action.Invoke();
+			}
+		}
+
+		protected T Impersonate<T>(Guid? tenantId, Guid? userId, Func<T> action)
+		{
+			if (action == null)
+				return default;
+
+			using (CurrentTenant.Change(tenantId))
+			{
+				ClaimsPrincipal principal = AsyncHelper.RunSync(async () =>
+					{
+						// userId ??= await GetUnregisteredUserId(tenantId);
+						IdentityUser user = await GetUserOrNull(userId);
+						return await UserClaimsPrincipalFactory.CreateAsync(user);
+					});
+
+				using (CurrentPrincipalAccessor.Change(principal))
+					return action.Invoke();
+			}
+		}
+
+		protected async Task<T> ImpersonateAsync<T>(Guid? tenantId, Guid? userId, Func<Task<T>> action)
+		{
+			if (action == null)
+				return default;
+
+			using (CurrentTenant.Change(tenantId))
+			{
+				// userId ??= await GetUnregisteredUserId(tenantId);
+				IdentityUser user = await GetUserOrNull(userId);
+				using (CurrentPrincipalAccessor.Change(await UserClaimsPrincipalFactory.CreateAsync(user)))
+					return await action.Invoke();
+			}
+		}
+
+		protected async Task ImpersonateAsync(Guid? tenantId, Guid? userId, Func<Task> action)
+		{
+			if (action == null)
+				return;
+
+			using (CurrentTenant.Change(tenantId))
+			{
+				// userId ??= await GetUnregisteredUserId(tenantId);
+				IdentityUser user = await GetUserOrNull(userId);
+				using (CurrentPrincipalAccessor.Change(await UserClaimsPrincipalFactory.CreateAsync(user)))
+					await action.Invoke();
+			}
+		}
+
+		protected async Task<Guid?> GetUnregisteredUserId(Guid? tenantId)
+		{
+			if (tenantId.HasValue)
+			{
+				ITenantBase tenant = await TenantCache.GetAsync(tenantId.Value);
+				return tenant.UnregisteredUserId;
+			}
+
+			return null;
+		}
+
+		protected async Task<IdentityUser> GetUserOrNull(Guid? userId)
+		{
+			return userId.HasValue ? await UserManager.GetByIdAsync(userId.Value) : null;
+		}
+
+		/// <summary>
+		///     Проверяет доступ текущего пользователя.
+		/// </summary>
+		/// <returns></returns>
+		// [AbpAllowAnonymous]
+		protected virtual async Task CheckPermission(params string[] permissionNames)
+		{
+			async Task Check()
+			{
+#if ABP_331
+				var notGrantedPermissions = new List<string>();
+				foreach (string permissionName in permissionNames)
+				{
+					if (!await PermissionChecker.IsGrantedAsync(permissionName))
+						notGrantedPermissions.Add(permissionName);
+				}
+				if (notGrantedPermissions.Count > 0)
+					throw new AbpAuthorizationException(L["AtLeastOneOfThesePermissionsMustBeGranted", string.Join(", ", notGrantedPermissions)]);
+#else
+				MultiplePermissionGrantResult result = await PermissionChecker.IsGrantedAsync(permissionNames);
+				if (!result.AllGranted)
+				{
+					string[] notGrantedPermissions = result.Result
+						.Where(pair => pair.Value != PermissionGrantResult.Granted)
+						.Select(pair => pair.Key)
+						.ToArray();
+					throw new AbpAuthorizationException(L["AtLeastOneOfThesePermissionsMustBeGranted", string.Join(", ", notGrantedPermissions)]);
+				}
+#endif
+			}
+
+			Guid? currentUserId = CurrentUser.Id;
+			if (currentUserId.HasValue)
+			{
+				await Check();
+				return;
+			}
+
+			Guid? currentTenantId = CurrentTenant.Id;
+			currentUserId = await GetUnregisteredUserId(currentTenantId);
+
+			await ImpersonateAsync(currentTenantId, currentUserId, Check);
+		}
 	}
 
 	public abstract class AppServiceBase<TEntityDto, TIntf>: AppServiceBase
 	{
+		// [AllowAnonymous]
 		protected virtual TEntityDto ToDto(TIntf entry)
 		{
 			return ObjectMapper.Map<TIntf, TEntityDto>(entry);

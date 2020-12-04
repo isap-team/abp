@@ -7,7 +7,9 @@ using Isap.Abp.Extensions.DataFilters;
 using Isap.Abp.Extensions.DataFilters.Converters;
 using Isap.Abp.Extensions.Localization;
 using Isap.Abp.Extensions.Metadata;
+using Isap.Abp.Extensions.SystemServices;
 using Isap.Abp.Extensions.Validation;
+using Isap.Abp.Extensions.Workflow;
 using Isap.CommonCore.Extensions;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -20,21 +22,27 @@ using Volo.Abp.DependencyInjection;
 using Volo.Abp.Identity;
 using Volo.Abp.Localization;
 using Volo.Abp.Modularity;
+using Volo.Abp.SettingManagement;
 using Volo.Abp.TenantManagement;
+using Volo.Abp.Timing;
 using Volo.Abp.Validation;
 using Volo.Abp.VirtualFileSystem;
 
 namespace Isap.Abp.Extensions
 {
 	[DependsOn(
+		typeof(AbpSettingManagementDomainModule),
 		typeof(AbpDddApplicationModule),
 		typeof(AbpAutoMapperModule),
 		typeof(AbpCachingModule),
+		typeof(AbpTimingModule),
 		typeof(AbpIdentityDomainModule),
 		typeof(AbpTenantManagementDomainModule)
 	)]
 	public class IsapAbpExtensionsModule: AbpModule
 	{
+		private IDisposable _clockControl;
+
 		public override void PreConfigureServices(ServiceConfigurationContext context)
 		{
 			IConfiguration config = context.Services.GetConfiguration();
@@ -54,6 +62,8 @@ namespace Isap.Abp.Extensions
 		public override void ConfigureServices(ServiceConfigurationContext context)
 		{
 			base.ConfigureServices(context);
+
+			context.Services.AddTransient(x => ClockProvider.Current);
 
 			Configure<AbpVirtualFileSystemOptions>(options =>
 				{
@@ -118,6 +128,24 @@ namespace Isap.Abp.Extensions
 				});
 			context.Services.AddSingleton<IDataFilterDataStore>(x => x.GetRequiredService<DataFilterDataStore>());
 			context.Services.AddSingleton<IDataFilterDataStoreBuilder>(x => x.GetRequiredService<DataFilterDataStore>());
+
+			context.Services.AddSingleton(new DocumentWorkflowStateStrategyFactory(serviceProviderAccessor));
+			context.Services.AddSingleton<IDocumentWorkflowStateStrategyFactory>(x => x.GetRequiredService<DocumentWorkflowStateStrategyFactory>());
+			context.Services.AddSingleton<IDocumentWorkflowStateStrategyFactoryBuilder>(x => x.GetRequiredService<DocumentWorkflowStateStrategyFactory>());
+
+			context.Services.AddSingleton(new DocumentWorkflowFactory(serviceProviderAccessor));
+			context.Services.AddSingleton<IDocumentWorkflowFactory>(x => x.GetRequiredService<DocumentWorkflowFactory>());
+			context.Services.AddSingleton<IDocumentWorkflowFactoryBuilder>(x => x.GetRequiredService<DocumentWorkflowFactory>());
+
+			context.Services.GetSingletonInstance<DocumentWorkflowStateStrategyFactory>().RegisterProducts(thisAssembly, context.Services);
+			context.Services.GetSingletonInstance<DocumentWorkflowFactory>().RegisterProducts(thisAssembly, context.Services);
+		}
+
+		public override void OnPreApplicationInitialization(ApplicationInitializationContext context)
+		{
+			base.OnPreApplicationInitialization(context);
+
+			_clockControl = ClockProvider.Use(context.ServiceProvider.GetRequiredService<IClock>());
 		}
 
 		public override void OnApplicationInitialization(ApplicationInitializationContext context)
@@ -141,6 +169,9 @@ namespace Isap.Abp.Extensions
 
 		public override void OnApplicationShutdown(ApplicationShutdownContext context)
 		{
+			_clockControl?.Dispose();
+			_clockControl = null;
+
 			context.ServiceProvider.GetRequiredService<IShutdownCancellationTokenManager>().EnterShutdownMode();
 
 			base.OnApplicationShutdown(context);

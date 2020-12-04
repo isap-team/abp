@@ -1,3 +1,4 @@
+using Isap.Abp.Extensions.EntityFrameworkCore;
 using Isap.Abp.Extensions.Expressions.Predicates;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -8,7 +9,7 @@ namespace Isap.Abp.Extensions.PostgreSql
 {
 	[DependsOn(
 		typeof(AbpEntityFrameworkCorePostgreSqlModule),
-		typeof(IsapAbpExtensionsModule)
+		typeof(IsapAbpExtensionsEntityFrameworkCoreModule)
 	)]
 	public class IsapAbpExtensionsPostgreSqlModule: AbpModule
 	{

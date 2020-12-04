@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Isap.Abp.Extensions</RootNamespace>
+    <AssemblyName>Isap.Abp.Extensions.RemoteSettings</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.Settings\Volo.Abp.Settings.csproj" />
+    <ProjectReference Include="..\Isap.Abp.Extensions\Isap.Abp.Extensions.csproj" />
+  </ItemGroup>
+
+</Project>

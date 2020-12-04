@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>Isap.Abp.Extensions.Web</RootNamespace>
+    <AssemblyName>Isap.Abp.Extensions.Web</AssemblyName>
+  </PropertyGroup>
+	
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.AspNetCore.MultiTenancy\Volo.Abp.AspNetCore.MultiTenancy.csproj" />
+  </ItemGroup>
+
+</Project>

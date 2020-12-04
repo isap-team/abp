@@ -1,9 +1,6 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Isap.Abp.Extensions.Data.Specifications;
-using Isap.Abp.Extensions.Data.Specifications.FilterSpecs;
-using Isap.Abp.Extensions.Data.Specifications.OrderSpecs;
 using Isap.Abp.Extensions.DataFilters;
 using Isap.Abp.Extensions.Domain;
 using Isap.Abp.Extensions.Querying;
@@ -16,6 +13,18 @@ namespace Isap.Abp.Extensions.Services
 		where TEntityDto: class, ICommonEntityDto<TKey>
 		where TIntf: class, ICommonEntity<TKey>
 	{
+		protected abstract string PermissionGroupName { get; }
+
+		/// <summary>
+		///     Наименование сущности, для которой реализован этот менеджер.
+		/// </summary>
+		protected virtual string DefaultPermissionName => $"{PermissionGroupName}.{typeof(TIntf).Name.Substring(1)}";
+
+		/// <summary>
+		///     Имя разрешения для проверки доступа на выборку данных из БД.
+		/// </summary>
+		protected virtual string QueryPermissionName => DefaultPermissionName;
+
 		public abstract Task<TEntityDto> Get(TKey id);
 
 		public abstract Task<Dictionary<TKey, TEntityDto>> GetMany(TKey[] idList);
@@ -36,6 +45,16 @@ namespace Isap.Abp.Extensions.Services
 		{
 			return GetPage(pageNumber, pageSize, countTotal, queryOptions);
 		}
+
+		/// <summary>
+		///     Проверяет доступ текущего пользователя на выборку данных.
+		/// </summary>
+		/// <returns></returns>
+		// [AbpAllowAnonymous]
+		protected virtual async Task CheckQueryPermission()
+		{
+			await CheckPermission(QueryPermissionName);
+		}
 	}
 
 	public abstract class ReferenceAppServiceBase<TEntityDto, TIntf, TKey, TDataStore>: ReferenceAppServiceBase<TEntityDto, TIntf, TKey>
@@ -47,14 +66,14 @@ namespace Isap.Abp.Extensions.Services
 
 		public override async Task<TEntityDto> Get(TKey id)
 		{
-			//await CheckPermissions(async () => await CheckQueryPermission());
+			await CheckQueryPermission();
 			TIntf entry = await DataStore.Get(id);
 			return ToDto(entry);
 		}
 
 		public override async Task<Dictionary<TKey, TEntityDto>> GetMany(TKey[] idList)
 		{
-			//await CheckPermissions(async () => await CheckQueryPermission());
+			await CheckQueryPermission();
 			if (idList == null)
 				return null;
 			List<TIntf> entries = await DataStore.GetMany(idList);
@@ -63,7 +82,7 @@ namespace Isap.Abp.Extensions.Services
 
 		public override async Task<ResultSet<TEntityDto>> GetPage(int pageNumber, int pageSize, bool countTotal = false, QueryOptionsDto queryOptions = null)
 		{
-			//await CheckPermissions(async () => await CheckQueryPermission());
+			await CheckQueryPermission();
 			ICollection<DataFilterValue> dataFilterValues = null;
 			ICollection<SortOption> sortOptions = null;
 			if (queryOptions != null)
@@ -88,14 +107,14 @@ namespace Isap.Abp.Extensions.Services
 
 		public override async Task<TEntityDto> Get(TKey id)
 		{
-			//await CheckPermissions(async () => await CheckQueryPermission());
+			await CheckQueryPermission();
 			TIntf entry = await DataStore.Get(id);
 			return ToDto(entry);
 		}
 
 		public override async Task<Dictionary<TKey, TEntityDto>> GetMany(TKey[] idList)
 		{
-			//await CheckPermissions(async () => await CheckQueryPermission());
+			await CheckQueryPermission();
 			if (idList == null)
 				return null;
 			List<TIntf> entries = await DataStore.GetMany(idList);
@@ -104,7 +123,7 @@ namespace Isap.Abp.Extensions.Services
 
 		public override async Task<ResultSet<TEntityDto>> GetPage(int pageNumber, int pageSize, bool countTotal = false, QueryOptionsDto queryOptions = null)
 		{
-			//await CheckPermissions(async () => await CheckQueryPermission());
+			await CheckQueryPermission();
 			ICollection<DataFilterValue> dataFilterValues = null;
 			ICollection<SortOption> sortOptions = null;
 			if (queryOptions != null)
@@ -121,7 +140,7 @@ namespace Isap.Abp.Extensions.Services
 		public override async Task<ResultSet<TEntityDto>> GetPage(int pageNumber, int pageSize, bool countTotal = false,
 			List<SpecificationParameters> specifications = null)
 		{
-			//await CheckPermissions(async () => await CheckQueryPermission());
+			await CheckQueryPermission();
 
 			List<SpecificationParameters> defaultSpecs = GetDefaultSpecifications();
 			if ((defaultSpecs?.Count ?? 0) > 0)

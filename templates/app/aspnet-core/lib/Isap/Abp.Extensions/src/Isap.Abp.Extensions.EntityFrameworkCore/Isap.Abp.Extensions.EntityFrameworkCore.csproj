@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.EntityFrameworkCore\Volo.Abp.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\..\..\..\..\..\..\..\modules\setting-management\src\Volo.Abp.SettingManagement.EntityFrameworkCore\Volo.Abp.SettingManagement.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\..\..\CommonCore\src\Isap.CommonCore.EntityFrameworkCore\Isap.CommonCore.EntityFrameworkCore.csproj" />
     <ProjectReference Include="..\Isap.Abp.Extensions\Isap.Abp.Extensions.csproj" />
   </ItemGroup>

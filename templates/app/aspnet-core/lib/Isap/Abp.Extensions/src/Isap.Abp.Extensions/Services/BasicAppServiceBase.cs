@@ -1,9 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Isap.Abp.Extensions.Data.Specifications;
-using Isap.Abp.Extensions.Data.Specifications.FilterSpecs;
-using Isap.Abp.Extensions.Data.Specifications.OrderSpecs;
 using Isap.Abp.Extensions.DataFilters;
 using Isap.Abp.Extensions.Domain;
 using Isap.Abp.Extensions.Querying;
@@ -41,18 +39,26 @@ namespace Isap.Abp.Extensions.Services
 		where TImpl: class, IEntity<TKey>, TIntf
 		where TDomainManager: class, IDomainManager<TIntf, TImpl, TKey>
 	{
-		public TDomainManager DomainManager => LazyGetRequiredService<TDomainManager>();
+		protected TDomainManager DomainManager => LazyGetRequiredService<TDomainManager>();
+
+		protected virtual string CreatePermissionName => $"{DefaultPermissionName}.Create";
+		protected virtual string UpdatePermissionName => $"{DefaultPermissionName}.Update";
+		protected virtual string UpdateOwnPermissionName => $"{UpdatePermissionName}.Own";
+		protected virtual string UpdateOtherPermissionName => $"{UpdatePermissionName}.Other";
+		protected virtual string DeletePermissionName => $"{DefaultPermissionName}.Delete";
+		protected virtual string DeleteOwnPermissionName => $"{DeletePermissionName}.Own";
+		protected virtual string DeleteOtherPermissionName => $"{DeletePermissionName}.Other";
 
 		public override async Task<TEntityDto> Get(TKey id)
 		{
-			//await CheckPermissions(async () => await CheckQueryPermission());
+			await CheckQueryPermission();
 			TIntf entry = await DomainManager.Get(id);
 			return ObjectMapper.Map<TIntf, TEntityDto>(entry);
 		}
 
 		public override async Task<Dictionary<TKey, TEntityDto>> GetMany(TKey[] idList)
 		{
-			//await CheckPermissions(async () => await CheckQueryPermission());
+			await CheckQueryPermission();
 			if (idList == null)
 				return null;
 			List<TIntf> entries = await DomainManager.GetMany(idList);
@@ -62,7 +68,7 @@ namespace Isap.Abp.Extensions.Services
 
 		public override async Task<ResultSet<TEntityDto>> GetPage(int pageNumber, int pageSize, bool countTotal = false, QueryOptionsDto queryOptions = null)
 		{
-			//await CheckPermissions(async () => await CheckQueryPermission());
+			await CheckQueryPermission();
 			ICollection<DataFilterValue> dataFilterValues = null;
 			ICollection<SortOption> sortOptions = null;
 			if (queryOptions != null)
@@ -79,7 +85,7 @@ namespace Isap.Abp.Extensions.Services
 		public override async Task<ResultSet<TEntityDto>> GetPage(int pageNumber, int pageSize, bool countTotal = false,
 			List<SpecificationParameters> specifications = null)
 		{
-			//await CheckPermissions(async () => await CheckQueryPermission());
+			await CheckQueryPermission();
 
 			List<SpecificationParameters> defaultSpecs = GetDefaultSpecifications();
 			if ((defaultSpecs?.Count ?? 0) > 0)
@@ -105,11 +111,7 @@ namespace Isap.Abp.Extensions.Services
 
 		public override async Task<TEntityDto> Create(TEntityDto entry)
 		{
-			// await CheckPermissions(async () =>
-			// 	{
-			// 		await CheckEditPermission(entry);
-			// 		await CheckCreatePermission(entry);
-			// 	});
+			await CheckCreatePermission(entry);
 			TImpl mappedEntry = ObjectMapper.Map<TEntityDto, TImpl>(entry);
 			TIntf savedEntry = await DomainManager.Save(mappedEntry);
 			TEntityDto result = ToDto(savedEntry);
@@ -118,11 +120,7 @@ namespace Isap.Abp.Extensions.Services
 
 		public override async Task<TEntityDto> Update(TEntityDto entry)
 		{
-			// await CheckPermissions(async () =>
-			// 	{
-			// 		await CheckEditPermission(entry);
-			// 		await CheckUpdatePermission(entry);
-			// 	});
+			await CheckUpdatePermission(entry);
 			TImpl mappedEntry = ObjectMapper.Map<TEntityDto, TImpl>(entry);
 			TIntf savedEntry = await DomainManager.Save(mappedEntry);
 			TEntityDto result = ToDto(savedEntry);
@@ -134,16 +132,15 @@ namespace Isap.Abp.Extensions.Services
 			TEntityDto entry = ObjectMapper.Map<TIntf, TEntityDto>(await DomainManager.Get(id));
 			if (entry == null) return;
 
-			// await CheckPermissions(async () =>
-			// 	{
-			// 		await CheckEditPermission(entry);
-			// 		await CheckDeletePermission(entry);
-			// 	});
+			await CheckDeletePermission(entry);
 			await DomainManager.Delete(id);
 		}
 
 		public override async Task<TEntityDto> Undelete(TKey id)
 		{
+			TEntityDto entryDto = ObjectMapper.Map<TIntf, TEntityDto>(await DomainManager.Get(id));
+			if (entryDto == null) return null;
+			await CheckUpdatePermission(entryDto);
 			TIntf entry = await DomainManager.Undelete(id);
 			return ToDto(entry);
 		}
@@ -156,6 +153,61 @@ namespace Isap.Abp.Extensions.Services
 		protected virtual TImpl ToDomain(TEntityDto entry)
 		{
 			return ObjectMapper.Map<TEntityDto, TImpl>(entry);
+		}
+
+		/// <summary>
+		///     Проверяет доступ текущего пользователя на добавление данных.
+		/// </summary>
+		/// <returns></returns>
+		protected virtual async Task CheckCreatePermission(TEntityDto entry)
+		{
+			await CheckPermission(CreatePermissionName);
+		}
+
+		/// <summary>
+		///     Проверяет доступ текущего пользователя на изменение данных.
+		/// </summary>
+		/// <returns></returns>
+		protected virtual async Task CheckUpdatePermission(TEntityDto entry)
+		{
+			await CheckPermission(UpdatePermissionName);
+			if (entry is ICommonOwnedEntity<Guid?> || typeof(ICommonOwnedEntity<Guid?>).IsAssignableFrom(typeof(TImpl)))
+				await CheckOwnOrOtherPermission(entry, UpdateOwnPermissionName, UpdateOtherPermissionName);
+		}
+
+		/// <summary>
+		///     Проверяет доступ текущего пользователя на удаление данных.
+		/// </summary>
+		/// <returns></returns>
+		protected virtual async Task CheckDeletePermission(TEntityDto entry)
+		{
+			await CheckPermission(DeletePermissionName);
+			if (entry is ICommonOwnedEntity<Guid?> || typeof(ICommonOwnedEntity<Guid?>).IsAssignableFrom(typeof(TImpl)))
+				await CheckOwnOrOtherPermission(entry, DeleteOwnPermissionName, DeleteOtherPermissionName);
+		}
+
+		protected async Task CheckOwnOrOtherPermission(TEntityDto entry, string ownPermissionName, string otherPermissionName)
+		{
+			Guid? ownerId = await GetOwnerId(entry);
+			ownerId = ownerId ?? (entry.Id.IsDefaultValue() ? CurrentUser.Id : null);
+			if (CurrentUser.Id == ownerId)
+				await CheckPermission(ownPermissionName);
+			else
+				await CheckPermission(otherPermissionName);
+		}
+
+		/// <summary>
+		///     Определяет владельца записи.
+		/// </summary>
+		/// <param name="entry">Запись для определения владельца.</param>
+		/// <returns>Идентификатор владельца записи.</returns>
+		protected virtual async Task<Guid?> GetOwnerId(TEntityDto entry)
+		{
+			TIntf dao = await DomainManager.Get(entry.Id);
+			if (dao == null)
+				return entry is ICommonOwnedEntity<Guid?> ownedEntity ? ownedEntity.OwnerId : null;
+
+			return dao is ICommonOwnedEntity<Guid?> ownedDao ? ownedDao.OwnerId : null;
 		}
 	}
 }

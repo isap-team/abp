@@ -4,7 +4,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Isap.Abp.Extensions.Clustering;
 using Microsoft.EntityFrameworkCore;
-using Npgsql;
 using Volo.Abp.Uow;
 
 namespace Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql
@@ -30,17 +29,17 @@ INTO	{Schema}.""{TablePrefix}JobQueueProcessors""
 	,	""LastActivityTime""
 	)
 VALUES
-	(	@id
-	,	@now
-	,	@nodeId
-	,	@queueId
-	,	@appRole
-	,	@now
+	(	{{0}}
+	,	{{1}}
+	,	{{2}}
+	,	{{3}}
+	,	{{4}}
+	,	{{1}}
 	)
 ON CONFLICT (""Id"")
 DO
 UPDATE
-	SET	""LastActivityTime"" = @now
+	SET	""LastActivityTime"" = {{1}}
 	;
 ";
 
@@ -50,11 +49,11 @@ UPDATE
 					.ExecuteSqlRawAsync(sql,
 						new List<object>
 							{
-								new NpgsqlParameter<Guid>("@id", lockId),
-								new NpgsqlParameter<DateTime>("@now", Clock.Now),
-								new NpgsqlParameter<int>("@nodeId", CurrentNode.Id),
-								new NpgsqlParameter<Guid>("@queueId", queueId),
-								new NpgsqlParameter<string>("@appRole", CurrentNode.ApplicationRole),
+								lockId,
+								Clock.Now,
+								CurrentNode.Id,
+								queueId,
+								CurrentNode.ApplicationRole,
 							},
 						cancellationToken);
 
