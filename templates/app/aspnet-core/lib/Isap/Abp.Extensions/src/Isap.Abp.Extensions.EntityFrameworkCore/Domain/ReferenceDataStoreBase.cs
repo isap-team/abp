@@ -30,7 +30,7 @@ namespace Isap.Abp.Extensions.Domain
 
 		protected ReferenceDataStoreBase()
 		{
-			_lazyIncludeExpressionRegistry = new Lazy<IIncludeExpressionRegistry<TImpl>>(() => new IncludeExpressionRegistry<TImpl, TImpl>(DbContextProvider));
+			_lazyIncludeExpressionRegistry = new Lazy<IIncludeExpressionRegistry<TImpl>>(() => new IncludeExpressionRegistry<TImpl, TImpl>(DbContextProviderResolver.GetProvider<TImpl>()));
 		}
 
 		/// <summary>

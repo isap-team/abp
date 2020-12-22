@@ -6,6 +6,8 @@ using Isap.Abp.BackgroundJobs.Configuration;
 using Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql;
 using Isap.Abp.Extensions.Clustering;
 using Isap.Abp.Extensions.Logging;
+using Isap.Abp.Extensions.MultiTenancy;
+using Isap.Abp.Extensions.Web;
 using Isap.CommonCore.Integrations;
 using Isap.CommonCore.Web.Middlewares.RequestLogging;
 using Isap.CommonCore.Web.Middlewares.Tracing;
@@ -15,6 +17,8 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.AspNetCore.Mvc.Controllers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -50,6 +54,7 @@ namespace MyCompanyName.MyProjectName
         typeof(AbpCachingStackExchangeRedisModule),
         typeof(AbpAspNetCoreMvcUiMultiTenancyModule),
         typeof(IsapAbpBackgroundJobsPostgreSqlModule),
+        typeof(IsapAbpExtensionsWebModule),
         typeof(MyProjectNameApplicationModule),
         typeof(MyProjectNameEntityFrameworkCoreDbMigrationsModule),
         typeof(AbpAspNetCoreSerilogModule),
@@ -68,6 +73,7 @@ namespace MyCompanyName.MyProjectName
             context.Services.AddSingleton(converter);
 
             ConfigureRequestLogging(context, converter, configuration);
+            ConfigureForwardedHeaders(context);
             ConfigureMultiTenancy();
 
             ConfigureConventionalControllers();
@@ -98,6 +104,16 @@ namespace MyCompanyName.MyProjectName
                 });
         }
 
+		private void ConfigureForwardedHeaders(ServiceConfigurationContext context)
+		{
+			context.Services.Configure<ForwardedHeadersOptions>(options =>
+				{
+					options.ForwardedHeaders = ForwardedHeaders.All;
+					options.KnownProxies.Clear();
+					options.KnownNetworks.Clear();
+				});
+		}
+
         private void ConfigureMultiTenancy()
         {
             Configure<AbpMultiTenancyOptions>(options =>
@@ -119,7 +135,7 @@ namespace MyCompanyName.MyProjectName
 
                 Configure<AbpAspNetCoreMultiTenancyOptions>(options =>
                     {
-                        options.TenantKey = "ABP-TenantId";
+                        options.TenantKey = IsapMultiTenancyConsts.TenantHeaderName;
                     });
             }
         }
@@ -186,6 +202,14 @@ namespace MyCompanyName.MyProjectName
                 {
                     options.SwaggerDoc("v1", new OpenApiInfo {Title = "MyProjectName API", Version = "v1"});
                     options.DocInclusionPredicate((docName, description) => true);
+						options.ResolveConflictingActions(descriptions =>
+							descriptions
+								.Where(d => d.ActionDescriptor is ControllerActionDescriptor)
+								.OrderByDescending(d =>
+									typeof(AbpController).IsAssignableFrom(((ControllerActionDescriptor) d.ActionDescriptor).ControllerTypeInfo.AsType())
+								)
+								.First()
+						);
                 });
         }
 

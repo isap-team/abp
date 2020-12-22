@@ -1,5 +1,5 @@
 using System;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace Isap.Abp.Extensions.Data.Specifications
 {
@@ -7,11 +7,11 @@ namespace Isap.Abp.Extensions.Data.Specifications
 	{
 		Type EntityType { get; }
 
-		ISpecification Create(ISpecificationBuildingContext context, JToken data);
+		ISpecification Create(ISpecificationBuildingContext context, JsonElement data);
 	}
 
 	public interface ISpecificationBuilder<TEntity>: ISpecificationBuilder
 	{
-		new ISpecification<TEntity> Create(ISpecificationBuildingContext context, JToken data);
+		new ISpecification<TEntity> Create(ISpecificationBuildingContext context, JsonElement data);
 	}
 }

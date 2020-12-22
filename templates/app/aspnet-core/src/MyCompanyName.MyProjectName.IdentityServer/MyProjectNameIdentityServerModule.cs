@@ -5,7 +5,10 @@ using System.Linq;
 using Isap.Abp.BackgroundJobs.Configuration;
 using Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql;
 using Isap.Abp.Extensions.Clustering;
+using Isap.Abp.Extensions.IdentityServer;
 using Isap.Abp.Extensions.Logging;
+using Isap.Abp.Extensions.MultiTenancy;
+using Isap.Abp.Extensions.Web;
 using Isap.CommonCore.Integrations;
 using Isap.CommonCore.Web.Middlewares.RequestLogging;
 using Isap.CommonCore.Web.Middlewares.Tracing;
@@ -52,6 +55,9 @@ using Volo.Abp.VirtualFileSystem;
 namespace MyCompanyName.MyProjectName
 {
     [DependsOn(
+        typeof(IsapAbpExtensionsIdentityServerModule),
+        typeof(IsapAbpBackgroundJobsPostgreSqlModule),
+        // typeof(MyProjectNameHttpApiModule),
         typeof(AbpAutofacModule),
         typeof(AbpCachingStackExchangeRedisModule),
         typeof(AbpAccountWebIdentityServerModule),
@@ -59,6 +65,7 @@ namespace MyCompanyName.MyProjectName
         typeof(AbpAspNetCoreMvcUiBasicThemeModule),
         typeof(IsapAbpBackgroundJobsPostgreSqlModule),
         typeof(MyProjectNameEntityFrameworkCoreDbMigrationsModule),
+        typeof(IsapAbpExtensionsWebModule),
         typeof(AbpAspNetCoreSerilogModule)
         )]
     public class MyProjectNameIdentityServerModule : AbpModule
@@ -74,9 +81,8 @@ namespace MyCompanyName.MyProjectName
             context.Services.AddSingleton(converter);
 
             ConfigureRequestLogging(context, converter, configuration);
-            ConfigureMultiTenancy();
-
             ConfigureForwardedHeaders(context);
+            ConfigureMultiTenancy(context, converter, configuration);
 
             Configure<AbpLocalizationOptions>(options =>
             {
@@ -196,34 +202,6 @@ namespace MyCompanyName.MyProjectName
                 });
         }
 
-        private void ConfigureMultiTenancy()
-        {
-            Configure<AbpMultiTenancyOptions>(options =>
-                {
-                    options.IsEnabled = MultiTenancyConsts.IsEnabled;
-                });
-
-            if (MultiTenancyConsts.IsEnabled)
-            {
-                /*
-                Configure<AbpTenantResolveOptions>(options =>
-                    {
-                        options.TenantResolvers.Add(new DefaultTenantResolveContributor());
-                    });
-                */
-
-                Configure<AbpDefaultTenantStoreOptions>(options =>
-                    {
-                        options.Tenants = MultiTenancyConsts.DefaultTenants;
-                    });
-
-                Configure<AbpAspNetCoreMultiTenancyOptions>(options =>
-                    {
-                        //options.TenantKey = ApmRequestHeaderNames.ApmTenantId;
-                    });
-            }
-        }
-
         private void ConfigureForwardedHeaders(ServiceConfigurationContext context)
         {
             context.Services.Configure<ForwardedHeadersOptions>(options =>
@@ -232,6 +210,34 @@ namespace MyCompanyName.MyProjectName
                     options.KnownProxies.Clear();
                     options.KnownNetworks.Clear();
                 });
+        }
+
+        private void ConfigureMultiTenancy(ServiceConfigurationContext context, IValueConverter converter, IConfiguration configuration)
+        {
+            Configure<AbpMultiTenancyOptions>(options =>
+                {
+                    options.IsEnabled = MultiTenancyConsts.IsEnabled;
+                });
+
+            Configure<AbpExtWebOptions>(configuration.GetSection("AbpExtWebOptions"));
+
+            if (MultiTenancyConsts.IsEnabled)
+            {
+                Configure<AbpTenantResolveOptions>(options =>
+                    {
+                        options.TenantResolvers.Add(new DomainNameTenantResolveContributor());
+                    });
+
+                Configure<AbpDefaultTenantStoreOptions>(options =>
+                    {
+                        options.Tenants = MultiTenancyConsts.DefaultTenants;
+                    });
+
+                Configure<AbpAspNetCoreMultiTenancyOptions>(options =>
+                    {
+                        options.TenantKey = IsapMultiTenancyConsts.TenantHeaderName;
+                    });
+            }
         }
 
         private void ConfigureClusterNode(ServiceConfigurationContext context, IConfiguration configuration)

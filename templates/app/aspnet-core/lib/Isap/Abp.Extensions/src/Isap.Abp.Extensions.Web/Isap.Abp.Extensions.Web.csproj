@@ -7,9 +7,11 @@
     <RootNamespace>Isap.Abp.Extensions.Web</RootNamespace>
     <AssemblyName>Isap.Abp.Extensions.Web</AssemblyName>
   </PropertyGroup>
-	
+
   <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.AspNetCore.Mvc\Volo.Abp.AspNetCore.Mvc.csproj" />
     <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.AspNetCore.MultiTenancy\Volo.Abp.AspNetCore.MultiTenancy.csproj" />
+    <ProjectReference Include="..\Isap.Abp.Extensions\Isap.Abp.Extensions.csproj" />
   </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using Autofac;
@@ -25,7 +25,7 @@ namespace MyCompanyName.MyProjectName.Web
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                 .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
-                .WriteTo.Async(c => c.File("App_Data/Logs/logs.txt"))
+                //.WriteTo.Async(c => c.File("App_Data/Logs/logs.txt"))
 #if DEBUG
                 .WriteTo.Logger(lc => lc
                     .WriteTo
@@ -74,7 +74,21 @@ namespace MyCompanyName.MyProjectName.Web
                             .UseStartup<Startup>();
                 })
                 .UseAutofac(containerBuilder => containerBuilder.RegisterModule<IsapAutofacModule>())
-                .UseSerilog();
-    }
+                .UseSerilog((context, loggerConfiguration) =>
+                    {
+                        IConfigurationRoot configuration = context.HostingEnvironment.GetAppConfiguration();
+                        loggerConfiguration.ReadFrom.Configuration(configuration)
+#if DEBUG
+                            .WriteTo.Logger(lc => lc
+                                .WriteTo
+                                .Console(LogEventLevel.Information, theme: AnsiConsoleTheme.Code)
+                                .Filter.With<HostingLifetimeFilter>()
+                            )
+                            .WriteTo.Debug()
+#endif
+                            ;
+                    })
+                ;
+        }
     }
 }

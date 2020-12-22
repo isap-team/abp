@@ -6,7 +6,7 @@ namespace Isap.Abp.Extensions.Domain
 {
 	public abstract class DataStoreBase: DomainServiceBase
 	{
-		public IIsapDbContextProvider DbContextProvider => LazyGetRequiredService<IIsapDbContextProvider>();
+		public IIsapDbContextProviderResolver DbContextProviderResolver => LazyGetRequiredService<IIsapDbContextProviderResolver>();
 
 		protected static string ReadEmbeddedResourceAsString(Type namespaceType, string name)
 		{

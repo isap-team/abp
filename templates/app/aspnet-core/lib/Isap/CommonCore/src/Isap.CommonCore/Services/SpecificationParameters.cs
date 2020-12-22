@@ -1,12 +1,12 @@
 using System;
-using Newtonsoft.Json.Linq;
+using System.Text.Json;
 
 namespace Isap.CommonCore.Services
 {
 	[Serializable]
 	public class SpecificationParameters
 	{
-		public SpecificationParameters(Guid specId, JToken parameters)
+		public SpecificationParameters(Guid specId, JsonElement parameters)
 		{
 			SpecId = specId;
 			Parameters = parameters;
@@ -17,6 +17,6 @@ namespace Isap.CommonCore.Services
 		}
 
 		public Guid SpecId { get; set; }
-		public JToken Parameters { get; set; }
+		public JsonElement Parameters { get; set; }
 	}
 }

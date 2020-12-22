@@ -9,6 +9,7 @@ namespace Isap.Abp.Extensions.MultiTenancy
 		Guid UnregisteredUserId { get; }
 	}
 
+	[Serializable]
 	public class TenantCacheItem: ICommonEntityDto<Guid>, ITenantBase
 	{
 		public TenantCacheItem()
@@ -24,7 +25,7 @@ namespace Isap.Abp.Extensions.MultiTenancy
 
 		public Guid Id { get; set; }
 		public string Name { get; set; }
-		public Guid UnregisteredUserId { get; }
+		public Guid UnregisteredUserId { get; set; }
 
 		object ICommonEntity.GetId() => Id;
 	}

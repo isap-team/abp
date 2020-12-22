@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Isap.Abp.Extensions;
+using Isap.CommonCore.Services;
 using Volo.Abp.Account;
 using Volo.Abp.FeatureManagement;
 using Volo.Abp.Identity;
@@ -10,6 +11,7 @@ namespace MyCompanyName.MyProjectName
 {
     [DependsOn(
         typeof(MyProjectNameApplicationContractsModule),
+        typeof(IsapAbpExtensionsHttpApiClientModule),
         typeof(AbpAccountHttpApiClientModule),
         typeof(AbpIdentityHttpApiClientModule),
         typeof(AbpPermissionManagementHttpApiClientModule),
@@ -22,7 +24,7 @@ namespace MyCompanyName.MyProjectName
 
         public override void ConfigureServices(ServiceConfigurationContext context)
         {
-            context.Services.AddHttpClientProxies(
+            context.Services.AddHttpClientProxies<ICommonAppService>(
                 typeof(MyProjectNameApplicationContractsModule).Assembly,
                 RemoteServiceName
             );

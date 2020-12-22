@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>net5.0</TargetFramework>
+    <RootNamespace>Isap.Abp.Extensions.IdentityServer</RootNamespace>
+    <AssemblyName>Isap.Abp.Extensions.IdentityServer</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\..\..\..\modules\identityserver\src\Volo.Abp.IdentityServer.Domain\Volo.Abp.IdentityServer.Domain.csproj" />
+    <ProjectReference Include="..\Isap.Abp.Extensions\Isap.Abp.Extensions.csproj" />
+  </ItemGroup>
+
+</Project>

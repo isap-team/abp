@@ -25,7 +25,7 @@ namespace MyCompanyName.MyProjectName
                 .MinimumLevel.Override("Microsoft", LogEventLevel.Information)
                 .MinimumLevel.Override("Microsoft.EntityFrameworkCore", LogEventLevel.Warning)
                 .Enrich.FromLogContext()
-                .WriteTo.Async(c => c.File("App_Data/Logs/logs.txt"))
+                //.WriteTo.Async(c => c.File("App_Data/Logs/logs.txt"))
 #if DEBUG
                 .WriteTo.Logger(lc => lc
                     .WriteTo
@@ -64,16 +64,30 @@ namespace MyCompanyName.MyProjectName
                 .Build();
 
             return Host.CreateDefaultBuilder(args)
-                .ConfigureWebHostDefaults(webBuilder =>
-                {
-                        webBuilder
-                            .UseContentRoot(contentRootDir)
-                            .UseUrls("https://*:44300")
-                            .UseConfiguration(config)
-                            .UseStartup<Startup>();
-                })
-                .UseAutofac(containerBuilder => containerBuilder.RegisterModule<IsapAutofacModule>())
-                .UseSerilog();
-    }
+                    .ConfigureWebHostDefaults(webBuilder =>
+                        {
+                            webBuilder
+                                .UseContentRoot(contentRootDir)
+                                .UseUrls("https://*:44300")
+                                .UseConfiguration(config)
+                                .UseStartup<Startup>();
+                        })
+                    .UseAutofac(containerBuilder => containerBuilder.RegisterModule<IsapAutofacModule>())
+                    .UseSerilog((context, loggerConfiguration) =>
+                        {
+                            IConfigurationRoot configuration = context.HostingEnvironment.GetAppConfiguration();
+                            loggerConfiguration.ReadFrom.Configuration(configuration)
+#if DEBUG
+                                .WriteTo.Logger(lc => lc
+                                    .WriteTo
+                                    .Console(LogEventLevel.Information, theme: AnsiConsoleTheme.Code)
+                                    .Filter.With<HostingLifetimeFilter>()
+                                )
+                                .WriteTo.Debug()
+#endif
+                                ;
+                        })
+                ;
+        }
     }
 }

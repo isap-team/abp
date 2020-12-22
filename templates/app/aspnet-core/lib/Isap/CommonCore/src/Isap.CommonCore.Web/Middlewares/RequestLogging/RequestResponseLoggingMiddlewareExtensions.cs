@@ -1,5 +1,4 @@
 using System;
-using System.Diagnostics;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
@@ -10,8 +9,7 @@ namespace Isap.CommonCore.Web.Middlewares.RequestLogging
 	{
 		public static IApplicationBuilder UseRequestResponseLogging(this IApplicationBuilder builder, Action<IsapRequestLoggingOptions> setupAction = null)
 		{
-			IsapRequestLoggingOptions options = builder.ApplicationServices.GetService<IOptions<IsapRequestLoggingOptions>>().Value;
-			Debug.Assert(options != null);
+			IsapRequestLoggingOptions options = builder.ApplicationServices.GetRequiredService<IOptions<IsapRequestLoggingOptions>>().Value;
 			setupAction?.Invoke(options);
 			return builder.UseMiddleware<LogRequestMiddleware>(options).UseMiddleware<LogResponseMiddleware>(options);
 		}

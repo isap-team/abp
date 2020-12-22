@@ -21,8 +21,8 @@
   <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.0.0" />
     <PackageReference Include="Castle.Core" Version="4.4.1" />
-    <PackageReference Include="IdentityModel" Version="4.3.0" />
-    <PackageReference Include="Stateless" Version="5.1.4" />
+    <PackageReference Include="IdentityModel" Version="4.5.0" />
+    <PackageReference Include="Stateless" Version="5.1.5" />
   </ItemGroup>
 
   <ItemGroup>

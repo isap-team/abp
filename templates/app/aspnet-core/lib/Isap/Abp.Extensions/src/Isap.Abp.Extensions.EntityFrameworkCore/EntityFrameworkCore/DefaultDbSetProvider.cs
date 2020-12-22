@@ -6,17 +6,17 @@ namespace Isap.Abp.Extensions.EntityFrameworkCore
 {
 	public class DefaultDbSetProvider: IDbSetProvider, ITransientDependency
 	{
-		public DefaultDbSetProvider(IIsapDbContextProvider dbContextProvider)
+		public DefaultDbSetProvider(IIsapDbContextProviderResolver dbContextProviderResolver)
 		{
-			DbContextProvider = dbContextProvider;
+			DbContextProviderResolver = dbContextProviderResolver;
 		}
 
-		protected IIsapDbContextProvider DbContextProvider { get; }
+		protected IIsapDbContextProviderResolver DbContextProviderResolver { get; }
 
 		public IQueryable<TEntity> GetDbSet<TEntity>()
 			where TEntity: class
 		{
-			return DbContextProvider.Set<TEntity>();
+			return DbContextProviderResolver.GetProvider<TEntity>().Set<TEntity>();
 		}
 	}
 }

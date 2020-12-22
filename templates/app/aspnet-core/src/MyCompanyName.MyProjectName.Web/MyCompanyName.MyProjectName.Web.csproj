@@ -32,20 +32,35 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
+    <PackageReference Include="EPPlus" Version="4.5.3.3" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="3.1.0" />
+    <PackageReference Include="Serilog.Filters.Expressions" Version="2.1.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
     <PackageReference Include="Serilog.Sinks.Async" Version="1.4.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.0" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="5.6.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="5.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="5.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.StackExchangeRedis" Version="5.0.0" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\lib\Isap\Abp.BackgroundJobs\src\Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql\Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql.csproj" />
+    <ProjectReference Include="..\..\lib\Isap\Abp.Extensions\src\Isap.Abp.Extensions.RemoteSettings\Isap.Abp.Extensions.RemoteSettings.csproj" />
+    <ProjectReference Include="..\..\lib\Isap\Abp.Extensions\src\Isap.Abp.Extensions.Web\Isap.Abp.Extensions.Web.csproj" />
     <ProjectReference Include="..\..\lib\Isap\CommonCore\src\Isap.CommonCore.Web\Isap.CommonCore.Web.csproj" />
     <ProjectReference Include="..\..\lib\Isap\Hosting\src\Isap.Hosting\Isap.Hosting.csproj" />
     <ProjectReference Include="..\MyCompanyName.MyProjectName.Application\MyCompanyName.MyProjectName.Application.csproj" />
     <ProjectReference Include="..\MyCompanyName.MyProjectName.HttpApi\MyCompanyName.MyProjectName.HttpApi.csproj" />
     <ProjectReference Include="..\MyCompanyName.MyProjectName.EntityFrameworkCore.DbMigrations\MyCompanyName.MyProjectName.EntityFrameworkCore.DbMigrations.csproj" />
+    <ProjectReference Include="..\..\..\..\..\framework\src\Volo.Abp.Caching.StackExchangeRedis\Volo.Abp.Caching.StackExchangeRedis.csproj" />
+    <ProjectReference Include="..\..\..\..\..\framework\src\Volo.Abp.AspNetCore.Mvc.Client\Volo.Abp.AspNetCore.Mvc.Client.csproj" />
+    <ProjectReference Include="..\..\..\..\..\framework\src\Volo.Abp.AspNetCore.Authentication.OpenIdConnect\Volo.Abp.AspNetCore.Authentication.OpenIdConnect.csproj" />
     <ProjectReference Include="..\..\..\..\..\framework\src\Volo.Abp.AspNetCore.Mvc.UI.Theme.Basic\Volo.Abp.AspNetCore.Mvc.UI.Theme.Basic.csproj" />
     <ProjectReference Include="..\..\..\..\..\framework\src\Volo.Abp.Autofac\Volo.Abp.Autofac.csproj" />
+    <ProjectReference Include="..\..\..\..\..\framework\src\Volo.Abp.AspNetCore.Serilog\Volo.Abp.AspNetCore.Serilog.csproj" />
+    <ProjectReference Include="..\..\..\..\..\framework\src\Volo.Abp.Http.Client.IdentityModel.Web\Volo.Abp.Http.Client.IdentityModel.Web.csproj" />
     <ProjectReference Include="..\..\..\..\..\framework\src\Volo.Abp.Swashbuckle\Volo.Abp.Swashbuckle.csproj" />
     <ProjectReference Include="..\..\..\..\..\framework\src\Volo.Abp.AspNetCore.Authentication.JwtBearer\Volo.Abp.AspNetCore.Authentication.JwtBearer.csproj" />
     <ProjectReference Include="..\..\..\..\..\framework\src\Volo.Abp.AspNetCore.Serilog\Volo.Abp.AspNetCore.Serilog.csproj" />

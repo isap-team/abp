@@ -1,5 +1,7 @@
 using System;
+using System.Linq;
 using AutoMapper;
+using Isap.Abp.Extensions.Data.Specifications;
 using Isap.Abp.Extensions.Domain;
 using Isap.CommonCore.Services;
 using Volo.Abp;
@@ -19,6 +21,14 @@ namespace Isap.Abp.Extensions
 			 * into multiple profile classes for a better organization. */
 			CreateBaseMapsForKey<Guid>();
 			CreateBaseMapsForKey<string>();
+
+			CreateMap<SpecificationMetadata, SpecificationMetadataDto>()
+				.ForMember(e => e.Types,
+					opt => opt.MapFrom(
+						(src, dest, value) => src.Types.Select(t => t.Name).ToList()
+					)
+				)
+				;
 		}
 
 		protected void CreateBaseMapsForKey<TKey>()
