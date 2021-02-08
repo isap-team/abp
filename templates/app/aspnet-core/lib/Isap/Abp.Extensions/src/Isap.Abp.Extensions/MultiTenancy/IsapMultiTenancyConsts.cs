@@ -5,6 +5,7 @@ namespace Isap.Abp.Extensions.MultiTenancy
 	public static class IsapMultiTenancyConsts
 	{
 		public const string TenantHeaderName = "__tenant";
+		public const bool IsEnabled = true;
 
 		public static class DefaultTenant
 		{

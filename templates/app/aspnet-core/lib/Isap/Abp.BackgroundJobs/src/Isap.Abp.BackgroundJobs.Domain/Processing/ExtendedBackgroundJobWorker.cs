@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -9,6 +10,7 @@ using Isap.Abp.BackgroundJobs.Jobs;
 using Isap.Abp.BackgroundJobs.Queues;
 using Isap.Abp.Extensions;
 using Isap.Abp.Extensions.Clustering;
+using Isap.Abp.Extensions.Domain;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -20,7 +22,7 @@ using Volo.Abp.Timing;
 namespace Isap.Abp.BackgroundJobs.Processing
 {
 	[Volo.Abp.DependencyInjection.Dependency(ReplaceServices = true)]
-	public class ExtendedBackgroundJobWorker: AsyncPeriodicBackgroundWorkerBase, IBackgroundJobWorker, IJobQueueProcessorManager
+	public class ExtendedBackgroundJobWorker: AsyncPeriodicBackgroundWorkerBase, IBackgroundJobWorker, IJobQueueProcessorManager, ISupportsLazyServices
 	{
 		public const int MaxRecommendedBackgroundProcessingThreads = 20;
 
@@ -46,12 +48,15 @@ namespace Isap.Abp.BackgroundJobs.Processing
 			Timer.RunOnStart = true;
 		}
 
-		public IClock Clock { get; set; }
-		public ICurrentNode CurrentNode { get; set; }
-		public IJobQueueCache QueueCache { get; set; }
-		public IJobDataManager JobDataManager { get; set; }
-		public IShutdownCancellationTokenProvider ShutdownCancellationTokenProvider { get; set; }
-		public IJobQueueProcessorFactory JobQueueProcessorFactory { get; set; }
+		object ISupportsLazyServices.ServiceProviderLock => ServiceProviderLock;
+		ConcurrentDictionary<Type, object> ISupportsLazyServices.ServiceReferenceMap { get; } = new ConcurrentDictionary<Type, object>();
+
+		protected IClock Clock => LazyGetRequiredService<IClock>();
+		protected ICurrentNode CurrentNode => LazyGetRequiredService<ICurrentNode>();
+		protected IJobQueueCache QueueCache => LazyGetRequiredService<IJobQueueCache>();
+		protected IJobDataManager JobDataManager => LazyGetRequiredService<IJobDataManager>();
+		protected IShutdownCancellationTokenProvider ShutdownCancellationTokenProvider => LazyGetRequiredService<IShutdownCancellationTokenProvider>();
+		protected IJobQueueProcessorFactory JobQueueProcessorFactory => LazyGetRequiredService<IJobQueueProcessorFactory>();
 
 		public override async Task StartAsync(CancellationToken cancellationToken = default)
 		{
@@ -85,6 +90,11 @@ namespace Isap.Abp.BackgroundJobs.Processing
 			return await Task.WhenAll(_queueProcessors.Select(p => p.CancelJobIfRunning(jobId)))
 					.ContinueWith(task => task.Result.Any(i => i))
 				;
+		}
+
+		protected TService LazyGetRequiredService<TService>()
+		{
+			return SupportsLazyServicesExtensions.LazyGetRequiredService<TService>(this);
 		}
 
 		private async IAsyncEnumerable<(IJobQueueBase, IJobQueueConfiguration)> GetNodeQueues([EnumeratorCancellation] CancellationToken cancellationToken)

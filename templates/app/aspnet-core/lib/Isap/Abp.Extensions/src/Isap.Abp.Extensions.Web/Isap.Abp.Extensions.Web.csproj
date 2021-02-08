@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk.Razor">
 
   <Import Project="..\..\common.props" />
 
@@ -6,12 +6,41 @@
     <TargetFramework>net5.0</TargetFramework>
     <RootNamespace>Isap.Abp.Extensions.Web</RootNamespace>
     <AssemblyName>Isap.Abp.Extensions.Web</AssemblyName>
+    <PackageId>Isap.Abp.Extensions.Web</PackageId>
+    <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
+    <IsPackable>true</IsPackable>
+    <OutputType>Library</OutputType>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.AspNetCore.Mvc\Volo.Abp.AspNetCore.Mvc.csproj" />
+    <EmbeddedResource Include="Modules\**\*.js" />
+    <EmbeddedResource Include="Modules\**\*.css" />
+    <EmbeddedResource Include="Modules\**\*.cshtml" />
+    <EmbeddedResource Include="Pages\**\*.js" />
+    <EmbeddedResource Include="Pages\**\*.css" />
+    <EmbeddedResource Include="Pages\**\*.cshtml" />
+    <EmbeddedResource Include="Components\**\*.js" />
+    <EmbeddedResource Include="Components\**\*.css" />
+    <EmbeddedResource Include="Components\**\*.cshtml" />
+    <Content Remove="Modules\**\*.js" />
+    <Content Remove="Modules\**\*.css" />
+    <Content Remove="Modules\**\*.cshtml" />
+    <Content Remove="Pages\**\*.js" />
+    <Content Remove="Pages\**\*.css" />
+    <Content Remove="Pages\**\*.cshtml" />
+    <Content Remove="Components\**\*.js" />
+    <Content Remove="Components\**\*.css" />
+    <Content Remove="Components\**\*.cshtml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.AspNetCore.Mvc.UI\Volo.Abp.AspNetCore.Mvc.UI.csproj" />
     <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.AspNetCore.MultiTenancy\Volo.Abp.AspNetCore.MultiTenancy.csproj" />
     <ProjectReference Include="..\Isap.Abp.Extensions\Isap.Abp.Extensions.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="5.0.0" />
   </ItemGroup>
 
 </Project>

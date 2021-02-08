@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using Isap.Abp.Extensions.Domain;
 using Isap.Abp.Extensions.Localization;
 using Isap.CommonCore;
 using Isap.CommonCore.Services;

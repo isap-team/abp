@@ -1,14 +1,16 @@
 using System;
-using Isap.CommonCore.Services;
-using Volo.Abp.MultiTenancy;
 
 namespace Isap.Abp.Extensions.Domain
 {
-	public interface IMultiTenantAggregateRoot<TKey>: ICommonAggregateRoot<TKey>, IMultiTenant
+	// ReSharper disable once PossibleInterfaceMemberAmbiguity
+	[Obsolete("Use IMultiTenantFullAuditedAggregateRoot<TKey>")]
+	public interface IMultiTenantAggregateRoot<TKey>: IMultiTenantFullAuditedAggregateRoot<TKey>
 	{
 	}
 
-	public class MultiTenantAggregateRoot<TKey>: CommonAggregateRoot<TKey>, IMultiTenantAggregateRoot<TKey>, ICommonMultiTenant<Guid?>
+	[Serializable]
+	[Obsolete("Use MultiTenantFullAuditedAggregateRoot<TKey>")]
+	public class MultiTenantAggregateRoot<TKey>: MultiTenantFullAuditedAggregateRoot<TKey>, IMultiTenantAggregateRoot<TKey>
 	{
 		public MultiTenantAggregateRoot()
 		{
@@ -18,7 +20,5 @@ namespace Isap.Abp.Extensions.Domain
 			: base(id)
 		{
 		}
-
-		public Guid? TenantId { get; set; }
 	}
 }

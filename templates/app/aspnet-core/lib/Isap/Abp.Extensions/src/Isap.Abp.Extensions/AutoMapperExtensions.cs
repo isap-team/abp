@@ -54,6 +54,16 @@ namespace Isap.Abp.Extensions
 			return (T) GetRequiredService(context, typeof(T));
 		}
 
+		public static TDestination LoadInstance<TService, TDestination>(this ResolutionContext context, object source, Func<TService, TDestination> load)
+		{
+			string key = $"@{typeof(TDestination)}:{source}";
+			if (context.Options.Items.TryGetValue(key, out object result))
+				return (TDestination) result;
+			TDestination instance = load(context.GetRequiredService<TService>());
+			context.Options.Items[key] = instance;
+			return instance;
+		}
+
 		public static void CustomMapFrom<TSource, TDestination, TSourceMember, TMember>(this IMemberConfigurationExpression<TSource, TDestination, TMember> opt,
 			Func<TSource, TSourceMember> getSourceMember, Func<TSource, TSourceMember, TDestination, TMember> createMember)
 			where TMember: class

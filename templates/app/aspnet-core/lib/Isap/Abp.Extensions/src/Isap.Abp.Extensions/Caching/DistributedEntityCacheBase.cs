@@ -1,5 +1,7 @@
 using System;
+using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using Isap.Abp.Extensions.Domain;
 using Isap.CommonCore.Services;
 using Volo.Abp;
 using Volo.Abp.Caching;
@@ -14,15 +16,24 @@ namespace Isap.Abp.Extensions.Caching
 		Task<TCacheItemIntf> GetAsync(TKey id);
 		TCacheItemIntf GetOrNull(TKey id);
 		Task<TCacheItemIntf> GetOrNullAsync(TKey id);
+
+		Task RemoveAsync(TKey id);
 	}
 
-	public abstract class DistributedEntityCacheBase<TCacheItemIntf, TCacheItemImpl, TKey>: IDistributedEntityCache<TCacheItemIntf, TKey>
+	public abstract class DistributedEntityCacheBase<TCacheItemIntf, TCacheItemImpl, TKey>: IDistributedEntityCache<TCacheItemIntf, TKey>, ISupportsLazyServices
 		where TCacheItemIntf: class, ICommonEntity<TKey>
 		where TCacheItemImpl: class, ICommonEntityDto<TKey>, TCacheItemIntf
 	{
+		protected readonly object ServiceProviderLock = new object();
+
 		protected abstract string EntityName { get; }
 
-		public IDistributedCache<TCacheItemImpl, TKey> Cache { get; set; }
+		public IServiceProvider ServiceProvider { get; set; }
+		object ISupportsLazyServices.ServiceProviderLock => ServiceProviderLock;
+
+		ConcurrentDictionary<Type, object> ISupportsLazyServices.ServiceReferenceMap { get; } = new ConcurrentDictionary<Type, object>();
+
+		protected IDistributedCache<TCacheItemImpl, TKey> Cache => LazyGetRequiredService<IDistributedCache<TCacheItemImpl, TKey>>();
 
 		public TCacheItemIntf Get(TKey id)
 		{
@@ -62,15 +73,25 @@ namespace Isap.Abp.Extensions.Caching
 			return result;
 		}
 
+		public async Task RemoveAsync(TKey id)
+		{
+			await Cache.RemoveAsync(id, true, true);
+		}
+
+		protected TService LazyGetRequiredService<TService>()
+		{
+			return SupportsLazyServicesExtensions.LazyGetRequiredService<TService>(this);
+		}
+
 		protected abstract Task<TCacheItemImpl> TryLoadItem(TKey id);
 
-		protected virtual async Task<TCacheItemIntf> InternalGetOrNullAsync(IDistributedCache<CacheRef<TCacheItemImpl, TKey>, string> index, string name,
-			Func<string, Task<TCacheItemImpl>> tryLoadItem)
+		protected virtual async Task<TCacheItemIntf> InternalGetOrNullAsync<TIndexKey>(IDistributedCache<CacheRef<TCacheItemImpl, TKey>, TIndexKey> index, TIndexKey key,
+			Func<TIndexKey, Task<TCacheItemImpl>> tryLoadItem)
 		{
-			CacheRef<TCacheItemImpl, TKey> cacheRef = await index.GetAsync(name);
+			CacheRef<TCacheItemImpl, TKey> cacheRef = await index.GetAsync(key);
 			if (cacheRef == null)
 			{
-				TCacheItemImpl entry = await tryLoadItem(name);
+				TCacheItemImpl entry = await tryLoadItem(key);
 				if (entry == null)
 					return null;
 
@@ -78,7 +99,7 @@ namespace Isap.Abp.Extensions.Caching
 				entry = Cache.GetOrAdd(((ICommonEntity<TKey>) entry).Id, () => entry);
 
 				cacheRef = new CacheRef<TCacheItemImpl, TKey>(((ICommonEntity<TKey>) entry).Id);
-				cacheRef = await index.GetOrAddAsync(name, () => Task.FromResult(cacheRef));
+				cacheRef = await index.GetOrAddAsync(key, () => Task.FromResult(cacheRef));
 			}
 
 			return await Cache.GetAsync(cacheRef.Id);

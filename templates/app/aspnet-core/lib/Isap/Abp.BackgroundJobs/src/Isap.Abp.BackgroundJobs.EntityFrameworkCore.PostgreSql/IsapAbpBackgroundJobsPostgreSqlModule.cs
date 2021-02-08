@@ -1,3 +1,4 @@
+using Isap.Abp.BackgroundJobs.Jobs;
 using Isap.Abp.Extensions.Data;
 using Isap.Abp.Extensions.PostgreSql;
 using Microsoft.Extensions.DependencyInjection;
@@ -25,6 +26,7 @@ namespace Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql
 			base.ConfigureDatabaseSpecificServices(context);
 
 			context.Services.AddTransient<IAbpExtDbSchemaMigrator, BackgroundJobsPostgreSqlDbSchemaMigrator>();
+			context.Services.AddTransient<IJobDataManager, PostgreSqlJobDataManager>();
 		}
 
 		protected override void ConfigureMainDbContext(ServiceConfigurationContext context)

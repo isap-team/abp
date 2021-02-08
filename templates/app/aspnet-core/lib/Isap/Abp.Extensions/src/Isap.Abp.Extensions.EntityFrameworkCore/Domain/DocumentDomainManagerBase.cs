@@ -11,11 +11,6 @@ namespace Isap.Abp.Extensions.Domain
 		where TImpl: class, IEntity<TKey>, TIntf, IAssignable<TKey, TIntf>, new()
 		where TDataRepository: class, IRepository<TImpl, TKey>
 	{
-		protected DocumentDomainManagerBase(TDataRepository dataRepository)
-			: base(dataRepository)
-		{
-		}
-
 		public abstract bool IsDraft(TIntf entry);
 
 		public abstract Task<TIntf> GetOrCreateDraft(TCreateDraftInput input);

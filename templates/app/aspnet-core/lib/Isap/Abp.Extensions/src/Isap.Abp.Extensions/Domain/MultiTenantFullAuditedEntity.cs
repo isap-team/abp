@@ -10,6 +10,7 @@ namespace Isap.Abp.Extensions.Domain
 	{
 	}
 
+	[Serializable]
 	public abstract class MultiTenantFullAuditedEntity<TKey>: FullAuditedEntity<TKey>, ICommonMultiTenant<Guid?>, IMultiTenantFullAuditedEntity<TKey>
 	{
 		protected MultiTenantFullAuditedEntity()
@@ -26,6 +27,7 @@ namespace Isap.Abp.Extensions.Domain
 		object ICommonEntity.GetId() => Id;
 	}
 
+	[Serializable]
 	public abstract class MultiTenantFullAuditedEntity<TKey, TIntf>: MultiTenantFullAuditedEntity<TKey>, IAssignable<TKey, TIntf>
 		where TIntf: IMultiTenantEntity<TKey>
 	{

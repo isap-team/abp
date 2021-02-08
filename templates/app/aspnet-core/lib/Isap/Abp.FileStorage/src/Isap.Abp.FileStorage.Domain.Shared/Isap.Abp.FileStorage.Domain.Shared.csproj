@@ -1,0 +1,28 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Isap.Abp.FileStorage</RootNamespace>
+    <GenerateEmbeddedFilesManifest>true</GenerateEmbeddedFilesManifest>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\abp\framework\src\Volo.Abp.Validation\Volo.Abp.Validation.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!--<PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="5.0.*" />-->
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Localization\FileStorage\*.json" />
+    <Content Remove="Localization\FileStorage\*.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Abp.Extensions\src\Isap.Abp.Extensions\Isap.Abp.Extensions.csproj" />
+  </ItemGroup>
+
+</Project>

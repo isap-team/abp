@@ -5,6 +5,8 @@ using System.Linq.Expressions;
 using System.Reflection;
 using Isap.Abp.Extensions.Expressions.Predicates;
 using Microsoft.EntityFrameworkCore;
+using Volo.Abp.Data;
+using Volo.Abp.EntityFrameworkCore.ValueConverters;
 
 namespace Isap.Abp.Extensions.PostgreSql
 {
@@ -49,6 +51,13 @@ namespace Isap.Abp.Extensions.PostgreSql
 
 			return Expression.Lambda<Func<T, bool>>(Expression.Call(null, method, Expression.Constant(EF.Functions), memberExpression, constantExpression),
 				parameter);
+		}
+
+		public override Expression<Func<T, bool>> ExtraProperty<T, TValue>(Expression<Func<T, ExtraPropertyDictionary>> extraPropertyExpression, string propertyName, TValue value)
+		{
+			var converter = new AbpJsonValueConverter<TValue>();
+			object strValue = converter.ConvertToProvider(value);
+			return e => EF.Functions.JsonContains(extraPropertyExpression, @$"{{""{propertyName}"": {strValue}}}");
 		}
 	}
 }

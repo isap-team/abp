@@ -63,6 +63,9 @@ namespace Isap.CommonCore.Utils
 			return result;
 		}
 
+		public string ToNameSurnameString() => string.Join(" ",
+			new [] { FirstName, LastName }.Where(x => !string.IsNullOrWhiteSpace(x)));
+
 		public static bool TryParseForSearch(string value, out FullName result)
 		{
 			return TryParseForSearch(value, true, out result);

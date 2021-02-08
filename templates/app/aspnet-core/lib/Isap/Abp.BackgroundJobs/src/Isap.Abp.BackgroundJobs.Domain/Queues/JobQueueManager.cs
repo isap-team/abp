@@ -17,11 +17,6 @@ namespace Isap.Abp.BackgroundJobs.Queues
 
 	public class JobQueueManager: DomainManagerBase<IJobQueue, JobQueue, Guid, IRepository<JobQueue, Guid>>, IJobQueueManager
 	{
-		public JobQueueManager(IRepository<JobQueue, Guid> dataRepository)
-			: base(dataRepository)
-		{
-		}
-
 		public async Task<IJobQueue> GetQueue(string name, CancellationToken cancellationToken = default)
 		{
 			return await DataRepository

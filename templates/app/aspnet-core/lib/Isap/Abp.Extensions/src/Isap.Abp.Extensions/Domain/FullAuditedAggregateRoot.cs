@@ -3,11 +3,11 @@ using Isap.Abp.Extensions.Data;
 using Isap.CommonCore.Services;
 using JetBrains.Annotations;
 using Volo.Abp.Domain.Entities.Auditing;
-using Volo.Abp.MultiTenancy;
 
 namespace Isap.Abp.Extensions.Domain
 {
-	public abstract class FullAuditedAggregateRoot<TKey, TIntf>: FullAuditedAggregateRoot<TKey>, IMultiTenantEntity<TKey>, IAssignable<TKey, TIntf>
+	[Serializable]
+	public abstract class FullAuditedAggregateRoot<TKey, TIntf>: FullAuditedAggregateRoot<TKey>, IAssignable<TKey, TIntf>, ICommonEntity<TKey>
 		where TIntf: ICommonEntity<TKey>
 	{
 		protected FullAuditedAggregateRoot()
@@ -19,14 +19,9 @@ namespace Isap.Abp.Extensions.Domain
 		{
 		}
 
-		public Guid? TenantId { get; set; }
-
 		public virtual void Assign([NotNull] TIntf source)
 		{
 			if (source == null) throw new ArgumentNullException(nameof(source));
-
-			if (source is IMultiTenant multiTenantSource)
-				TenantId = multiTenantSource.TenantId;
 
 			InternalAssign(source);
 		}

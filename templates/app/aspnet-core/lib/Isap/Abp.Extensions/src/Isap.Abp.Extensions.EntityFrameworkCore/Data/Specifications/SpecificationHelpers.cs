@@ -9,12 +9,12 @@ namespace Isap.Abp.Extensions.Data.Specifications
 	public static class SpecificationHelpers
 	{
 		public static List<ISpecification<TEntity>> BuildSpecifications<TEntity>(ISpecificationBuildingContext context,
-			ICollection<SpecificationParameters> specifications)
+			IEnumerable<ISpecificationParameters> specifications)
 		{
 			if (specifications == null)
 				return new List<ISpecification<TEntity>>();
 
-			ISpecification<TEntity> ToSpec(SpecificationParameters specification)
+			ISpecification<TEntity> ToSpec(ISpecificationParameters specification)
 			{
 				ISpecificationBuilder<TEntity> builder = context.SpecificationBuilderRepository.Get<TEntity>(specification.SpecId);
 				return builder.Create(context, specification.Parameters);
@@ -32,7 +32,7 @@ namespace Isap.Abp.Extensions.Data.Specifications
 		}
 
 		public static IFilterSpecification<TEntity> BuildFilterSpecification<TEntity>(ISpecificationBuildingContext context,
-			ICollection<SpecificationParameters> specifications)
+			IEnumerable<ISpecificationParameters> specifications)
 		{
 			var specs = BuildSpecifications<TEntity>(context, specifications);
 			return specs.ToFilterSpecification();
@@ -47,7 +47,7 @@ namespace Isap.Abp.Extensions.Data.Specifications
 		}
 
 		public static IOrderSpecification<TEntity> BuildOrderSpecification<TEntity>(ISpecificationBuildingContext context,
-			ICollection<SpecificationParameters> specifications)
+			IEnumerable<ISpecificationParameters> specifications)
 		{
 			var specs = BuildSpecifications<TEntity>(context, specifications);
 			return specs.ToOrderSpecification();

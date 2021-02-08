@@ -1,6 +1,7 @@
 using System;
 using System.Collections;
 using System.Linq.Expressions;
+using Volo.Abp.Data;
 
 // ReSharper disable InconsistentNaming
 
@@ -24,6 +25,9 @@ namespace Isap.Abp.Extensions.Expressions.Predicates
 		Expression<Func<T, bool>> Between2<T, TValue>(TValue value, Expression<Func<T, TValue>> fromExpr, Expression<Func<T, TValue>> toExpr);
 		Expression<Func<T, bool>> BuildFindExpression<T>(LambdaExpression expression, object findValue) where T: class;
 		MemberExpression CreateMemberExpression(ParameterExpression parameter, string path);
+
+		Expression<Func<T, bool>> ExtraProperty<T, TValue>(Expression<Func<T, ExtraPropertyDictionary>> extraPropertyExpression,
+			string propertyName, TValue value);
 
 		string EscapeSqlString(string value);
 	}

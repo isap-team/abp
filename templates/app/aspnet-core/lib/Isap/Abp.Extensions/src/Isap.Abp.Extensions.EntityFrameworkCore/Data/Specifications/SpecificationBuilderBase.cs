@@ -1,6 +1,5 @@
 using System;
-using System.Text.Json;
-using Isap.CommonCore.Extensions;
+using Isap.CommonCore.Services;
 
 namespace Isap.Abp.Extensions.Data.Specifications
 {
@@ -9,14 +8,14 @@ namespace Isap.Abp.Extensions.Data.Specifications
 	{
 		public Type EntityType => typeof(TEntity);
 
-		ISpecification<TEntity> ISpecificationBuilder<TEntity>.Create(ISpecificationBuildingContext context, JsonElement data)
+		ISpecification<TEntity> ISpecificationBuilder<TEntity>.Create(ISpecificationBuildingContext context, ISpecificationParametersProvider provider)
 		{
-			return Create(context, data.ToObject<TParams>());
+			return Create(context, provider.GetParameters<TParams>());
 		}
 
-		ISpecification ISpecificationBuilder.Create(ISpecificationBuildingContext context, JsonElement data)
+		ISpecification ISpecificationBuilder.Create(ISpecificationBuildingContext context, ISpecificationParametersProvider provider)
 		{
-			return Create(context, data.ToObject<TParams>());
+			return Create(context, provider.GetParameters<TParams>());
 		}
 
 		public abstract ISpecification<TEntity> Create(ISpecificationBuildingContext context, TParams parameters);

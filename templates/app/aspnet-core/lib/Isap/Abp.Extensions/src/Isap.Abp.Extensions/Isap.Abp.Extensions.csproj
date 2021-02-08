@@ -9,16 +9,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Localization\AbpExtensions\en.json" />
-    <None Remove="Localization\AbpExtensions\ru.json" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <EmbeddedResource Include="Localization\AbpExtensions\ru.json" />
-    <EmbeddedResource Include="Localization\AbpExtensions\en.json" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="AutoMapper" Version="10.0.0" />
     <PackageReference Include="Castle.Core" Version="4.4.1" />
     <PackageReference Include="IdentityModel" Version="4.5.0" />
@@ -31,10 +21,22 @@
     <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.Caching\Volo.Abp.Caching.csproj" />
     <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.Core\Volo.Abp.Core.csproj" />
     <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.Ddd.Application\Volo.Abp.Ddd.Application.csproj" />
+    <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.BackgroundWorkers\Volo.Abp.BackgroundWorkers.csproj" />
     <ProjectReference Include="..\..\..\..\..\..\..\..\modules\setting-management\src\Volo.Abp.SettingManagement.Domain\Volo.Abp.SettingManagement.Domain.csproj" />
     <ProjectReference Include="..\..\..\..\..\..\..\..\modules\tenant-management\src\Volo.Abp.TenantManagement.Domain\Volo.Abp.TenantManagement.Domain.csproj" />
+    <ProjectReference Include="..\..\..\..\..\..\..\..\modules\permission-management\src\Volo.Abp.PermissionManagement.Domain\Volo.Abp.PermissionManagement.Domain.csproj" />
     <ProjectReference Include="..\..\..\..\..\..\..\..\modules\identity\src\Volo.Abp.Identity.Domain\Volo.Abp.Identity.Domain.csproj" />
+    <ProjectReference Include="..\..\..\..\..\..\..\..\modules\identity\src\Volo.Abp.Identity.Application.Contracts\Volo.Abp.Identity.Application.Contracts.csproj" />
     <ProjectReference Include="..\..\..\CommonCore\src\Isap.CommonCore\Isap.CommonCore.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Localization\AbpExtensions\*.json" />
+    <Content Remove="Localization\AbpExtensions\*.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.FileProviders.Embedded" Version="5.0.0" />
   </ItemGroup>
 
 </Project>

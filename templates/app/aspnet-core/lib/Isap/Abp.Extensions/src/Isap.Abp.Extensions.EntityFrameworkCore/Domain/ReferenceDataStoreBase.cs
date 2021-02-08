@@ -148,7 +148,7 @@ namespace Isap.Abp.Extensions.Domain
 
 		/// <inheritdoc
 		///     cref="IReferenceDataStore{TIntf,TImpl,TKey}.GetPage(int,int,Expression{Func{TImpl,bool}},IOrderSpecification{TImpl},bool)" />
-		public Task<ResultSet<TIntf>> GetPage(int pageNumber, int pageSize, Expression<Func<TImpl, bool>> predicate,
+		public virtual Task<ResultSet<TIntf>> GetPage(int pageNumber, int pageSize, Expression<Func<TImpl, bool>> predicate,
 			IOrderSpecification<TImpl> orderSpecification, bool countTotal = false)
 		{
 			return GetPageInternal(pageNumber, pageSize, countTotal, predicate, orderSpecification);
@@ -163,13 +163,13 @@ namespace Isap.Abp.Extensions.Domain
 		/// <param name="orderSpecification">Спецификация сортировки</param>
 		/// <param name="countTotal">Флаг управления подсчетом общего количества записей.</param>
 		/// <returns>Информация о странице, выбранной из базы данных.</returns>
-		public Task<ResultSet<TIntf>> GetPage(int pageNumber, int pageSize, IFilterSpecification<TImpl> filterSpecification = null,
+		public virtual Task<ResultSet<TIntf>> GetPage(int pageNumber, int pageSize, IFilterSpecification<TImpl> filterSpecification = null,
 			IOrderSpecification<TImpl> orderSpecification = null, bool countTotal = false)
 		{
 			return GetPageInternal(pageNumber, pageSize, countTotal, filterSpecification, orderSpecification, false);
 		}
 
-		public async Task<ResultSet<TIntf>> GetPage(int pageNumber, int pageSize, List<SpecificationParameters> specifications, bool countTotal = false)
+		public virtual async Task<ResultSet<TIntf>> GetPage(int pageNumber, int pageSize, List<SpecificationParameters> specifications, bool countTotal = false)
 		{
 			List<ISpecification<TImpl>> allSpecs = SpecificationHelpers.BuildSpecifications<TImpl>(SpecificationBuildingContext, specifications);
 
@@ -194,7 +194,7 @@ namespace Isap.Abp.Extensions.Domain
 		}
 
 		/// <inheritdoc cref="IReferenceDataStore{TIntf,TImpl,TKey}.CountAsync" />
-		public async Task<int> CountAsync(Expression<Func<TImpl, bool>> predicate = null)
+		public virtual async Task<int> CountAsync(Expression<Func<TImpl, bool>> predicate = null)
 		{
 			predicate = predicate ?? (e => true);
 			return await GetQuery().Where(predicate).CountAsync();

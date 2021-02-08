@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Isap.Abp.FileStorage</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\abp\framework\src\Volo.Abp.Ddd.Application.Contracts\Volo.Abp.Ddd.Application.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\..\abp\framework\src\Volo.Abp.Authorization\Volo.Abp.Authorization.csproj" />
+    <ProjectReference Include="..\Isap.Abp.FileStorage.Domain.Shared\Isap.Abp.FileStorage.Domain.Shared.csproj" />
+    <ProjectReference Include="..\..\..\CommonCore\src\Isap.CommonCore\Isap.CommonCore.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,33 @@
+@page
+@using Isap.Abp.Extensions.Localization
+@using Microsoft.AspNetCore.Mvc.Localization
+@model Isap.Abp.Extensions.Web.Pages.Configuration.SecureStringModel
+@inject IHtmlLocalizer<AbpExtensionsResource> L
+@{
+}
+<div class="card mt-3 shadow-sm rounded">
+	<div class="card-body p-5">
+		<h4>@L["Menu:Configuration.SecureString"]</h4>
+		<form method="post" class="mt-4">
+			<abp-row>
+				<abp-column size="_6">
+					<abp-input asp-for="Text"></abp-input>
+				</abp-column>
+				<abp-column size="_3">
+					<abp-button type="submit" button-type="Primary" name="Action" value="Encrypt" class="btn-block btn-lg mt-4">Encrypt</abp-button>
+				</abp-column>
+				<abp-column size="_3">
+					<abp-button type="submit" button-type="Primary" name="Action" value="Decrypt" class="btn-block btn-lg mt-4">Decrypt</abp-button>
+				</abp-column>
+			</abp-row>
+		</form>
+		@if (!string.IsNullOrEmpty(Model.Result))
+		{
+			<abp-row>
+				<abp-column size="_12">
+					<abp-input readonly="true" asp-for="Result"></abp-input>
+				</abp-column>
+			</abp-row>
+		}
+	</div>
+</div>

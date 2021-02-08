@@ -9,6 +9,7 @@ using Isap.CommonCore;
 using Isap.CommonCore.Services;
 using Isap.Converters.Extensions;
 using Volo.Abp.Domain.Entities;
+using Volo.Abp.Identity;
 
 namespace Isap.Abp.Extensions.Services
 {
@@ -155,13 +156,16 @@ namespace Isap.Abp.Extensions.Services
 			return ObjectMapper.Map<TEntityDto, TImpl>(entry);
 		}
 
+		protected virtual Task<ICollection<OrganizationUnit>> GetRelatedOrganizationUnits(TEntityDto entry) => Task.FromResult<ICollection<OrganizationUnit>>(null);
+
 		/// <summary>
 		///     Проверяет доступ текущего пользователя на добавление данных.
 		/// </summary>
 		/// <returns></returns>
 		protected virtual async Task CheckCreatePermission(TEntityDto entry)
 		{
-			await CheckPermission(CreatePermissionName);
+			ICollection<OrganizationUnit> organizationUnits = await GetRelatedOrganizationUnits(entry);
+			await CheckPermission(organizationUnits, CreatePermissionName);
 		}
 
 		/// <summary>
@@ -170,7 +174,8 @@ namespace Isap.Abp.Extensions.Services
 		/// <returns></returns>
 		protected virtual async Task CheckUpdatePermission(TEntityDto entry)
 		{
-			await CheckPermission(UpdatePermissionName);
+			ICollection<OrganizationUnit> organizationUnits = await GetRelatedOrganizationUnits(entry);
+			await CheckPermission(organizationUnits, UpdatePermissionName);
 			if (entry is ICommonOwnedEntity<Guid?> || typeof(ICommonOwnedEntity<Guid?>).IsAssignableFrom(typeof(TImpl)))
 				await CheckOwnOrOtherPermission(entry, UpdateOwnPermissionName, UpdateOtherPermissionName);
 		}
@@ -181,19 +186,21 @@ namespace Isap.Abp.Extensions.Services
 		/// <returns></returns>
 		protected virtual async Task CheckDeletePermission(TEntityDto entry)
 		{
-			await CheckPermission(DeletePermissionName);
+			ICollection<OrganizationUnit> organizationUnits = await GetRelatedOrganizationUnits(entry);
+			await CheckPermission(organizationUnits, DeletePermissionName);
 			if (entry is ICommonOwnedEntity<Guid?> || typeof(ICommonOwnedEntity<Guid?>).IsAssignableFrom(typeof(TImpl)))
 				await CheckOwnOrOtherPermission(entry, DeleteOwnPermissionName, DeleteOtherPermissionName);
 		}
 
 		protected async Task CheckOwnOrOtherPermission(TEntityDto entry, string ownPermissionName, string otherPermissionName)
 		{
+			ICollection<OrganizationUnit> organizationUnits = await GetRelatedOrganizationUnits(entry);
 			Guid? ownerId = await GetOwnerId(entry);
 			ownerId = ownerId ?? (entry.Id.IsDefaultValue() ? CurrentUser.Id : null);
 			if (CurrentUser.Id == ownerId)
-				await CheckPermission(ownPermissionName);
+				await CheckPermission(organizationUnits, ownPermissionName);
 			else
-				await CheckPermission(otherPermissionName);
+				await CheckPermission(organizationUnits, otherPermissionName);
 		}
 
 		/// <summary>

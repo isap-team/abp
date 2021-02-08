@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
-using Castle.Components.DictionaryAdapter;
+using System.Threading.Tasks;
 
 namespace Isap.CommonCore.Extensions
 {
@@ -104,6 +104,22 @@ namespace Isap.CommonCore.Extensions
 		public static Dictionary<TKey, TValue> ToDictionary<TKey, TValue>(this IEnumerable<KeyValuePair<TKey, TValue>> collection)
 		{
 			return collection.ToDictionary(pair => pair.Key, pair => pair.Value);
+		}
+
+		public static TValue GetOrAdd<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TKey, TValue> factory)
+		{
+			if (dictionary.TryGetValue(key, out TValue obj))
+				return obj;
+
+			return dictionary[key] = factory(key);
+		}
+
+		public static async Task<TValue> GetOrAddAsync<TKey, TValue>(this IDictionary<TKey, TValue> dictionary, TKey key, Func<TKey, Task<TValue>> factory)
+		{
+			if (dictionary.TryGetValue(key, out TValue obj))
+				return obj;
+
+			return dictionary[key] = await factory(key);
 		}
 	}
 }

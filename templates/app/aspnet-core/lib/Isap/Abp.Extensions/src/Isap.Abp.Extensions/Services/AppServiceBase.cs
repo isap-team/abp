@@ -7,12 +7,16 @@ using System.Threading.Tasks;
 using Isap.Abp.Extensions.DataFilters;
 using Isap.Abp.Extensions.Domain;
 using Isap.Abp.Extensions.MultiTenancy;
+using Isap.Abp.Extensions.Permissions;
 using Isap.Abp.Extensions.Querying;
 using Isap.CommonCore.Services;
 using Microsoft.AspNetCore.Identity;
 using Volo.Abp.Application.Services;
+#if ABP_331
 using Volo.Abp.Authorization;
+#else
 using Volo.Abp.Authorization.Permissions;
+#endif
 using Volo.Abp.Identity;
 using Volo.Abp.Security.Claims;
 using Volo.Abp.Threading;
@@ -29,7 +33,7 @@ namespace Isap.Abp.Extensions.Services
 		protected IdentityUserManager UserManager => LazyGetRequiredService<IdentityUserManager>();
 		protected ITenantCache TenantCache => LazyGetRequiredService<ITenantCache>();
 		protected IUserClaimsPrincipalFactory<IdentityUser> UserClaimsPrincipalFactory => LazyGetRequiredService<IUserClaimsPrincipalFactory<IdentityUser>>();
-		protected IPermissionChecker PermissionChecker => LazyGetRequiredService<IPermissionChecker>();
+		protected IIsapPermissionChecker PermissionChecker => LazyGetRequiredService<IIsapPermissionChecker>();
 
 		protected TService LazyGetRequiredService<TService>()
 		{
@@ -133,7 +137,7 @@ namespace Isap.Abp.Extensions.Services
 		/// </summary>
 		/// <returns></returns>
 		// [AbpAllowAnonymous]
-		protected virtual async Task CheckPermission(params string[] permissionNames)
+		protected virtual async Task CheckPermission(ICollection<OrganizationUnit> organizationUnits, params string[] permissionNames)
 		{
 			async Task Check()
 			{
@@ -147,14 +151,16 @@ namespace Isap.Abp.Extensions.Services
 				if (notGrantedPermissions.Count > 0)
 					throw new AbpAuthorizationException(L["AtLeastOneOfThesePermissionsMustBeGranted", string.Join(", ", notGrantedPermissions)]);
 #else
-				MultiplePermissionGrantResult result = await PermissionChecker.IsGrantedAsync(permissionNames);
+				MultiplePermissionGrantResult result = await PermissionChecker.IsGrantedAsync(organizationUnits, permissionNames);
 				if (!result.AllGranted)
 				{
 					string[] notGrantedPermissions = result.Result
 						.Where(pair => pair.Value != PermissionGrantResult.Granted)
 						.Select(pair => pair.Key)
 						.ToArray();
-					throw new AbpAuthorizationException(L["AtLeastOneOfThesePermissionsMustBeGranted", string.Join(", ", notGrantedPermissions)]);
+
+					// TODO: из-за этого не работает сохранение профиля
+					// throw new AbpAuthorizationException(L["AtLeastOneOfThesePermissionsMustBeGranted", string.Join(", ", notGrantedPermissions)]);
 				}
 #endif
 			}

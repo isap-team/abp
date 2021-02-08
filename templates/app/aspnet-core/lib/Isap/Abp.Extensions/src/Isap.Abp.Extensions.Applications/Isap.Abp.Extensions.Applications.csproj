@@ -11,6 +11,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.Ddd.Domain\Volo.Abp.Ddd.Domain.csproj" />
     <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.AspNetCore.Mvc\Volo.Abp.AspNetCore.Mvc.csproj" />
+    <ProjectReference Include="..\..\..\..\..\..\..\..\modules\permission-management\src\Volo.Abp.PermissionManagement.Domain\Volo.Abp.PermissionManagement.Domain.csproj" />
     <ProjectReference Include="..\..\..\CommonCore\src\Isap.CommonCore\Isap.CommonCore.csproj" />
     <ProjectReference Include="..\Isap.Abp.Extensions\Isap.Abp.Extensions.csproj" />
   </ItemGroup>

@@ -3,10 +3,12 @@ using System.Linq;
 using AutoMapper;
 using Isap.Abp.Extensions.Data.Specifications;
 using Isap.Abp.Extensions.Domain;
+using Isap.Abp.Extensions.Identity;
 using Isap.CommonCore.Services;
 using Volo.Abp;
 using Volo.Abp.AutoMapper;
 using Volo.Abp.Domain.Entities;
+using Volo.Abp.Identity;
 using Volo.Abp.MultiTenancy;
 using Volo.Abp.Users;
 
@@ -29,6 +31,11 @@ namespace Isap.Abp.Extensions
 					)
 				)
 				;
+			CreateMap<IdentityRole, RoleDto>()
+				.IncludeBase<IdentityRole, IdentityRoleDto>()
+				.ForMember(e => e.TenantId, opt => opt.MapFrom(e => e.TenantId))
+				.Ignore(e => e.Permissions)
+				;
 		}
 
 		protected void CreateBaseMapsForKey<TKey>()
@@ -37,7 +44,7 @@ namespace Isap.Abp.Extensions
 
 			CreateMap<CommonEntityDto<TKey>, Entity<TKey>>();
 
-			CreateMap<SoftDeleteEntityDto<TKey>, CommonAggregateRoot<TKey>>()
+			CreateMap<SoftDeleteEntityDto<TKey>, CommonFullAuditedAggregateRoot<TKey>>()
 				.Ignore(e => e.CreationTime)
 				.Ignore(e => e.CreatorId)
 				.Ignore(e => e.LastModificationTime)
@@ -47,10 +54,20 @@ namespace Isap.Abp.Extensions
 				.Ignore(e => e.ConcurrencyStamp)
 				.Ignore(e => e.ExtraProperties)
 				;
+#pragma warning disable 618
+			CreateMap<SoftDeleteEntityDto<TKey>, CommonAggregateRoot<TKey>>()
+#pragma warning restore 618
+				.IncludeBase<SoftDeleteEntityDto<TKey>, CommonFullAuditedAggregateRoot<TKey>>()
+				;
 
-			CreateMap<SoftDeleteEntityDto<TKey>, MultiTenantAggregateRoot<TKey>>()
-				.IncludeBase<SoftDeleteEntityDto<TKey>, CommonAggregateRoot<TKey>>()
+			CreateMap<SoftDeleteEntityDto<TKey>, MultiTenantFullAuditedAggregateRoot<TKey>>()
+				.IncludeBase<SoftDeleteEntityDto<TKey>, CommonFullAuditedAggregateRoot<TKey>>()
 				.ForMember(e => e.TenantId, opt => opt.MapFrom((src, dest, member, res) => res.GetService<ICurrentTenant>()?.Id))
+				;
+#pragma warning disable 618
+			CreateMap<SoftDeleteEntityDto<TKey>, MultiTenantAggregateRoot<TKey>>()
+#pragma warning restore 618
+				.IncludeBase<SoftDeleteEntityDto<TKey>, MultiTenantFullAuditedAggregateRoot<TKey>>()
 				;
 
 			CreateMap<SoftDeleteEntityDto<TKey>, SoftDeleteEntity<TKey>>()
@@ -79,7 +96,7 @@ namespace Isap.Abp.Extensions
 				.ForMember(e => e.LastModificationTime, opt => opt.MapFrom(src => src.LastModificationTime ?? src.CreationTime))
 				;
 			CreateMap<DocumentEntityDto<TKey>, DocumentEntity<TKey>>()
-				.IncludeBase<SoftDeleteEntityDto<TKey>, MultiTenantAggregateRoot<TKey>>()
+				.IncludeBase<SoftDeleteEntityDto<TKey>, MultiTenantFullAuditedAggregateRoot<TKey>>()
 				.ForMember(e => e.OwnerId, opt => opt.MapFrom((src, dest, member, res) => res.GetService<ICurrentUser>()?.Id))
 				;
 

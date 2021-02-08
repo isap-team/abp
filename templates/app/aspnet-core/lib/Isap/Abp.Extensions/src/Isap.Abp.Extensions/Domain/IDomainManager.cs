@@ -30,6 +30,22 @@ namespace Isap.Abp.Extensions.Domain
 		TImpl CreateNew([NotNull] TIntf entry);
 
 		/// <summary>
+		///     Позволяет редактировать информацию о сущности.
+		/// </summary>
+		/// <param name="entry">Информация о сущности.</param>
+		/// <param name="update">Функция изменения сущности.</param>
+		/// <returns>Информация о сущности, скорректированная в процессе сохранения.</returns>
+		Task<TIntf> Edit([NotNull] TIntf entry, [NotNull] Action<TImpl> update);
+
+		/// <summary>
+		///     Позволяет редактировать информацию о сущности.
+		/// </summary>
+		/// <param name="entry">Информация о сущности.</param>
+		/// <param name="update">Функция изменения сущности.</param>
+		/// <returns>Информация о сущности, скорректированная в процессе сохранения.</returns>
+		Task<TIntf> Edit([NotNull] TIntf entry, [NotNull] Func<TImpl, Task<TImpl>> update);
+
+		/// <summary>
 		///     Сохраняет (добавляет/обновляет) информацию.
 		/// </summary>
 		/// <param name="entry">Информация о сущности.</param>
@@ -42,7 +58,7 @@ namespace Isap.Abp.Extensions.Domain
 		/// <param name="entry">Информация о сущности.</param>
 		/// <param name="update">Функция изменения сущности.</param>
 		/// <returns>Информация о сущности, скорректированная в процессе сохранения.</returns>
-		Task<TIntf> Save([NotNull] TIntf entry, Action<TImpl> update);
+		Task<TIntf> Save([NotNull] TIntf entry, [NotNull] Action<TImpl> update);
 
 		/// <summary>
 		///     Сохраняет (добавляет/обновляет) информацию.
@@ -50,7 +66,7 @@ namespace Isap.Abp.Extensions.Domain
 		/// <param name="entry">Информация о сущности.</param>
 		/// <param name="update">Функция изменения сущности.</param>
 		/// <returns>Информация о сущности, скорректированная в процессе сохранения.</returns>
-		Task<TIntf> Save(TIntf entry, Func<TImpl, Task<TImpl>> update);
+		Task<TIntf> Save([NotNull] TIntf entry, [NotNull] Func<TImpl, Task<TImpl>> update);
 
 		/// <summary>
 		///     Сохраняет (добавляет/обновляет) информацию.
@@ -58,7 +74,7 @@ namespace Isap.Abp.Extensions.Domain
 		/// <param name="id">Идентификатор обновляемой сущности.</param>
 		/// <param name="update">Функция изменения сущности.</param>
 		/// <returns>Информация о сущности, скорректированная в процессе сохранения.</returns>
-		Task<TIntf> Save(TKey id, Action<TImpl> update);
+		Task<TIntf> Save([NotNull] TKey id, [NotNull] Action<TImpl> update);
 
 		/// <summary>
 		///     Сохраняет (добавляет/обновляет) информацию.
@@ -66,7 +82,7 @@ namespace Isap.Abp.Extensions.Domain
 		/// <param name="id">Идентификатор обновляемой сущности.</param>
 		/// <param name="update">Функция изменения сущности.</param>
 		/// <returns>Информация о сущности, скорректированная в процессе сохранения.</returns>
-		Task<TIntf> Save(TKey id, Func<TImpl, Task<TImpl>> update);
+		Task<TIntf> Save([NotNull] TKey id, [NotNull] Func<TImpl, Task<TImpl>> update);
 
 		/// <summary>
 		///     Удаляет из БД информацию о сущности. Фактически запись не удаляется, а лишь отмечается как удаленная и, в
@@ -74,7 +90,7 @@ namespace Isap.Abp.Extensions.Domain
 		/// </summary>
 		/// <param name="id">Идентификатор записи.</param>
 		/// <returns></returns>
-		Task Delete(TKey id);
+		Task Delete([NotNull] TKey id);
 
 		/// <summary>
 		///     Удаляет из БД информацию о сущности. Фактически записи не удаляется, а лишь отмечается как удаленные и, в
@@ -82,7 +98,7 @@ namespace Isap.Abp.Extensions.Domain
 		/// </summary>
 		/// <param name="predicate">Условие поиска записей для удаления.</param>
 		/// <returns></returns>
-		Task Delete(Expression<Func<TImpl, bool>> predicate);
+		Task Delete([NotNull] Expression<Func<TImpl, bool>> predicate);
 
 		/// <summary>
 		///     Восстанавливает в БД информацию о сущности. Фактически для записи сбрасывается отметка "IsDeleted" в значение
@@ -90,7 +106,7 @@ namespace Isap.Abp.Extensions.Domain
 		/// </summary>
 		/// <param name="id">Идентификатор записи.</param>
 		/// <returns></returns>
-		Task<TIntf> Undelete(TKey id);
+		Task<TIntf> Undelete([NotNull] TKey id);
 
 		/// <summary>
 		///     Добавляет связанную сущность в коллекцию и включает отслеживание изменений для добавляемой сущности.

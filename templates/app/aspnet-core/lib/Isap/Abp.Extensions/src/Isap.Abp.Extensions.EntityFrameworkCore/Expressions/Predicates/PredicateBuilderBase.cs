@@ -8,6 +8,7 @@ using System.Reflection;
 using Isap.Converters;
 using Isap.Converters.Extensions;
 using Microsoft.EntityFrameworkCore;
+using Volo.Abp.Data;
 
 namespace Isap.Abp.Extensions.Expressions.Predicates
 {
@@ -175,6 +176,9 @@ namespace Isap.Abp.Extensions.Expressions.Predicates
 			string[] propertyNames = path.Split('.');
 			return (MemberExpression) propertyNames.Aggregate((Expression) parameter, Expression.PropertyOrField);
 		}
+
+		public abstract Expression<Func<T, bool>> ExtraProperty<T, TValue>(Expression<Func<T, ExtraPropertyDictionary>> extraPropertyExpression,
+			string propertyName, TValue value);
 
 		public virtual string EscapeSqlString(string value)
 		{

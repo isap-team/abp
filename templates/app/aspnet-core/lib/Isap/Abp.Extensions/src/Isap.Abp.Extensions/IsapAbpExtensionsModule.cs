@@ -17,10 +17,12 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Volo.Abp;
 using Volo.Abp.Application;
 using Volo.Abp.AutoMapper;
+using Volo.Abp.BackgroundWorkers;
 using Volo.Abp.Caching;
 using Volo.Abp.DependencyInjection;
 using Volo.Abp.Identity;
 using Volo.Abp.Localization;
+using Volo.Abp.Localization.ExceptionHandling;
 using Volo.Abp.Modularity;
 using Volo.Abp.SettingManagement;
 using Volo.Abp.TenantManagement;
@@ -36,6 +38,7 @@ namespace Isap.Abp.Extensions
 		typeof(AbpAutoMapperModule),
 		typeof(AbpCachingModule),
 		typeof(AbpTimingModule),
+		typeof(AbpBackgroundWorkersModule),
 		typeof(AbpIdentityDomainModule),
 		typeof(AbpTenantManagementDomainModule)
 	)]
@@ -65,18 +68,7 @@ namespace Isap.Abp.Extensions
 
 			context.Services.AddTransient(x => ClockProvider.Current);
 
-			Configure<AbpVirtualFileSystemOptions>(options =>
-				{
-					options.FileSets.AddEmbedded<IsapAbpExtensionsModule>();
-				});
-
-			Configure<AbpLocalizationOptions>(options =>
-				{
-					options.Resources
-						.Add<AbpExtensionsResource>("ru")
-						.AddVirtualJson("/Localization/AbpExtensions")
-						;
-				});
+			ConfigureLocalization();
 
 			ObjectAccessor<IServiceProvider> serviceProviderAccessor = context.Services.GetSingletonInstance<ObjectAccessor<IServiceProvider>>();
 
@@ -139,6 +131,34 @@ namespace Isap.Abp.Extensions
 
 			context.Services.GetSingletonInstance<DocumentWorkflowStateStrategyFactory>().RegisterProducts(thisAssembly, context.Services);
 			context.Services.GetSingletonInstance<DocumentWorkflowFactory>().RegisterProducts(thisAssembly, context.Services);
+		}
+
+
+		private void ConfigureLocalization()
+		{
+			//Json file registration:
+			Configure<AbpVirtualFileSystemOptions>(options =>
+				{
+					options.FileSets.AddEmbedded<IsapAbpExtensionsModule>(typeof(IsapAbpExtensionsModule).Namespace);
+				});
+
+			//Set current module culture:
+			Configure<AbpLocalizationOptions>(options =>
+				{
+					options.Resources
+						.Add<AbpExtensionsResource>("ru")
+						.AddVirtualJson($"/Localization/{AbpExtensionsResource.ResourceName}")
+						;
+
+					options.DefaultResourceType = typeof(AbpExtensionsResource);
+				});
+
+			//L-void mapping:
+			Configure<AbpExceptionLocalizationOptions>(options =>
+				{
+					options.MapCodeNamespace(typeof(IsapAbpExtensionsModule).Namespace,
+						typeof(AbpExtensionsResource));
+				});
 		}
 
 		public override void OnPreApplicationInitialization(ApplicationInitializationContext context)

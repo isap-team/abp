@@ -15,13 +15,15 @@ namespace Isap.CommonCore.Expressions.Evaluation
 			}
 		}
 
-		protected EvaluateExpressionValueProviderBase(TIntf entry, IValueConverter converter)
+		protected EvaluateExpressionValueProviderBase(TIntf entry, IValueConverter converter, IDictionary<string, object> args)
 		{
 			Entry = entry;
 			Converter = converter;
+			Arguments = args ?? new Dictionary<string, object>();
 		}
 
 		public IValueConverter Converter { get; set; }
+		public IDictionary<string, object> Arguments { get; }
 
 		protected abstract Dictionary<string, IPropertyGetAccessor<TIntf>> PropertyAccessorMap { get; }
 
@@ -29,6 +31,12 @@ namespace Isap.CommonCore.Expressions.Evaluation
 
 		public bool TryGetValue(string id, out object result)
 		{
+			if (Arguments.TryGetValue(id, out object value))
+			{
+				result = value;
+				return true;
+			}
+
 			if (PropertyAccessorMap.TryGetValue(id, out IPropertyGetAccessor<TIntf> accessor))
 			{
 				result = accessor.GetValue(Entry);

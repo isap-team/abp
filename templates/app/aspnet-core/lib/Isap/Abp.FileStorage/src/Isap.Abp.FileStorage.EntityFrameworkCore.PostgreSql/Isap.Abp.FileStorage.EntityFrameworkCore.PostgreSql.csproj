@@ -1,0 +1,16 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netcoreapp3.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\abp\framework\src\Volo.Abp.EntityFrameworkCore.PostgreSql\Volo.Abp.EntityFrameworkCore.PostgreSql.csproj" />
+    <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="5.0.0-rc1" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Isap.Abp.FileStorage.EntityFrameworkCore\Isap.Abp.FileStorage.EntityFrameworkCore.csproj" />
+  </ItemGroup>
+
+</Project>

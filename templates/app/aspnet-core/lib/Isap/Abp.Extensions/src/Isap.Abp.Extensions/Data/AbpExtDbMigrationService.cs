@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Isap.CommonCore.Extensions;
@@ -19,9 +20,12 @@ namespace Isap.Abp.Extensions.Data
 
 	public static class IsapDataSeederExtensions
 	{
-		public static Task SeedAsync(this IDataSeeder seeder, Guid? tenantId, object args)
+		public const string AppDataDirPropertyName = "#AppDataDir";
+
+		public static Task SeedAsync(this IDataSeeder seeder, Guid? tenantId, DirectoryInfo appDataDir, object args)
 		{
 			var context = new DataSeedContext(tenantId);
+			context.Properties[AppDataDirPropertyName] = appDataDir;
 			context.Properties.Assign(args.AsNameToObjectMap());
 			return seeder.SeedAsync(context);
 		}
@@ -104,7 +108,22 @@ namespace Isap.Abp.Extensions.Data
 		{
 			Logger.LogInformation($"Executing {(tenant == null ? "host" : tenant.Name + " tenant")} database seed...");
 
-			await _dataSeeder.SeedAsync(tenant?.Id, args);
+			var appDataDir = new DirectoryInfo(Path.Combine(Environment.CurrentDirectory, "App_Data"));
+			if (appDataDir.Exists)
+			{
+				if (tenant != null)
+				{
+					DirectoryInfo tenantsDir = appDataDir.GetDirectories("Tenants").FirstOrDefault();
+					if (tenantsDir != null)
+					{
+						DirectoryInfo tenantAppDataDir = tenantsDir.GetDirectories(tenant.Name).FirstOrDefault();
+						if (tenantAppDataDir != null)
+							appDataDir = tenantAppDataDir;
+					}
+				}
+			}
+
+			await _dataSeeder.SeedAsync(tenant?.Id, appDataDir, args);
 		}
 	}
 }

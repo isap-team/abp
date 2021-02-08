@@ -64,6 +64,36 @@ namespace Isap.Abp.Extensions.Domain
 		public abstract TImpl CreateNew(TIntf entry);
 
 		/// <summary>
+		///     Позволяет редактировать информацию о сущности.
+		/// </summary>
+		/// <param name="entry">Информация о сущности.</param>
+		/// <param name="update">Функция изменения сущности.</param>
+		/// <returns>Информация о сущности, скорректированная в процессе сохранения.</returns>
+		public async Task<TIntf> Edit(TIntf entry, Action<TImpl> update)
+		{
+			if (entry == null) throw new ArgumentNullException(nameof(entry));
+			if (update == null) throw new ArgumentNullException(nameof(update));
+			TImpl editableEntry = await GetEditable(entry);
+			update(editableEntry);
+			return editableEntry;
+		}
+
+		/// <summary>
+		///     Позволяет редактировать информацию о сущности.
+		/// </summary>
+		/// <param name="entry">Информация о сущности.</param>
+		/// <param name="update">Функция изменения сущности.</param>
+		/// <returns>Информация о сущности, скорректированная в процессе сохранения.</returns>
+		public async Task<TIntf> Edit(TIntf entry, Func<TImpl, Task<TImpl>> update)
+		{
+			if (entry == null) throw new ArgumentNullException(nameof(entry));
+			if (update == null) throw new ArgumentNullException(nameof(update));
+			TImpl editableEntry = await GetEditable(entry);
+			editableEntry = await update(editableEntry);
+			return editableEntry;
+		}
+
+		/// <summary>
 		///     Приводит интерфейс к классу. Если приведение невозможно, то создается независимая копия, доступная для дальнейшего
 		///     редактирования.
 		/// </summary>
@@ -81,6 +111,7 @@ namespace Isap.Abp.Extensions.Domain
 		/// <returns>Информация о сохраненной записи, доступная только для чтения.</returns>
 		public virtual async Task<TIntf> Save(TImpl entry)
 		{
+			if (entry == null) throw new ArgumentNullException(nameof(entry));
 			var cts = new CancellationTokenSource(5000);
 			using (await LockManager.GetWriterLockAsync(((IEntity<TKey>) entry).Id, cts.Token))
 				return await SaveInternal(entry);
@@ -94,6 +125,8 @@ namespace Isap.Abp.Extensions.Domain
 		/// <returns>Информация о сущности, скорректированная в процессе сохранения.</returns>
 		public async Task<TIntf> Save(TIntf entry, Action<TImpl> update)
 		{
+			if (entry == null) throw new ArgumentNullException(nameof(entry));
+			if (update == null) throw new ArgumentNullException(nameof(update));
 			var cts = new CancellationTokenSource(5000);
 			using (await LockManager.GetWriterLockAsync(entry.Id, cts.Token))
 			{
@@ -110,6 +143,8 @@ namespace Isap.Abp.Extensions.Domain
 		/// <returns>Информация о сущности, скорректированная в процессе сохранения.</returns>
 		public async Task<TIntf> Save(TIntf entry, Func<TImpl, Task<TImpl>> update)
 		{
+			if (entry == null) throw new ArgumentNullException(nameof(entry));
+			if (update == null) throw new ArgumentNullException(nameof(update));
 			var cts = new CancellationTokenSource(5000);
 			using (await LockManager.GetWriterLockAsync(entry.Id, cts.Token))
 			{
@@ -126,6 +161,8 @@ namespace Isap.Abp.Extensions.Domain
 		/// <returns>Информация о сущности, скорректированная в процессе сохранения.</returns>
 		public async Task<TIntf> Save(TKey id, Action<TImpl> update)
 		{
+			if (id == null) throw new ArgumentNullException(nameof(id));
+			if (update == null) throw new ArgumentNullException(nameof(update));
 			var cts = new CancellationTokenSource(5000);
 			using (await LockManager.GetWriterLockAsync(id, cts.Token))
 			{
@@ -142,6 +179,8 @@ namespace Isap.Abp.Extensions.Domain
 		/// <returns>Информация о сущности, скорректированная в процессе сохранения.</returns>
 		public async Task<TIntf> Save(TKey id, Func<TImpl, Task<TImpl>> update)
 		{
+			if (id == null) throw new ArgumentNullException(nameof(id));
+			if (update == null) throw new ArgumentNullException(nameof(update));
 			var cts = new CancellationTokenSource(5000);
 			using (await LockManager.GetWriterLockAsync(id, cts.Token))
 			{
@@ -157,6 +196,7 @@ namespace Isap.Abp.Extensions.Domain
 		/// <returns></returns>
 		public virtual async Task Delete(TKey id)
 		{
+			if (id == null) throw new ArgumentNullException(nameof(id));
 			var cts = new CancellationTokenSource(5000);
 			using (await LockManager.GetWriterLockAsync(id, cts.Token))
 				await DeleteInternal(id);
@@ -170,6 +210,7 @@ namespace Isap.Abp.Extensions.Domain
 		/// <returns></returns>
 		public virtual async Task Delete(Expression<Func<TImpl, bool>> predicate)
 		{
+			if (predicate == null) throw new ArgumentNullException(nameof(predicate));
 			await DeleteInternal(predicate);
 		}
 
@@ -181,6 +222,7 @@ namespace Isap.Abp.Extensions.Domain
 		/// <returns></returns>
 		public virtual async Task<TIntf> Undelete(TKey id)
 		{
+			if (id == null) throw new ArgumentNullException(nameof(id));
 			var cts = new CancellationTokenSource(5000);
 			using (await LockManager.GetWriterLockAsync(id, cts.Token))
 				return await UndeleteInternal(id);
@@ -407,18 +449,9 @@ namespace Isap.Abp.Extensions.Domain
 		where TEntityBuilder: IEntityBuilder<TIntf, TImpl>
 	{
 		/// <summary>
-		///     Конструктор.
-		/// </summary>
-		/// <param name="dataRepository">Репозиторий для доступа к БД.</param>
-		protected DomainManagerBase(TDataRepository dataRepository)
-		{
-			DataRepository = dataRepository;
-		}
-
-		/// <summary>
 		///     Репозиторий для доступа к БД.
 		/// </summary>
-		protected TDataRepository DataRepository { get; }
+		protected TDataRepository DataRepository => LazyGetRequiredService<TDataRepository>();
 
 		[PropertyInject(IsOptional = false)]
 		public IIdGenerator<TKey> IdGenerator { get; set; }
@@ -715,9 +748,5 @@ namespace Isap.Abp.Extensions.Domain
 		where TImpl: class, IAssignable<TKey, TIntf>, TIntf, IEntity<TKey>, new()
 		where TDataRepository: class, IRepository<TImpl, TKey>
 	{
-		protected DomainManagerBase(TDataRepository dataRepository)
-			: base(dataRepository)
-		{
-		}
 	}
 }

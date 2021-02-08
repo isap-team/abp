@@ -22,11 +22,6 @@ namespace Isap.Abp.BackgroundJobs.EntityFrameworkCore
 {
 	public abstract class JobDataManagerBase: DomainManagerBase<IJobData, JobData, Guid, IRepository<JobData, Guid>>, IJobDataManager
 	{
-		protected JobDataManagerBase(IRepository<JobData, Guid> dataRepository)
-			: base(dataRepository)
-		{
-		}
-
 		protected IJobQueueCache JobQueueCache => LazyGetRequiredService<IJobQueueCache>();
 
 		public async Task<IJobArguments> GetOrCreateArguments<TArgs>(TArgs args)

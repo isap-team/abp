@@ -14,7 +14,8 @@ namespace Isap.Abp.Extensions.Domain
 	{
 	}
 
-	public abstract class DocumentEntity<TKey>: MultiTenantAggregateRoot<TKey>, IDocumentEntity<TKey>
+	[Serializable]
+	public abstract class DocumentEntity<TKey>: MultiTenantFullAuditedAggregateRoot<TKey>, IDocumentEntity<TKey>
 	{
 		protected DocumentEntity()
 		{
@@ -31,6 +32,7 @@ namespace Isap.Abp.Extensions.Domain
 		public Guid? OwnerId { get; set; }
 	}
 
+	[Serializable]
 	public abstract class DocumentEntity<TKey, TIntf>: DocumentEntity<TKey>, IAssignable<TKey, TIntf>
 		where TIntf: IDocumentEntity<TKey>
 	{

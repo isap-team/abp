@@ -1,5 +1,5 @@
 using System;
-using System.Text.Json;
+using Isap.CommonCore.Services;
 
 namespace Isap.Abp.Extensions.Data.Specifications
 {
@@ -7,11 +7,11 @@ namespace Isap.Abp.Extensions.Data.Specifications
 	{
 		Type EntityType { get; }
 
-		ISpecification Create(ISpecificationBuildingContext context, JsonElement data);
+		ISpecification Create(ISpecificationBuildingContext context, ISpecificationParametersProvider provider);
 	}
 
 	public interface ISpecificationBuilder<TEntity>: ISpecificationBuilder
 	{
-		new ISpecification<TEntity> Create(ISpecificationBuildingContext context, JsonElement data);
+		new ISpecification<TEntity> Create(ISpecificationBuildingContext context, ISpecificationParametersProvider provider);
 	}
 }

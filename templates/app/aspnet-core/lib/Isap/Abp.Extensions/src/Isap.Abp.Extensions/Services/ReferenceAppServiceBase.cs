@@ -53,7 +53,7 @@ namespace Isap.Abp.Extensions.Services
 		// [AbpAllowAnonymous]
 		protected virtual async Task CheckQueryPermission()
 		{
-			await CheckPermission(QueryPermissionName);
+			await CheckPermission(null, QueryPermissionName);
 		}
 	}
 

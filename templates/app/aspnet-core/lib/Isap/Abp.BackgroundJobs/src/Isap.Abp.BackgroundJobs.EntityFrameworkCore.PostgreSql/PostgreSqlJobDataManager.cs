@@ -6,18 +6,12 @@ using System.Threading.Tasks;
 using Isap.Abp.BackgroundJobs.Jobs;
 using Microsoft.EntityFrameworkCore;
 using Npgsql;
-using Volo.Abp.Domain.Repositories;
 using Volo.Abp.MultiTenancy;
 
 namespace Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql
 {
 	public class PostgreSqlJobDataManager: JobDataManagerBase
 	{
-		public PostgreSqlJobDataManager(IRepository<JobData, Guid> dataRepository)
-			: base(dataRepository)
-		{
-		}
-
 		protected string TablePrefix => BackgroundJobsDbProperties.DbTablePrefix;
 		protected string Schema => BackgroundJobsDbProperties.DbSchema ?? "public";
 

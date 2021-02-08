@@ -43,28 +43,13 @@ namespace Isap.Abp.Extensions.Web.Controllers
 			IEnumerable<string> scriptItems = metadata
 				.GroupBy(m => string.Join('.', m.Namespace))
 				.OrderBy(g => g.Key)
-				.SelectMany(g => GetScriptForNamespace(new string(' ', 8), g.Key, g));
+				.SelectMany(g => GetScriptForNamespace(new string(' ', 4), g.Key, g));
 
 			string script = @$"//****************************************************************************//
 //* ISAP Specification Definitions
 
-var isap = isap || {{}};
-
-(function () {{
-
-    isap.spec = isap.spec || {{}};
-
-    (function () {{
-
-        isap.spec.defs = isap.spec.defs || {{}};
-
-        (function () {{
-            {string.Join("\r\n", scriptItems)}
-        }})();
-
-    }})();
-
-}})();
+abp.utils.createNamespace(window, 'isap.spec.defs');
+{string.Join("\r\n", scriptItems)}
 ";
 			return Content(
 				_options.MinifyGeneratedScript == true
@@ -76,20 +61,23 @@ var isap = isap || {{}};
 
 		private IEnumerable<string> GetScriptForNamespace(string ident, string @namespace, IEnumerable<SpecificationMetadataDto> metadata)
 		{
-			yield return $"var ns = abp.utils.createNamespace(isap.spec.defs, '{@namespace}');";
+			yield return "\n(function () {";
+			yield return $"{ident}var ns = abp.utils.createNamespace(isap.spec.defs, '{@namespace}');";
 
 			IEnumerable<string> lines =
 				metadata
 					.GroupBy(m => m.Types.First())
 					.OrderBy(g => g.Key)
 					.SelectMany(g =>
-						GetScriptForType(ident + new string(' ', 4), "ns", g.Key,
+						GetScriptForType(ident, "ns", g.Key,
 							g.Select(m => Tuple.Create(m, m.Types.Skip(1).ToList())).ToList()
 						)
 					);
 
 			foreach (string line in lines)
 				yield return line;
+
+			yield return "})();";
 		}
 
 		private IEnumerable<string> GetScriptForType(string ident, string nsRefName, string type, List<Tuple<SpecificationMetadataDto, List<string>>> metadata)
