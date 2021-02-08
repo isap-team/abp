@@ -62,7 +62,7 @@ namespace Isap.Abp.Extensions.Services
 		where TIntf: class, ICommonEntity<TKey>
 		where TDataStore: class, IReferenceDataStore<TIntf, TKey>
 	{
-		public TDataStore DataStore => LazyGetRequiredService<TDataStore>();
+		protected TDataStore DataStore => LazyServiceProvider.LazyGetRequiredService<TDataStore>();
 
 		public override async Task<TEntityDto> Get(TKey id)
 		{
@@ -103,7 +103,7 @@ namespace Isap.Abp.Extensions.Services
 		where TImpl: class, TIntf
 		where TDataStore: class, IReferenceDataStore<TIntf, TImpl, TKey>
 	{
-		public TDataStore DataStore => LazyGetRequiredService<TDataStore>();
+		protected TDataStore DataStore => LazyServiceProvider.LazyGetRequiredService<TDataStore>();
 
 		public override async Task<TEntityDto> Get(TKey id)
 		{

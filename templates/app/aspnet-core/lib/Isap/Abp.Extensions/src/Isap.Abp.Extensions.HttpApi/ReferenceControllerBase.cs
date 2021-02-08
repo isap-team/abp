@@ -14,7 +14,7 @@ namespace Isap.Abp.Extensions
 		where TService: IReferenceAppService<TEntityDto, TKey>
 		where TLocalizationResource: ILocalizationResource
 	{
-		protected TService AppService => this.LazyGetRequiredService<TService>();
+		protected TService AppService => LazyServiceProvider.LazyGetRequiredService<TService>();
 
 		[HttpGet]
 		[Route("get")]

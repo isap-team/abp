@@ -1,4 +1,5 @@
 using System;
+using System.Threading.Tasks;
 using Isap.Abp.Extensions.Domain;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
@@ -16,24 +17,24 @@ namespace Isap.Abp.Extensions.Data
 			ServiceProvider = serviceProvider;
 		}
 
-		protected IDbContextProvider<TDbContext> DbContextProvider => LazyGetRequiredService<IDbContextProvider<TDbContext>>();
+		protected IDbContextProvider<TDbContext> DbContextProvider => LazyServiceProvider.LazyGetRequiredService<IDbContextProvider<TDbContext>>();
 
-		public bool IsForEntity<TEntity>() where TEntity: class
+		public async Task<bool> IsForEntity<TEntity>() where TEntity: class
 		{
 #pragma warning disable EF1001 // Internal EF Core API usage.
-			IEntityType entityType = DbContextProvider.GetDbContext().Model.FindEntityType(typeof(TEntity));
+			IEntityType entityType = (await DbContextProvider.GetDbContextAsync()).Model.FindEntityType(typeof(TEntity));
 #pragma warning restore EF1001 // Internal EF Core API usage.
 			return entityType != null;
 		}
 
-		public IEfCoreDbContext GetDbContext<TEntity>() where TEntity: class
+		public async Task<IEfCoreDbContext> GetDbContext<TEntity>() where TEntity: class
 		{
-			return DbContextProvider.GetDbContext();
+			return await DbContextProvider.GetDbContextAsync();
 		}
 
-		public DbSet<TEntity> Set<TEntity>() where TEntity: class
+		public async Task<DbSet<TEntity>> Set<TEntity>() where TEntity: class
 		{
-			return GetDbContext<TEntity>().Set<TEntity>();
+			return (await GetDbContext<TEntity>()).Set<TEntity>();
 		}
 	}
 }

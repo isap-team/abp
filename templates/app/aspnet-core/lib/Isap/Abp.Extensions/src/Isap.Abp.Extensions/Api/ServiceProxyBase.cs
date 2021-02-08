@@ -19,8 +19,8 @@ namespace Isap.Abp.Extensions.Api
 			_lazyApiClient = new Lazy<TApiClient>(() => ApiApplication.CreateClient(ApiOptions));
 		}
 
-		protected TApiOptions ApiOptions => LazyGetRequiredService<IOptions<TApiOptions>>().Value;
-		protected TApiApplication ApiApplication => LazyGetRequiredService<TApiApplication>();
+		protected TApiOptions ApiOptions => LazyServiceProvider.LazyGetRequiredService<IOptions<TApiOptions>>().Value;
+		protected TApiApplication ApiApplication => LazyServiceProvider.LazyGetRequiredService<TApiApplication>();
 		protected TApiClient ApiClient => _lazyApiClient.Value;
 
 		protected override void InternalDispose()

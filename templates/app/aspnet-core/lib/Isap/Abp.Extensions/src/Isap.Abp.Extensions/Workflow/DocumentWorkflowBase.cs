@@ -125,7 +125,7 @@ namespace Isap.Abp.Extensions.Workflow
 		where TStateMachine: IDocumentWorkflowStateMachine
 		where TDomainManager: IDomainManager<TDocument, TDocumentImpl, TKey>
 	{
-		public TDomainManager DomainManager => LazyGetRequiredService<TDomainManager>();
+		public TDomainManager DomainManager => LazyServiceProvider.LazyGetRequiredService<TDomainManager>();
 
 		protected override async Task<TDocument> SaveState(TDocumentState state)
 		{

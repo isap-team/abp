@@ -7,7 +7,7 @@ namespace Isap.Abp.Extensions.Data.Specifications
 {
 	public class SpecificationAppService: AppServiceBase, ISpecificationAppService
 	{
-		protected ISpecificationBuilderRepository SpecificationBuilderRepository => LazyGetRequiredService<ISpecificationBuilderRepository>();
+		protected ISpecificationBuilderRepository SpecificationBuilderRepository => LazyServiceProvider.LazyGetRequiredService<ISpecificationBuilderRepository>();
 
 		public async Task<List<SpecificationMetadataDto>> GetAll()
 		{

@@ -1,9 +1,7 @@
 using System;
-using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Threading;
 using Isap.CommonCore;
-using Isap.CommonCore.DependencyInjection;
 using Isap.Converters;
 using Microsoft.Extensions.Localization;
 using Microsoft.Extensions.Logging;
@@ -14,11 +12,9 @@ using Volo.Abp.Uow;
 
 namespace Isap.Abp.Extensions.Domain
 {
-	public abstract class DomainServiceBase: DomainService, IDomainServiceBase, ISupportsLazyServices, ICommonInitialize
+	public abstract class DomainServiceBase: DomainService, IDomainServiceBase, ICommonInitialize
 	{
 		private static long _lastObjectInstanceId;
-
-		private static readonly IValueConverter _defaultValueConverter = ValueConverterProviders.Default.GetConverter();
 
 		private IStringLocalizer _localizer;
 		private Type _localizationResource = typeof(DefaultResource);
@@ -26,26 +22,20 @@ namespace Isap.Abp.Extensions.Domain
 		protected DomainServiceBase()
 		{
 			ObjectInstanceId = Interlocked.Increment(ref _lastObjectInstanceId);
-			Converter = _defaultValueConverter;
 			//PermissionChecker = NullPermissionChecker.Instance;
 		}
 
-		object ISupportsLazyServices.ServiceProviderLock => ServiceProviderLock;
-
-		ConcurrentDictionary<Type, object> ISupportsLazyServices.ServiceReferenceMap { get; } = new ConcurrentDictionary<Type, object>();
-
 		public long ObjectInstanceId { get; }
 
-		public IUnitOfWorkManager UnitOfWorkManager => LazyGetRequiredService<IUnitOfWorkManager>();
+		public IUnitOfWorkManager UnitOfWorkManager => LazyServiceProvider.LazyGetRequiredService<IUnitOfWorkManager>();
 
-		[PropertyInject]
-		public IValueConverter Converter { get; set; }
+		protected IValueConverter Converter => LazyServiceProvider.LazyGetService(ValueConverterProviders.Default.GetConverter());
 
 		//public IPermissionChecker PermissionChecker { get; set; }
 
 		public IUnitOfWork CurrentUnitOfWork => UnitOfWorkManager.Current;
 
-		public IStringLocalizerFactory StringLocalizerFactory => LazyGetRequiredService<IStringLocalizerFactory>();
+		public IStringLocalizerFactory StringLocalizerFactory => LazyServiceProvider.LazyGetRequiredService<IStringLocalizerFactory>();
 
 		protected ILogger DomainLogger { get; private set; }
 
@@ -65,11 +55,6 @@ namespace Isap.Abp.Extensions.Domain
 		{
 			Debug.Assert(ServiceProvider != null);
 			DomainLogger = Logger;
-		}
-
-		protected TService LazyGetRequiredService<TService>()
-		{
-			return SupportsLazyServicesExtensions.LazyGetRequiredService<TService>(this);
 		}
 
 		protected virtual IStringLocalizer CreateLocalizer()

@@ -37,13 +37,13 @@ namespace Isap.Abp.Extensions.Identity
 					{ nameof(RoleDto.TenantId), (role, attr, converter) => role.TenantId = converter.TryConvertTo<Guid?>(attr.Value).AsDefaultIfNotSuccess() },
 				};
 
-		protected IValueConverter Converter => LazyGetRequiredService<IValueConverter>();
-		protected IPermissionManager PermissionManager => LazyGetRequiredService<IPermissionManager>();
-		//protected IPermissionGrantRepository PermissionManager => LazyGetRequiredService<IPermissionManager>();
-		protected IPermissionDefinitionManager PermissionDefinitionManager => LazyGetRequiredService<IPermissionDefinitionManager>();
-		protected IStringLocalizerFactory StringLocalizerFactory => LazyGetRequiredService<IStringLocalizerFactory>();
-		protected IdentityRoleManager RoleManager => LazyGetRequiredService<IdentityRoleManager>();
-		protected IGuidGenerator GuidGenerator => LazyGetRequiredService<IGuidGenerator>();
+		protected IValueConverter Converter => LazyServiceProvider.LazyGetRequiredService<IValueConverter>();
+		protected IPermissionManager PermissionManager => LazyServiceProvider.LazyGetRequiredService<IPermissionManager>();
+		//protected IPermissionGrantRepository PermissionManager => LazyServiceProvider.LazyGetRequiredService<IPermissionManager>();
+		protected IPermissionDefinitionManager PermissionDefinitionManager => LazyServiceProvider.LazyGetRequiredService<IPermissionDefinitionManager>();
+		protected IStringLocalizerFactory StringLocalizerFactory => LazyServiceProvider.LazyGetRequiredService<IStringLocalizerFactory>();
+		protected IdentityRoleManager RoleManager => LazyServiceProvider.LazyGetRequiredService<IdentityRoleManager>();
+		protected IGuidGenerator GuidGenerator => LazyServiceProvider.LazyGetRequiredService<IGuidGenerator>();
 
 		public override async Task SeedAsync(DataSeedContext context)
 		{

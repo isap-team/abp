@@ -10,7 +10,7 @@ namespace Isap.Abp.Extensions.Settings
 	[Route("api/system/setting")]
 	public class SettingController: IsapControllerBase, ISettingAppService
 	{
-		protected ISettingAppService SettingAppService => LazyGetRequiredService<ISettingAppService>();
+		protected ISettingAppService SettingAppService => LazyServiceProvider.LazyGetRequiredService<ISettingAppService>();
 
 		[HttpGet]
 		[Route("get-or-null")]

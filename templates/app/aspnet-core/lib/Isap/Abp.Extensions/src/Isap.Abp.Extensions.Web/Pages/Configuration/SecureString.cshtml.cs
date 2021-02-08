@@ -9,7 +9,7 @@ namespace Isap.Abp.Extensions.Web.Pages.Configuration
 {
 	public class SecureStringModel: IsapPageModel<AbpExtensionsResource>
 	{
-		protected IStringEncryptionService StringEncryptionService => LazyGetRequiredService<IStringEncryptionService>();
+		protected IStringEncryptionService StringEncryptionService => LazyServiceProvider.LazyGetRequiredService<IStringEncryptionService>();
 
 		[Required]
 		[BindProperty]

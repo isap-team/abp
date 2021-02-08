@@ -1,4 +1,5 @@
 using System.Linq;
+using System.Threading.Tasks;
 using Isap.Abp.Extensions.Data;
 using Volo.Abp.DependencyInjection;
 
@@ -13,10 +14,10 @@ namespace Isap.Abp.Extensions.EntityFrameworkCore
 
 		protected IIsapDbContextProviderResolver DbContextProviderResolver { get; }
 
-		public IQueryable<TEntity> GetDbSet<TEntity>()
+		public async Task<IQueryable<TEntity>> GetDbSet<TEntity>()
 			where TEntity: class
 		{
-			return DbContextProviderResolver.GetProvider<TEntity>().Set<TEntity>();
+			return await (await DbContextProviderResolver.GetProvider<TEntity>()).Set<TEntity>();
 		}
 	}
 }

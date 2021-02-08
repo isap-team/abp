@@ -23,22 +23,13 @@ using Volo.Abp.Threading;
 
 namespace Isap.Abp.Extensions.Services
 {
-	public abstract class AppServiceBase: ApplicationService, ISupportsLazyServices
+	public abstract class AppServiceBase: ApplicationService
 	{
-		object ISupportsLazyServices.ServiceProviderLock => ServiceProviderLock;
-
-		ConcurrentDictionary<Type, object> ISupportsLazyServices.ServiceReferenceMap { get; } = new ConcurrentDictionary<Type, object>();
-
-		protected ICurrentPrincipalAccessor CurrentPrincipalAccessor => LazyGetRequiredService<ICurrentPrincipalAccessor>();
-		protected IdentityUserManager UserManager => LazyGetRequiredService<IdentityUserManager>();
-		protected ITenantCache TenantCache => LazyGetRequiredService<ITenantCache>();
-		protected IUserClaimsPrincipalFactory<IdentityUser> UserClaimsPrincipalFactory => LazyGetRequiredService<IUserClaimsPrincipalFactory<IdentityUser>>();
-		protected IIsapPermissionChecker PermissionChecker => LazyGetRequiredService<IIsapPermissionChecker>();
-
-		protected TService LazyGetRequiredService<TService>()
-		{
-			return SupportsLazyServicesExtensions.LazyGetRequiredService<TService>(this);
-		}
+		protected ICurrentPrincipalAccessor CurrentPrincipalAccessor => LazyServiceProvider.LazyGetRequiredService<ICurrentPrincipalAccessor>();
+		protected IdentityUserManager UserManager => LazyServiceProvider.LazyGetRequiredService<IdentityUserManager>();
+		protected ITenantCache TenantCache => LazyServiceProvider.LazyGetRequiredService<ITenantCache>();
+		protected IUserClaimsPrincipalFactory<IdentityUser> UserClaimsPrincipalFactory => LazyServiceProvider.LazyGetRequiredService<IUserClaimsPrincipalFactory<IdentityUser>>();
+		protected IIsapPermissionChecker PermissionChecker => LazyServiceProvider.LazyGetRequiredService<IIsapPermissionChecker>();
 
 		protected virtual List<DataFilterValue> ToDataFilterValues(ICollection<DataFilterValueDto> filterValues)
 		{

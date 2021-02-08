@@ -11,7 +11,7 @@ namespace Isap.Abp.Extensions.Workflow
 		where TDocumentImpl: TDocument
 		where TDocumentWorkflow: IDocumentWorkflow<TDocument>
 	{
-		public IDocumentWorkflowFactory WorkflowFactory => LazyGetRequiredService<IDocumentWorkflowFactory>();
+		public IDocumentWorkflowFactory WorkflowFactory => LazyServiceProvider.LazyGetRequiredService<IDocumentWorkflowFactory>();
 
 		Task<bool> IDocumentWorkflowStateStrategy.CanSave(IDocumentWorkflow workflow)
 		{
@@ -80,7 +80,7 @@ namespace Isap.Abp.Extensions.Workflow
 		where TDocumentImpl: TDocument
 		where TDocumentWorkflow: IDocumentWorkflow<TDocument>
 	{
-		public IDocumentWorkflowFactory WorkflowFactory => LazyGetRequiredService<IDocumentWorkflowFactory>();
+		public IDocumentWorkflowFactory WorkflowFactory => LazyServiceProvider.LazyGetRequiredService<IDocumentWorkflowFactory>();
 
 		Task<bool> IDocumentWorkflowStateStrategy.CanSave(IDocumentWorkflow workflow)
 		{
@@ -159,7 +159,7 @@ namespace Isap.Abp.Extensions.Workflow
 		where TDocumentImpl: TDocument
 		where TDocumentWorkflow: IDocumentWorkflow<TDocument>
 	{
-		public IDocumentWorkflowFactory WorkflowFactory => LazyGetRequiredService<IDocumentWorkflowFactory>();
+		public IDocumentWorkflowFactory WorkflowFactory => LazyServiceProvider.LazyGetRequiredService<IDocumentWorkflowFactory>();
 
 		Task<bool> IDocumentWorkflowStateStrategy.CanSave(IDocumentWorkflow workflow)
 		{
@@ -245,7 +245,7 @@ namespace Isap.Abp.Extensions.Workflow
 		where TDocumentImpl: TDocument
 		where TDocumentWorkflow: IDocumentWorkflow<TDocument>
 	{
-		public IDocumentWorkflowFactory WorkflowFactory => LazyGetRequiredService<IDocumentWorkflowFactory>();
+		protected IDocumentWorkflowFactory WorkflowFactory => LazyServiceProvider.LazyGetRequiredService<IDocumentWorkflowFactory>();
 
 		Task<bool> IDocumentWorkflowStateStrategy.CanSave(IDocumentWorkflow workflow)
 		{

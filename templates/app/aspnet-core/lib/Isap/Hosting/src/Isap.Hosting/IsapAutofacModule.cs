@@ -1,6 +1,7 @@
 using Autofac;
 using Autofac.Core;
 using Autofac.Core.Registration;
+using Autofac.Core.Resolving.Pipeline;
 using Isap.CommonCore;
 
 namespace Isap.Hosting
@@ -10,13 +11,17 @@ namespace Isap.Hosting
 		protected override void AttachToComponentRegistration(IComponentRegistryBuilder componentRegistry, IComponentRegistration registration)
 		{
 			base.AttachToComponentRegistration(componentRegistry, registration);
-			registration.Activated += OnActivated;
+			registration.PipelineBuilding += Registration_PipelineBuilding;
 		}
 
-		private void OnActivated(object sender, ActivatedEventArgs<object> e)
+		private void Registration_PipelineBuilding(object sender, IResolvePipelineBuilder e)
 		{
-			if (e.Instance is ICommonInitialize initializable)
-				initializable.Initialize();
+			e.Use(PipelinePhase.Activation, MiddlewareInsertionMode.EndOfPhase, (context, next) =>
+				{
+					if (context.Instance is ICommonInitialize initializable)
+						initializable.Initialize();
+					next(context);
+				});
 		}
 	}
 }

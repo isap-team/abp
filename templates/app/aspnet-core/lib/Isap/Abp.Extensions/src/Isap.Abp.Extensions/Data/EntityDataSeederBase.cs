@@ -6,7 +6,6 @@ using Isap.CommonCore.Services;
 using Volo.Abp.Data;
 using Volo.Abp.Domain.Entities;
 using Volo.Abp.Domain.Repositories;
-using Volo.Abp.Guids;
 
 namespace Isap.Abp.Extensions.Data
 {
@@ -25,12 +24,7 @@ namespace Isap.Abp.Extensions.Data
 	public abstract class EntityDataSeederBase<TEntity, TKey>: DomainServiceBase, IEntityDataSeeder<TEntity, TKey>
 		where TEntity: class, IEntity<TKey>, ICommonEntity<TKey>, IAssignable<TKey, TEntity>
 	{
-		protected EntityDataSeederBase()
-		{
-			GuidGenerator = SimpleGuidGenerator.Instance;
-		}
-
-		protected IRepository<TEntity, TKey> Repository => LazyGetRequiredService<IRepository<TEntity, TKey>>();
+		protected IRepository<TEntity, TKey> Repository => LazyServiceProvider.LazyGetRequiredService<IRepository<TEntity, TKey>>();
 
 		public abstract bool IsForHost { get; }
 		public abstract bool IsForTenant { get; }

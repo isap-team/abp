@@ -22,7 +22,7 @@ namespace Isap.Abp.BackgroundJobs.EntityFrameworkCore
 {
 	public abstract class JobDataManagerBase: DomainManagerBase<IJobData, JobData, Guid, IRepository<JobData, Guid>>, IJobDataManager
 	{
-		protected IJobQueueCache JobQueueCache => LazyGetRequiredService<IJobQueueCache>();
+		protected IJobQueueCache JobQueueCache => LazyServiceProvider.LazyGetRequiredService<IJobQueueCache>();
 
 		public async Task<IJobArguments> GetOrCreateArguments<TArgs>(TArgs args)
 		{
@@ -250,7 +250,7 @@ namespace Isap.Abp.BackgroundJobs.EntityFrameworkCore
 		{
 			using (var uow = UnitOfWorkManager.Begin(true))
 			{
-				IBackgroundJobsDbContext dbContext = (IBackgroundJobsDbContext) DataRepository.GetDbContext();
+				IBackgroundJobsDbContext dbContext = (IBackgroundJobsDbContext) await DataRepository.GetDbContextAsync();
 				T result = await action(dbContext);
 				await uow.CompleteAsync();
 				return result;

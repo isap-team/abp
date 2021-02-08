@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -7,30 +6,24 @@ using IdentityModel;
 using IdentityServer4;
 using IdentityServer4.Models;
 using IdentityServer4.Validation;
-using Isap.Abp.Extensions.Domain;
 using Isap.Converters;
 using Microsoft.AspNetCore.Authentication;
+using Volo.Abp.DependencyInjection;
 using Volo.Abp.Identity;
 using Volo.Abp.MultiTenancy;
 using Volo.Abp.Uow;
 
 namespace Isap.Abp.Extensions.IdentityServer
 {
-	public abstract class IsapGrantValidatorBase: IExtensionGrantValidator, ISupportsLazyServices
+	public abstract class IsapGrantValidatorBase: IExtensionGrantValidator
 	{
-		public IServiceProvider ServiceProvider { protected get; set; }
+		public IAbpLazyServiceProvider LazyServiceProvider { get; set; }
 
-		protected readonly object ServiceProviderLock = new object();
-		object ISupportsLazyServices.ServiceProviderLock => ServiceProviderLock;
-
-		IServiceProvider ISupportsLazyServices.ServiceProvider => ServiceProvider;
-		ConcurrentDictionary<Type, object> ISupportsLazyServices.ServiceReferenceMap { get; } = new ConcurrentDictionary<Type, object>();
-
-		protected ISystemClock Clock => this.LazyGetRequiredService<ISystemClock>();
-		protected IValueConverter Converter => this.LazyGetRequiredService<IValueConverter>();
-		protected IUnitOfWorkManager UnitOfWorkManager => this.LazyGetRequiredService<IUnitOfWorkManager>();
-		protected AbpUserClaimsPrincipalFactory UserClaimsPrincipalFactory => this.LazyGetRequiredService<AbpUserClaimsPrincipalFactory>();
-		protected ICurrentTenant CurrentTenant => this.LazyGetRequiredService<ICurrentTenant>();
+		protected ISystemClock Clock => LazyServiceProvider.LazyGetRequiredService<ISystemClock>();
+		protected IValueConverter Converter => LazyServiceProvider.LazyGetRequiredService<IValueConverter>();
+		protected IUnitOfWorkManager UnitOfWorkManager => LazyServiceProvider.LazyGetRequiredService<IUnitOfWorkManager>();
+		protected AbpUserClaimsPrincipalFactory UserClaimsPrincipalFactory => LazyServiceProvider.LazyGetRequiredService<AbpUserClaimsPrincipalFactory>();
+		protected ICurrentTenant CurrentTenant => LazyServiceProvider.LazyGetRequiredService<ICurrentTenant>();
 
 		public abstract string GrantType { get; }
 

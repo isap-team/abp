@@ -12,9 +12,9 @@ namespace Isap.Abp.Extensions.Identity
 {
 	public class IdentityAppService: AppServiceBase, IIdentityAppService
 	{
-		protected IdentityRoleManager RoleManager => LazyGetRequiredService<IdentityRoleManager>();
-		protected IPermissionManager PermissionManager => LazyGetRequiredService<IPermissionManager>();
-		protected IPermissionDefinitionManager PermissionDefinitionManager => LazyGetRequiredService<IPermissionDefinitionManager>();
+		protected IdentityRoleManager RoleManager => LazyServiceProvider.LazyGetRequiredService<IdentityRoleManager>();
+		protected IPermissionManager PermissionManager => LazyServiceProvider.LazyGetRequiredService<IPermissionManager>();
+		protected IPermissionDefinitionManager PermissionDefinitionManager => LazyServiceProvider.LazyGetRequiredService<IPermissionDefinitionManager>();
 
 		public async Task<RoleDto> RoleExport(Guid roleId)
 		{

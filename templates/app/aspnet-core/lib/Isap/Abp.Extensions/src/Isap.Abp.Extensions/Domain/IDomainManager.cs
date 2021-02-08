@@ -114,7 +114,7 @@ namespace Isap.Abp.Extensions.Domain
 		/// <param name="getCollection">Делегат, возвращающий ссылку на коллекцию связанных сущностей.</param>
 		/// <param name="entry">Сылка на добавляемую сущность.</param>
 		/// <returns>Ссылка на добавленную сущность.</returns>
-		TRelatedImpl AddRelatedEntry<TRelatedImpl>(Func<ICollection<TRelatedImpl>> getCollection, TRelatedImpl entry)
+		Task<TRelatedImpl> AddRelatedEntry<TRelatedImpl>(Func<ICollection<TRelatedImpl>> getCollection, TRelatedImpl entry)
 			where TRelatedImpl: class;
 	}
 }

@@ -5,6 +5,7 @@ using Isap.Abp.Extensions.Domain;
 using Isap.CommonCore.Services;
 using Volo.Abp;
 using Volo.Abp.Caching;
+using Volo.Abp.DependencyInjection;
 using Volo.Abp.Threading;
 
 namespace Isap.Abp.Extensions.Caching
@@ -20,20 +21,15 @@ namespace Isap.Abp.Extensions.Caching
 		Task RemoveAsync(TKey id);
 	}
 
-	public abstract class DistributedEntityCacheBase<TCacheItemIntf, TCacheItemImpl, TKey>: IDistributedEntityCache<TCacheItemIntf, TKey>, ISupportsLazyServices
+	public abstract class DistributedEntityCacheBase<TCacheItemIntf, TCacheItemImpl, TKey>: IDistributedEntityCache<TCacheItemIntf, TKey>
 		where TCacheItemIntf: class, ICommonEntity<TKey>
 		where TCacheItemImpl: class, ICommonEntityDto<TKey>, TCacheItemIntf
 	{
-		protected readonly object ServiceProviderLock = new object();
-
 		protected abstract string EntityName { get; }
 
-		public IServiceProvider ServiceProvider { get; set; }
-		object ISupportsLazyServices.ServiceProviderLock => ServiceProviderLock;
+		protected IDistributedCache<TCacheItemImpl, TKey> Cache => LazyServiceProvider.LazyGetRequiredService<IDistributedCache<TCacheItemImpl, TKey>>();
 
-		ConcurrentDictionary<Type, object> ISupportsLazyServices.ServiceReferenceMap { get; } = new ConcurrentDictionary<Type, object>();
-
-		protected IDistributedCache<TCacheItemImpl, TKey> Cache => LazyGetRequiredService<IDistributedCache<TCacheItemImpl, TKey>>();
+		public IAbpLazyServiceProvider LazyServiceProvider { get; set; }
 
 		public TCacheItemIntf Get(TKey id)
 		{
@@ -76,11 +72,6 @@ namespace Isap.Abp.Extensions.Caching
 		public async Task RemoveAsync(TKey id)
 		{
 			await Cache.RemoveAsync(id, true, true);
-		}
-
-		protected TService LazyGetRequiredService<TService>()
-		{
-			return SupportsLazyServicesExtensions.LazyGetRequiredService<TService>(this);
 		}
 
 		protected abstract Task<TCacheItemImpl> TryLoadItem(TKey id);

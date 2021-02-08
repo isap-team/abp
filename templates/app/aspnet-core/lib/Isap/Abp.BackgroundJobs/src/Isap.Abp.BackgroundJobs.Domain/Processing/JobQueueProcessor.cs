@@ -60,16 +60,15 @@ namespace Isap.Abp.BackgroundJobs.Processing
 
 		public static TimeSpan UpdateActivityInterval = TimeSpan.FromSeconds(5);
 
-		private readonly AbpTimer _activityTimer;
+		private readonly AbpAsyncTimer _activityTimer;
 		private readonly IBackgroundProcessingConfiguration _backgroundJobsConfig;
 		private RunningJobInfo _runningJob;
-		private ILoggerFactory _castleLoggerFactory;
 
 		public JobQueueProcessor(
 			IOptions<AbpBackgroundJobOptions> jobOptions,
 			IOptions<AbpBackgroundJobsOptions> backgroundJobsOptions,
-			AbpTimer timer,
-			AbpTimer activityTimer,
+			AbpAsyncTimer timer,
+			AbpAsyncTimer activityTimer,
 			IServiceScopeFactory serviceScopeFactory)
 			: base(timer, serviceScopeFactory)
 		{
@@ -100,7 +99,7 @@ namespace Isap.Abp.BackgroundJobs.Processing
 
 		public ICurrentTenant CurrentTenant { get; set; }
 
-		protected ILoggerFactory CastleLoggerFactory => LazyGetRequiredService(ref _castleLoggerFactory);
+		protected ILoggerFactory CastleLoggerFactory => LazyServiceProvider.LazyGetRequiredService<ILoggerFactory>();
 
 		public async Task<bool> CancelJobIfRunning(Guid jobId)
 		{
@@ -173,9 +172,9 @@ namespace Isap.Abp.BackgroundJobs.Processing
 			}
 		}
 
-		private void ActivityTimerElapsed(object sender, EventArgs e)
+		private async Task ActivityTimerElapsed(AbpAsyncTimer sender)
 		{
-			AsyncHelper.RunSync(() => JobQueueProcessorDataStore.RegisterProcessorActivity(Queue.Id, LockId));
+			await JobQueueProcessorDataStore.RegisterProcessorActivity(Queue.Id, LockId);
 		}
 
 		protected RunningJobInfo GetRunningJob()

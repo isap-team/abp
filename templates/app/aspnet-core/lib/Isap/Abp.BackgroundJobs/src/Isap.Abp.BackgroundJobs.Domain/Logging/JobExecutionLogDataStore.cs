@@ -14,7 +14,7 @@ namespace Isap.Abp.BackgroundJobs.Logging
 
 	public class JobExecutionLogDataStore: ReferenceDataStoreBase<IJobExecutionLogEntry, JobExecutionLogEntry, Guid>, IJobExecutionLogDataStore
 	{
-		protected IRepository<JobExecutionLogEntry, Guid> DataRepository => LazyGetRequiredService<IRepository<JobExecutionLogEntry, Guid>>();
+		protected IRepository<JobExecutionLogEntry, Guid> DataRepository => LazyServiceProvider.LazyGetRequiredService<IRepository<JobExecutionLogEntry, Guid>>();
 
 		public async Task<IJobExecutionLogEntry> MakeExecutionLogEntry(IJobData jobData, string log)
 		{

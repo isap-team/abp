@@ -128,7 +128,7 @@ namespace Isap.Abp.Extensions.Services
 		where TDomainManager: class, IDocumentDomainManager<TIntf, TImpl, TKey, TCreateDraftInput>
 		where TDocumentWorkflow: IDocumentWorkflow<TIntf>
 	{
-		public IDocumentWorkflowFactory WorkflowFactory => LazyGetRequiredService<IDocumentWorkflowFactory>();
+		public IDocumentWorkflowFactory WorkflowFactory => LazyServiceProvider.LazyGetRequiredService<IDocumentWorkflowFactory>();
 
 		[HttpPost]
 		[Route("getOrCreateDraft")]

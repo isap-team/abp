@@ -1,23 +1,13 @@
-using System;
-using System.Collections.Concurrent;
 using System.Threading.Tasks;
-using Isap.Abp.Extensions.Domain;
 using Volo.Abp.Data;
+using Volo.Abp.DependencyInjection;
 
 namespace Isap.Abp.Extensions.Data
 {
-	public abstract class IsapDataSeedContributorBase: IDataSeedContributor, ISupportsLazyServices
+	public abstract class IsapDataSeedContributorBase: IDataSeedContributor
 	{
-		public IServiceProvider ServiceProvider { get; set; }
-		protected readonly object ServiceProviderLock = new object();
-		object ISupportsLazyServices.ServiceProviderLock => ServiceProviderLock;
-		ConcurrentDictionary<Type, object> ISupportsLazyServices.ServiceReferenceMap { get; } = new ConcurrentDictionary<Type, object>();
+		public IAbpLazyServiceProvider LazyServiceProvider { get; set; }
 
 		public abstract Task SeedAsync(DataSeedContext context);
-
-		protected TService LazyGetRequiredService<TService>()
-		{
-			return SupportsLazyServicesExtensions.LazyGetRequiredService<TService>(this);
-		}
 	}
 }

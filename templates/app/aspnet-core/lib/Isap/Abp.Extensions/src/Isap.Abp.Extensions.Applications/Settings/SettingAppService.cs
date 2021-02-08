@@ -8,7 +8,7 @@ namespace Isap.Abp.Extensions.Settings
 {
 	public class SettingAppService: AppServiceBase, ISettingAppService
 	{
-		protected ISettingManagementStore SettingStore => LazyGetRequiredService<ISettingManagementStore>();
+		protected ISettingManagementStore SettingStore => LazyServiceProvider.LazyGetRequiredService<ISettingManagementStore>();
 
 		public async Task<string> GetOrNullAsync(string name, string providerName, string providerKey)
 		{

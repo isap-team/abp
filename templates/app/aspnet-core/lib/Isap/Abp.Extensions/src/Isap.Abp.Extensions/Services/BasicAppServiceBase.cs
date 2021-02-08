@@ -40,7 +40,7 @@ namespace Isap.Abp.Extensions.Services
 		where TImpl: class, IEntity<TKey>, TIntf
 		where TDomainManager: class, IDomainManager<TIntf, TImpl, TKey>
 	{
-		protected TDomainManager DomainManager => LazyGetRequiredService<TDomainManager>();
+		protected TDomainManager DomainManager => LazyServiceProvider.LazyGetRequiredService<TDomainManager>();
 
 		protected virtual string CreatePermissionName => $"{DefaultPermissionName}.Create";
 		protected virtual string UpdatePermissionName => $"{DefaultPermissionName}.Update";

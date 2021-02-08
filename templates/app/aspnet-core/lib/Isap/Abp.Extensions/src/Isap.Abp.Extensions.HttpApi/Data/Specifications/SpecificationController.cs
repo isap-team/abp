@@ -9,7 +9,7 @@ namespace Isap.Abp.Extensions.Data.Specifications
 	[Route("api/isap/specifications")]
 	public class SpecificationController: IsapControllerBase, ISpecificationAppService
 	{
-		protected ISpecificationAppService AppService => LazyGetRequiredService<ISpecificationAppService>();
+		protected ISpecificationAppService AppService => LazyServiceProvider.LazyGetRequiredService<ISpecificationAppService>();
 
 		[HttpGet]
 		[Route("all")]

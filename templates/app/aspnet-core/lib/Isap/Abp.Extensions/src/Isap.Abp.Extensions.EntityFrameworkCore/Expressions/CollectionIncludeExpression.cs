@@ -36,7 +36,7 @@ namespace Isap.Abp.Extensions.Expressions
 			IEnumerable<TProperty> properties = getItems(entry);
 			if (properties == null)
 			{
-				IEfCoreDbContext dbContext = DbContextProvider.GetDbContext<TEntity>();
+				IEfCoreDbContext dbContext = await DbContextProvider.GetDbContext<TEntity>();
 				EntityEntry<TEntity> entityEntry = dbContext.Entry(entry);
 				if (entityEntry.State == EntityState.Detached)
 					entityEntry = dbContext.Attach(entry);

@@ -11,7 +11,7 @@ namespace Isap.Abp.BackgroundJobs
 {
 	public abstract class ExtendedAsyncBackgroundJobBase<TArgs, TResult>: DomainServiceBase, IExtendedAsyncBackgroundJob<TArgs>
 	{
-		protected ICurrentPrincipalAccessor CurrentPrincipalAccessor => LazyGetRequiredService<ICurrentPrincipalAccessor>();
+		protected ICurrentPrincipalAccessor CurrentPrincipalAccessor => LazyServiceProvider.LazyGetRequiredService<ICurrentPrincipalAccessor>();
 
 		async Task<object> IExtendedAsyncBackgroundJob<TArgs>.ExecuteAsync(TArgs args, CancellationToken cancellationToken)
 		{

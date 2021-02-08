@@ -39,10 +39,10 @@ namespace Isap.Abp.Extensions.Identity
 		protected override string EntityName => "UserRole";
 
 		protected IDistributedCache<CacheRef<RoleCacheItem, Guid>, string> ByNameIndex =>
-			LazyGetRequiredService<IDistributedCache<CacheRef<RoleCacheItem, Guid>, string>>();
+			LazyServiceProvider.LazyGetRequiredService<IDistributedCache<CacheRef<RoleCacheItem, Guid>, string>>();
 
-		protected ICurrentTenant CurrentTenant => LazyGetRequiredService<ICurrentTenant>();
-		protected IdentityRoleManager RoleManager => LazyGetRequiredService<IdentityRoleManager>();
+		protected ICurrentTenant CurrentTenant => LazyServiceProvider.LazyGetRequiredService<ICurrentTenant>();
+		protected IdentityRoleManager RoleManager => LazyServiceProvider.LazyGetRequiredService<IdentityRoleManager>();
 
 		public IRoleBase Get(Guid? tenantId, string name)
 		{

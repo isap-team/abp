@@ -1,5 +1,4 @@
 using System.Collections.Generic;
-using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Isap.Abp.Extensions.Domain;
@@ -24,9 +23,9 @@ namespace Isap.Abp.Extensions.Permissions
 
 	public class IsapPermissionChecker: DomainServiceBase, IIsapPermissionChecker
 	{
-		protected IPermissionChecker PermissionChecker => LazyGetRequiredService<IPermissionChecker>();
-		protected ICurrentPrincipalAccessor PrincipalAccessor => LazyGetRequiredService<ICurrentPrincipalAccessor>();
-		protected IRoleCache RoleCache => LazyGetRequiredService<IRoleCache>();
+		protected IPermissionChecker PermissionChecker => LazyServiceProvider.LazyGetRequiredService<IPermissionChecker>();
+		protected ICurrentPrincipalAccessor PrincipalAccessor => LazyServiceProvider.LazyGetRequiredService<ICurrentPrincipalAccessor>();
+		protected IRoleCache RoleCache => LazyServiceProvider.LazyGetRequiredService<IRoleCache>();
 
 		public async Task<bool> IsGrantedAsync(ICollection<OrganizationUnit> organizationUnits, string name)
 		{

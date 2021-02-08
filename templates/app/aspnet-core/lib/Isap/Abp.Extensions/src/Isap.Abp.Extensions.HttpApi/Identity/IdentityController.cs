@@ -9,7 +9,7 @@ namespace Isap.Abp.Extensions.Identity
 	[Route("api/isap/identity")]
 	public class IdentityController: IsapControllerBase, IIdentityAppService
 	{
-		protected IIdentityAppService AppService => LazyGetRequiredService<IIdentityAppService>();
+		protected IIdentityAppService AppService => LazyServiceProvider.LazyGetRequiredService<IIdentityAppService>();
 
 		[HttpGet]
 		[Route("role-export")]

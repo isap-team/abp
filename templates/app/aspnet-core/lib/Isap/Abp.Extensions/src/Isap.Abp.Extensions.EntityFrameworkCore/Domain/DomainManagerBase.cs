@@ -19,6 +19,7 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Volo.Abp;
 using Volo.Abp.Domain.Entities;
 using Volo.Abp.Domain.Repositories;
+using Volo.Abp.EntityFrameworkCore;
 using Volo.Abp.Users;
 using Volo.Abp.Validation;
 
@@ -228,7 +229,7 @@ namespace Isap.Abp.Extensions.Domain
 				return await UndeleteInternal(id);
 		}
 
-		public abstract TRelatedImpl AddRelatedEntry<TRelatedImpl>(Func<ICollection<TRelatedImpl>> getCollection, TRelatedImpl entry)
+		public abstract Task<TRelatedImpl> AddRelatedEntry<TRelatedImpl>(Func<ICollection<TRelatedImpl>> getCollection, TRelatedImpl entry)
 			where TRelatedImpl: class;
 
 		/// <summary>
@@ -451,7 +452,7 @@ namespace Isap.Abp.Extensions.Domain
 		/// <summary>
 		///     Репозиторий для доступа к БД.
 		/// </summary>
-		protected TDataRepository DataRepository => LazyGetRequiredService<TDataRepository>();
+		protected TDataRepository DataRepository => LazyServiceProvider.LazyGetRequiredService<TDataRepository>();
 
 		[PropertyInject(IsOptional = false)]
 		public IIdGenerator<TKey> IdGenerator { get; set; }
@@ -707,9 +708,9 @@ namespace Isap.Abp.Extensions.Domain
 			return CreateValidationResult(names => L["PropertiesShouldNotBeEmpty", names], propertyNames);
 		}
 
-		public override TRelatedImpl AddRelatedEntry<TRelatedImpl>(Func<ICollection<TRelatedImpl>> getCollection, TRelatedImpl entry)
+		public override async Task<TRelatedImpl> AddRelatedEntry<TRelatedImpl>(Func<ICollection<TRelatedImpl>> getCollection, TRelatedImpl entry)
 		{
-			DbContext dbContext = GetDbContextForEntity<TRelatedImpl>();
+			IEfCoreDbContext dbContext = await GetDbContextForEntity<TRelatedImpl>();
 			EntityEntry<TRelatedImpl> entityEntry = dbContext.Entry(entry);
 			getCollection().Add(entry);
 			entityEntry.State = EntityState.Added;
@@ -718,18 +719,18 @@ namespace Isap.Abp.Extensions.Domain
 
 		//public IAbpExtDbContextTypeMatcher DbContextTypeMatcher { get; set; }
 
-		protected virtual DbContext GetDbContextForEntity<TRelatedImpl>()
+		protected virtual async Task<IEfCoreDbContext> GetDbContextForEntity<TRelatedImpl>()
 			where TRelatedImpl: class
 		{
-			return DataRepository.GetDbContext();
+			return await (await DbContextProviderResolver.GetProvider<TRelatedImpl>()).GetDbContext<TRelatedImpl>();
 			//Type dbContextType = DbContextTypeMatcher.GetConcreteType(typeof(AbpDbContext), typeof(TRelatedImpl));
 			//return UnitOfWorkManager.Current.GetDbContext<AbpDbContext>(dbContextType);
 		}
 
-		protected virtual DbSet<TRelatedImpl> GetDbSet<TRelatedImpl>()
+		protected virtual async Task<DbSet<TRelatedImpl>> GetDbSet<TRelatedImpl>()
 			where TRelatedImpl: class
 		{
-			DbContext dbContext = GetDbContextForEntity<TRelatedImpl>();
+			IEfCoreDbContext dbContext = await GetDbContextForEntity<TRelatedImpl>();
 			return dbContext.Set<TRelatedImpl>();
 		}
 	}

@@ -14,6 +14,7 @@ using Isap.CommonCore;
 using Isap.CommonCore.EntityFrameworkCore.Extensions;
 using Isap.CommonCore.Services;
 using Microsoft.EntityFrameworkCore;
+using Nito.AsyncEx;
 using Volo.Abp;
 using Volo.Abp.Data;
 using Volo.Abp.Domain.Entities;
@@ -26,28 +27,28 @@ namespace Isap.Abp.Extensions.Domain
 		where TIntf: class, ICommonEntity<TKey>
 		where TImpl: class, IEntity<TKey>, TIntf
 	{
-		private readonly Lazy<IIncludeExpressionRegistry<TImpl>> _lazyIncludeExpressionRegistry;
+		private readonly AsyncLazy<IIncludeExpressionRegistry<TImpl>> _lazyIncludeExpressionRegistry;
 
 		protected ReferenceDataStoreBase()
 		{
-			_lazyIncludeExpressionRegistry = new Lazy<IIncludeExpressionRegistry<TImpl>>(() => new IncludeExpressionRegistry<TImpl, TImpl>(DbContextProviderResolver.GetProvider<TImpl>()));
+			_lazyIncludeExpressionRegistry = new AsyncLazy<IIncludeExpressionRegistry<TImpl>>(async () => new IncludeExpressionRegistry<TImpl, TImpl>(await DbContextProviderResolver.GetProvider<TImpl>()));
 		}
 
 		/// <summary>
 		///     Провайдер фильтров.
 		/// </summary>
-		public IDataFilterProvider DataFilterProvider { get; set; }
+		private IDataFilterProvider DataFilterProvider => LazyServiceProvider.LazyGetRequiredService<IDataFilterProvider>();
 
-		public IPredicateBuilder PredicateBuilder { get; set; }
+		protected IPredicateBuilder PredicateBuilder => LazyServiceProvider.LazyGetRequiredService<IPredicateBuilder>();
 
-		public IDataFilter DataFilter { get; set; }
+		protected IDataFilter DataFilter => LazyServiceProvider.LazyGetRequiredService<IDataFilter>();
 
 		/// <summary>
 		///     Реестр Include выражений.
 		/// </summary>
-		public IIncludeExpressionRegistry<TImpl> IncludeExpressionRegistry => _lazyIncludeExpressionRegistry.Value;
+		public IIncludeExpressionRegistry<TImpl> IncludeExpressionRegistry => _lazyIncludeExpressionRegistry.Task.Result;
 
-		public ISpecificationBuildingContext SpecificationBuildingContext => LazyGetRequiredService<ISpecificationBuildingContext>();
+		protected ISpecificationBuildingContext SpecificationBuildingContext => LazyServiceProvider.LazyGetRequiredService<ISpecificationBuildingContext>();
 
 		IQueryable<TImpl> IQueryableSortProvider<TImpl>.Apply(IQueryable<TImpl> query)
 		{
@@ -430,7 +431,7 @@ namespace Isap.Abp.Extensions.Domain
 		/// <summary>
 		///     Репозиторий для доступа к БД.
 		/// </summary>
-		protected TDataRepository DataRepository => LazyGetRequiredService<TDataRepository>();
+		protected TDataRepository DataRepository => LazyServiceProvider.LazyGetRequiredService<TDataRepository>();
 
 		/// <summary>
 		///     Возвращает объект, необходимый для построения запроса выборки данных из БД.
