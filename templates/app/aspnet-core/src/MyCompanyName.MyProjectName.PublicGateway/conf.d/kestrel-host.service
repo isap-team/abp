@@ -1,0 +1,16 @@
+[Unit]
+Description=#{ApplicationDescription}
+
+[Service]
+WorkingDirectory=#{ServiceOptions.WorkingDirectory}
+ExecStart=#{dotnetExecutablePath} \
+	#{ServiceOptions.WorkingDirectory}/#{ApplicationExecutableName}
+Restart=always
+RestartSec=10
+SyslogIdentifier=#{ServiceOptions.Name}
+User=#{ServiceOptions.User}
+Environment=ASPNETCORE_ENVIRONMENT=#{ASPNETCORE_ENVIRONMENT}
+
+[Install]
+WantedBy=multi-user.target
+Alias=#{ServiceOptions.Name}.service

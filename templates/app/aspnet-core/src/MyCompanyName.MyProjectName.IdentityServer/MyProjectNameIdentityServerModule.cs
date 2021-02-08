@@ -1,10 +1,24 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using Isap.Abp.BackgroundJobs.Configuration;
+using Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql;
+using Isap.Abp.Extensions.Clustering;
+using Isap.Abp.Extensions.IdentityServer;
+using Isap.Abp.Extensions.Logging;
+using Isap.Abp.Extensions.MultiTenancy;
+using Isap.Abp.Extensions.Web;
+using Isap.CommonCore.Integrations;
+using Isap.CommonCore.Web.Middlewares.RequestLogging;
+using Isap.CommonCore.Web.Middlewares.Tracing;
+using Isap.Converters;
 using Localization.Resources.AbpUi;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.DataProtection;
+using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using MyCompanyName.MyProjectName.EntityFrameworkCore;
@@ -14,6 +28,7 @@ using StackExchange.Redis;
 using Volo.Abp;
 using Volo.Abp.Account;
 using Volo.Abp.Account.Web;
+using Volo.Abp.AspNetCore.MultiTenancy;
 using Volo.Abp.AspNetCore.Mvc.UI;
 using Volo.Abp.AspNetCore.Mvc.UI.Bootstrap;
 using Volo.Abp.AspNetCore.Mvc.UI.Bundling;
@@ -28,19 +43,29 @@ using Volo.Abp.Caching;
 using Volo.Abp.Caching.StackExchangeRedis;
 using Volo.Abp.Localization;
 using Volo.Abp.Modularity;
+using Volo.Abp.MultiTenancy;
+using Volo.Abp.MultiTenancy.ConfigurationStore;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.UI;
 using Volo.Abp.VirtualFileSystem;
 
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
+// ReSharper disable UnusedParameter.Local
+
 namespace MyCompanyName.MyProjectName
 {
     [DependsOn(
+        typeof(IsapAbpExtensionsIdentityServerModule),
+        typeof(IsapAbpBackgroundJobsPostgreSqlModule),
+        // typeof(MyProjectNameHttpApiModule),
         typeof(AbpAutofacModule),
         typeof(AbpCachingStackExchangeRedisModule),
         typeof(AbpAccountWebIdentityServerModule),
         typeof(AbpAccountApplicationModule),
         typeof(AbpAspNetCoreMvcUiBasicThemeModule),
+        typeof(IsapAbpBackgroundJobsPostgreSqlModule),
         typeof(MyProjectNameEntityFrameworkCoreDbMigrationsModule),
+        typeof(IsapAbpExtensionsWebModule),
         typeof(AbpAspNetCoreSerilogModule)
         )]
     public class MyProjectNameIdentityServerModule : AbpModule
@@ -51,6 +76,13 @@ namespace MyCompanyName.MyProjectName
         {
             var hostingEnvironment = context.Services.GetHostingEnvironment();
             var configuration = context.Services.GetConfiguration();
+
+            IValueConverter converter = ValueConverterProviders.Default.GetConverter();
+            context.Services.AddSingleton(converter);
+
+            ConfigureRequestLogging(context, converter, configuration);
+            ConfigureForwardedHeaders(context);
+            ConfigureMultiTenancy(context, converter, configuration);
 
             Configure<AbpLocalizationOptions>(options =>
             {
@@ -152,6 +184,72 @@ namespace MyCompanyName.MyProjectName
                         .AllowCredentials();
                 });
             });
+
+            ConfigureClusterNode(context, configuration);
+            ConfigureBackgroundJobs(context, converter, configuration);
+        }
+
+        private void ConfigureRequestLogging(ServiceConfigurationContext context, IValueConverter converter, IConfiguration configuration)
+        {
+            context.Services.UseMsToCastleLoggingAdapter();
+
+            Configure<IsapRequestLoggingOptions>(options =>
+                {
+                    IConfigValueProvider config = new ConfigurationSectionValueProvider(converter, configuration.GetSection("RequestLogging"));
+
+                    options.IsEnabled = config.GetValue("IsEnabled", false);
+
+                    List<string> basePaths = config.GetValue("BasePaths", () => new List<string>());
+                    options.AddBasePaths(basePaths.ToArray());
+                });
+        }
+
+        private void ConfigureForwardedHeaders(ServiceConfigurationContext context)
+        {
+            context.Services.Configure<ForwardedHeadersOptions>(options =>
+                {
+                    options.ForwardedHeaders = ForwardedHeaders.All;
+                    options.KnownProxies.Clear();
+                    options.KnownNetworks.Clear();
+                });
+        }
+
+        private void ConfigureMultiTenancy(ServiceConfigurationContext context, IValueConverter converter, IConfiguration configuration)
+        {
+            Configure<AbpMultiTenancyOptions>(options =>
+                {
+                    options.IsEnabled = MultiTenancyConsts.IsEnabled;
+                });
+
+            Configure<AbpExtWebOptions>(configuration.GetSection("AbpExtWebOptions"));
+
+            if (MultiTenancyConsts.IsEnabled)
+            {
+                Configure<AbpTenantResolveOptions>(options =>
+                    {
+                        options.TenantResolvers.Add(new DomainNameTenantResolveContributor());
+                    });
+
+                Configure<AbpDefaultTenantStoreOptions>(options =>
+                    {
+                        options.Tenants = MultiTenancyConsts.DefaultTenants;
+                    });
+
+                Configure<AbpAspNetCoreMultiTenancyOptions>(options =>
+                    {
+                        options.TenantKey = IsapMultiTenancyConsts.TenantHeaderName;
+                    });
+            }
+        }
+
+        private void ConfigureClusterNode(ServiceConfigurationContext context, IConfiguration configuration)
+        {
+            Configure<AbpClusterNodeOptions>(configuration.GetSection("ClusterNodeOptions"));
+        }
+
+        private void ConfigureBackgroundJobs(ServiceConfigurationContext context, IValueConverter converter, IConfiguration configuration)
+        {
+            Configure<AbpBackgroundJobsOptions>(configuration.GetSection("BackgroundJobProcessing"));
         }
 
         public override void OnApplicationInitialization(ApplicationInitializationContext context)
@@ -159,9 +257,15 @@ namespace MyCompanyName.MyProjectName
             var app = context.GetApplicationBuilder();
             var env = context.GetEnvironment();
 
+            app.UseMiddleware<LoggingTraceIdentifierMiddleware>();
+            app.UseRequestResponseLogging();
+
+            app.UseHttpMethodOverride();
+
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                app.UseForwardedHeaders();
             }
 
             app.UseAbpRequestLocalization();
@@ -169,6 +273,8 @@ namespace MyCompanyName.MyProjectName
             if (!env.IsDevelopment())
             {
                 app.UseErrorPage();
+                app.UseForwardedHeaders();
+                //app.UseHsts();
             }
 
             app.UseCorrelationId();

@@ -1,0 +1,8 @@
+{
+  "culture": "en",
+  "texts": {
+    "Menu:Configuration": "Configuration",
+    "Menu:Configuration.SecureString": "Secure String",
+    "AtLeastOneOfThesePermissionsMustBeGranted": "Required permissions are not granted. At least one of these permissions must be granted: {0}"
+  }
+}

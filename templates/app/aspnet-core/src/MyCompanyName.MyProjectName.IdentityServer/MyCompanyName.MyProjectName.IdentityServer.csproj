@@ -32,7 +32,11 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Serilog.AspNetCore" Version="3.2.0" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="3.1.0" />
+    <PackageReference Include="Serilog.Filters.Expressions" Version="2.1.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="3.4.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="4.1.0" />
     <PackageReference Include="Serilog.Sinks.Async" Version="1.4.0" />
     <PackageReference Include="Microsoft.AspNetCore.DataProtection.StackExchangeRedis" Version="5.0.*" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="5.0.*" />
@@ -45,6 +49,11 @@
     <ProjectReference Include="..\..\..\..\..\framework\src\Volo.Abp.AspNetCore.Serilog\Volo.Abp.AspNetCore.Serilog.csproj" />
     <ProjectReference Include="..\..\..\..\..\modules\account\src\Volo.Abp.Account.Web.IdentityServer\Volo.Abp.Account.Web.IdentityServer.csproj" />
     <ProjectReference Include="..\..\..\..\..\modules\account\src\Volo.Abp.Account.Application\Volo.Abp.Account.Application.csproj" />
+    <ProjectReference Include="..\..\lib\Isap\Abp.BackgroundJobs\src\Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql\Isap.Abp.BackgroundJobs.EntityFrameworkCore.PostgreSql.csproj" />
+    <ProjectReference Include="..\..\lib\Isap\Abp.Extensions\src\Isap.Abp.Extensions.IdentityServer\Isap.Abp.Extensions.IdentityServer.csproj" />
+    <ProjectReference Include="..\..\lib\Isap\Abp.Extensions\src\Isap.Abp.Extensions.Web\Isap.Abp.Extensions.Web.csproj" />
+    <ProjectReference Include="..\..\lib\Isap\CommonCore\src\Isap.CommonCore.Web\Isap.CommonCore.Web.csproj" />
+    <ProjectReference Include="..\..\lib\Isap\Hosting\src\Isap.Hosting\Isap.Hosting.csproj" />
     <ProjectReference Include="..\MyCompanyName.MyProjectName.EntityFrameworkCore.DbMigrations\MyCompanyName.MyProjectName.EntityFrameworkCore.DbMigrations.csproj" />
   </ItemGroup>
 

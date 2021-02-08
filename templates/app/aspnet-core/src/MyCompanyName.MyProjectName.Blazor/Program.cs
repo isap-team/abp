@@ -1,4 +1,6 @@
 using System.Threading.Tasks;
+using Autofac;
+using Isap.Hosting;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
 namespace MyCompanyName.MyProjectName.Blazor
@@ -11,7 +13,9 @@ namespace MyCompanyName.MyProjectName.Blazor
 
             var application = builder.AddApplication<MyProjectNameBlazorModule>(options =>
             {
-                options.UseAutofac();
+                options
+                    .UseAutofac(containerBuilder => containerBuilder.RegisterModule<IsapAutofacModule>())
+                    ;
             });
 
             var host = builder.Build();

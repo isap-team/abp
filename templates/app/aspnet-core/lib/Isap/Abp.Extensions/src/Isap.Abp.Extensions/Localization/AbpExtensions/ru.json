@@ -1,0 +1,10 @@
+{
+  "culture": "ru",
+  "texts": {
+    "Menu:Configuration": "Конфигурация",
+    "Menu:Configuration.SecureString": "Зашифрованные строки",
+    "AtLeastOneOfThesePermissionsMustBeGranted": "Требуемый уровень доступа не предоставлен. Для работы метода требуются следующие разрешения: {0}",
+    "CouldNotValidateOnCreating": "Ошибка валидации при создании сущности '{0}'.",
+    "CouldNotValidateOnUpdating": "Ошибка валидации при изменении сущности '{0}'."
+  }
+}

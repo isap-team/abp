@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\lib\Isap\Abp.Extensions\src\Isap.Abp.Extensions.HttpApi.Client\Isap.Abp.Extensions.HttpApi.Client.csproj" />
     <ProjectReference Include="..\MyCompanyName.MyProjectName.Application.Contracts\MyCompanyName.MyProjectName.Application.Contracts.csproj" />
   </ItemGroup>
 

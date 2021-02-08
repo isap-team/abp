@@ -1,6 +1,16 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using IdentityModel;
+using Isap.Abp.Extensions.Logging;
+using Isap.CommonCore.Integrations;
+using Isap.CommonCore.Web.Middlewares.RequestLogging;
+using Isap.CommonCore.Web.Middlewares.Tracing;
+using Isap.Converters;
+using Microsoft.AspNetCore.Authentication.OAuth.Claims;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -14,6 +24,7 @@ using StackExchange.Redis;
 using Microsoft.OpenApi.Models;
 using Volo.Abp;
 using Volo.Abp.AspNetCore.Authentication.OpenIdConnect;
+using Volo.Abp.AspNetCore.MultiTenancy;
 using Volo.Abp.AspNetCore.Mvc.Client;
 using Volo.Abp.AspNetCore.Mvc.Localization;
 using Volo.Abp.AspNetCore.Mvc.UI;
@@ -23,6 +34,7 @@ using Volo.Abp.AspNetCore.Mvc.UI.Theme.Basic;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Basic.Bundling;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared;
 using Volo.Abp.AspNetCore.Mvc.UI.Theme.Shared.Toolbars;
+using Volo.Abp.AspNetCore.Security.Claims;
 using Volo.Abp.AspNetCore.Serilog;
 using Volo.Abp.Autofac;
 using Volo.Abp.AutoMapper;
@@ -33,13 +45,18 @@ using Volo.Abp.Http.Client.IdentityModel.Web;
 using Volo.Abp.Identity.Web;
 using Volo.Abp.Modularity;
 using Volo.Abp.MultiTenancy;
+using Volo.Abp.MultiTenancy.ConfigurationStore;
 using Volo.Abp.PermissionManagement.Web;
+using Volo.Abp.Security.Claims;
 using Volo.Abp.Swashbuckle;
 using Volo.Abp.TenantManagement.Web;
 using Volo.Abp.UI.Navigation.Urls;
 using Volo.Abp.UI;
 using Volo.Abp.UI.Navigation;
 using Volo.Abp.VirtualFileSystem;
+
+// ReSharper disable ConditionIsAlwaysTrueOrFalse
+// ReSharper disable UnusedParameter.Local
 
 namespace MyCompanyName.MyProjectName.Web
 {
@@ -60,6 +77,8 @@ namespace MyCompanyName.MyProjectName.Web
         )]
     public class MyProjectNameWebModule : AbpModule
     {
+        private const string DefaultCorsPolicyName = "Default";
+
         public override void PreConfigureServices(ServiceConfigurationContext context)
         {
             context.Services.PreConfigure<AbpMvcDataAnnotationsLocalizationOptions>(options =>
@@ -78,6 +97,11 @@ namespace MyCompanyName.MyProjectName.Web
             var hostingEnvironment = context.Services.GetHostingEnvironment();
             var configuration = context.Services.GetConfiguration();
 
+            IValueConverter converter = ValueConverterProviders.Default.GetConverter();
+            context.Services.AddSingleton(converter);
+
+            ConfigureRequestLogging(context, converter, configuration);
+
             ConfigureBundles();
             ConfigureCache(configuration);
             ConfigureRedis(context, configuration, hostingEnvironment);
@@ -87,7 +111,23 @@ namespace MyCompanyName.MyProjectName.Web
             ConfigureVirtualFileSystem(hostingEnvironment);
             ConfigureNavigationServices(configuration);
             ConfigureMultiTenancy();
+            ConfigureCors(context, configuration);
             ConfigureSwaggerServices(context.Services);
+        }
+
+        private void ConfigureRequestLogging(ServiceConfigurationContext context, IValueConverter converter, IConfiguration configuration)
+        {
+            context.Services.UseMsToCastleLoggingAdapter();
+
+            Configure<IsapRequestLoggingOptions>(options =>
+                {
+                    IConfigValueProvider config = new ConfigurationSectionValueProvider(converter, configuration.GetSection("RequestLogging"));
+
+                    options.IsEnabled = config.GetValue("IsEnabled", false);
+
+                    List<string> basePaths = config.GetValue("BasePaths", () => new List<string>());
+                    options.AddBasePaths(basePaths.ToArray());
+                });
         }
 
         private void ConfigureBundles()
@@ -126,11 +166,30 @@ namespace MyCompanyName.MyProjectName.Web
             {
                 options.IsEnabled = MultiTenancyConsts.IsEnabled;
             });
+
+            if (MultiTenancyConsts.IsEnabled)
+            {
+                Configure<AbpTenantResolveOptions>(options =>
+                    {
+                        options.TenantResolvers.Add(new DefaultTenantResolveContributor());
+                    });
+
+                Configure<AbpDefaultTenantStoreOptions>(options =>
+                    {
+                        options.Tenants = MultiTenancyConsts.DefaultTenants;
+                    });
+
+                Configure<AbpAspNetCoreMultiTenancyOptions>(options =>
+                    {
+                        options.TenantKey = "ABP-TenantId";
+                    });
+            }
         }
 
         private void ConfigureAuthentication(ServiceConfigurationContext context, IConfiguration configuration)
         {
-            context.Services.AddAuthentication(options =>
+            context.Services
+                .AddAuthentication(options =>
                 {
                     options.DefaultScheme = "Cookies";
                     options.DefaultChallengeScheme = "oidc";
@@ -155,6 +214,19 @@ namespace MyCompanyName.MyProjectName.Web
                     options.Scope.Add("email");
                     options.Scope.Add("phone");
                     options.Scope.Add("MyProjectName");
+
+                    options.ClaimActions.MapAbpClaimTypes();
+                    })
+                ;
+
+            Configure<AbpClaimsMapOptions>(options =>
+                {
+                    //options.Maps.Add(JwtClaimTypes.Subject, () => AbpClaimTypes.UserId);
+                    //options.Maps.Add(JwtClaimTypes.PreferredUserName, () => AbpClaimTypes.UserName);
+                    //options.Maps.Add(JwtClaimTypes.Email, () => AbpClaimTypes.Email);
+                    options.Maps.Add(JwtClaimTypes.EmailVerified, () => AbpClaimTypes.EmailVerified);
+                    options.Maps.Add(JwtClaimTypes.PhoneNumber, () => AbpClaimTypes.PhoneNumber);
+                    options.Maps.Add(JwtClaimTypes.PhoneNumberVerified, () => AbpClaimTypes.PhoneNumberVerified);
                 });
         }
 
@@ -227,10 +299,35 @@ namespace MyCompanyName.MyProjectName.Web
             }
         }
 
+        private void ConfigureCors(ServiceConfigurationContext context, IConfiguration configuration)
+        {
+            context.Services.AddCors(options =>
+                {
+                    options.AddPolicy(DefaultCorsPolicyName, builder =>
+                        {
+                            builder
+                                .WithOrigins(
+                                    configuration["App:CorsOrigins"]
+                                        .Split(",", StringSplitOptions.RemoveEmptyEntries)
+                                        .Select(o => o.RemovePostFix("/"))
+                                        .ToArray()
+                                )
+                                .WithAbpExposedHeaders()
+                                .SetIsOriginAllowedToAllowWildcardSubdomains()
+                                .AllowAnyHeader()
+                                .AllowAnyMethod()
+                                .AllowCredentials();
+                        });
+                });
+        }
+
         public override void OnApplicationInitialization(ApplicationInitializationContext context)
         {
             var app = context.GetApplicationBuilder();
             var env = context.GetEnvironment();
+
+            app.UseMiddleware<LoggingTraceIdentifierMiddleware>();
+            app.UseRequestResponseLogging();
 
             if (env.IsDevelopment())
             {
@@ -247,7 +344,9 @@ namespace MyCompanyName.MyProjectName.Web
             app.UseCorrelationId();
             app.UseVirtualFiles();
             app.UseRouting();
+            app.UseCors(DefaultCorsPolicyName);
             app.UseAuthentication();
+            app.UseAbpClaimsMap();
 
             if (MultiTenancyConsts.IsEnabled)
             {

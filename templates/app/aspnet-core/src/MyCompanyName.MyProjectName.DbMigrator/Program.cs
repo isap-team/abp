@@ -1,5 +1,7 @@
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -29,12 +31,25 @@ namespace MyCompanyName.MyProjectName.DbMigrator
             await CreateHostBuilder(args).RunConsoleAsync();
         }
 
-        public static IHostBuilder CreateHostBuilder(string[] args) =>
-            Host.CreateDefaultBuilder(args)
+        public static IHostBuilder CreateHostBuilder(string[] args)
+        {
+            var switchMappings = new Dictionary<string, string>
+                {
+                    { "-p", "DataProviderKey" },
+                    { "-e", "EnvironmentName" },
+                };
+
+            return Host.CreateDefaultBuilder()
+                .ConfigureAppConfiguration((hostContext, config) =>
+                    {
+                        config.AddCommandLine(args, switchMappings);
+                    })
                 .ConfigureLogging((context, logging) => logging.ClearProviders())
                 .ConfigureServices((hostContext, services) =>
-                {
-                    services.AddHostedService<DbMigratorHostedService>();
-                });
+                    {
+                        services.AddHostedService<DbMigratorHostedService>();
+                    })
+                ;
+        }
     }
 }

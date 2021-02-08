@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <RootNamespace>Isap.Abp.FileStorage</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Volo.Abp.MongoDB" Version="4.1.1" />
+    <ProjectReference Include="..\Isap.Abp.FileStorage.Domain\Isap.Abp.FileStorage.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -308,5 +308,7 @@ modules/virtual-file-explorer/app/Volo.Abp.VirtualFileExplorer.DemoApp/Logs/
 abp-build-config.json
 /templates/app/aspnet-core/src/MyCompanyName.MyProjectName.Blazor/Pages/Test/
 
+templates/*.zip
+
 # Identity Server temp signature file
 tempkey.jwk

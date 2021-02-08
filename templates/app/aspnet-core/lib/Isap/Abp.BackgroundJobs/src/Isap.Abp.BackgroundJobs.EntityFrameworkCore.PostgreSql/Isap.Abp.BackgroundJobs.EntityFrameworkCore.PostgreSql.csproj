@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Abp.Extensions\src\Isap.Abp.Extensions.PostgreSql\Isap.Abp.Extensions.PostgreSql.csproj" />
+    <ProjectReference Include="..\Isap.Abp.BackgroundJobs.EntityFrameworkCore\Isap.Abp.BackgroundJobs.EntityFrameworkCore.csproj" />
+  </ItemGroup>
+
+</Project>

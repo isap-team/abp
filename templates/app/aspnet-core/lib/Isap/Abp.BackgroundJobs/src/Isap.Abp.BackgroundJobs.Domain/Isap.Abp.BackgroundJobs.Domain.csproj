@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <Import Project="..\..\common.props" />
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.1</TargetFramework>
+    <RootNamespace>Isap.Abp.BackgroundJobs</RootNamespace>
+    <AssemblyName>Isap.Abp.BackgroundJobs.Domain</AssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.AutoMapper\Volo.Abp.AutoMapper.csproj" />
+    <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.Caching\Volo.Abp.Caching.csproj" />
+    <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.Ddd.Domain\Volo.Abp.Ddd.Domain.csproj" />
+    <ProjectReference Include="..\..\..\..\..\..\..\..\framework\src\Volo.Abp.BackgroundJobs\Volo.Abp.BackgroundJobs.csproj" />
+    <PackageReference Include="System.Text.Json" Version="5.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\Abp.Extensions\src\Isap.Abp.Extensions.EntityFrameworkCore\Isap.Abp.Extensions.EntityFrameworkCore.csproj" />
+    <ProjectReference Include="..\..\..\CommonCore\src\Isap.CommonCore\Isap.CommonCore.csproj" />
+    <ProjectReference Include="..\..\..\Abp.Extensions\src\Isap.Abp.Extensions\Isap.Abp.Extensions.csproj" />
+    <ProjectReference Include="..\Isap.Abp.BackgroundJobs.Domain.Shared\Isap.Abp.BackgroundJobs.Domain.Shared.csproj" />
+  </ItemGroup>
+
+</Project>
