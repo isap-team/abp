@@ -164,12 +164,6 @@ namespace MyCompanyName.MyProjectName.Web
 
         private void ConfigureSession(ServiceConfigurationContext context, IConfiguration configuration)
         {
-            // Add Distributed Redis Cache for Session
-            context.Services.AddStackExchangeRedisCache(options =>
-                {
-                    options.Configuration = configuration["Redis:Configuration"] ?? "localhost";
-                    options.InstanceName = "Session_";
-                });
             context.Services.AddSession(options =>
                 {
                     // 20 minutes later from last access your session will be removed.
